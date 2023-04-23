@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${LOCAL_DB_URL}
+    username: ${LOCAL_DB_USERNAME}
+    password: ${LOCAL_DB_PASSWORD}
+  jpa:
+    hibernate.ddl-auto: create
+    show-sql: true
+    h2.console.enabled: false # default
+    sql.init.mode: always # data.sql rule[NEVER, ALWAYS EMBEDDED]
