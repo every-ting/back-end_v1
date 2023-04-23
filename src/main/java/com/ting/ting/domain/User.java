@@ -7,50 +7,31 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Setter
 @Getter
+@Table(name = "\"user\"", indexes = {
+        @Index(columnList = "username")
+})
 @Entity
-@Table(name = "\"user\"")
 public class User {
 
-    public User() {
-    }
-
-    public User(String username, String school, String major, Gender gender, Date birth, String email, float weight, float height, String ideal_photo) {
-        this.username = username;
-        this.school = school;
-        this.major = major;
-        this.gender = gender;
-        this.birth = birth;
-        this.email = email;
-        this.weight = weight;
-        this.height = height;
-        this.ideal_photo = ideal_photo;
-    }
-
-    public User(Long id, String username, String school, String major, Gender gender, Date birth, String email) {
-        this.id = id;
-        this.username = username;
-        this.school = school;
-        this.major = major;
-        this.gender = gender;
-        this.birth = birth;
-        this.email = email;
-    }
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @NotNull
+    @Email
+    @Column(unique = true, nullable = false, length = 100)
+    private String email;
+
+    @Column(length = 70, nullable = false)
     private String school;
 
-    @NotNull
+    @Column(length = 50, nullable = false)
     private String major;
 
     @Enumerated(EnumType.STRING)
@@ -58,14 +39,12 @@ public class User {
     private Gender gender;
 
     @NotNull
-    private Date birth;
-
-    @Email
-    private String email;
+    private LocalDate birth;
 
     private float weight;
 
     private float height;
 
-    private String ideal_photo;
+    @Column(name="ideal_photo")
+    private String idealPhoto;
 }
