@@ -1,6 +1,7 @@
 package com.ting.ting.domain;
 
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.MBTI;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,6 +47,9 @@ public class User {
     @NotNull
     @Column(nullable = false)
     private LocalDate birth;
+
+    @Enumerated(EnumType.STRING)
+    private MBTI mbti;
 
     private float weight;
 
