@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Setter
@@ -21,24 +22,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull @Size(min = 4, max = 100)
     @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @Email
+    @Email @NotNull
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
+    @NotNull @Size(max = 70)
     @Column(length = 70, nullable = false)
     private String school;
 
+    @NotNull @Size(max = 50)
     @Column(length = 50, nullable = false)
     private String major;
 
-    @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @NotNull
+    @Column(nullable = false)
     private LocalDate birth;
 
     private float weight;
@@ -47,4 +53,5 @@ public class User {
 
     @Column(name="ideal_photo")
     private String idealPhoto;
+
 }
