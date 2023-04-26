@@ -23,19 +23,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull @Size(min = 4, max = 100)
+    @NotNull
+    @Size(min = 4, max = 100)
     @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @Email @NotNull
+    @Email
+    @NotNull
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @NotNull @Size(max = 70)
+    @NotNull
+    @Size(max = 70)
     @Column(length = 70, nullable = false)
     private String school;
 
-    @NotNull @Size(max = 50)
+    @NotNull
+    @Size(max = 50)
     @Column(length = 50, nullable = false)
     private String major;
 
@@ -55,7 +59,6 @@ public class User {
 
     private float height;
 
-    @Column(name="ideal_photo")
+    @Column(name = "ideal_photo")
     private String idealPhoto;
-
 }

@@ -1,7 +1,6 @@
 package com.ting.ting.domain.constant;
 
 public enum MBTI {
-
     ENFJ,
     ENFP,
     ENTJ,
