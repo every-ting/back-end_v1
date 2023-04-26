@@ -39,8 +39,8 @@ public class User {
     @Column(length = 50, nullable = false)
     private String major;
 
-    @NotNull
-    @Column(nullable = false)
+    @NotNull @Size(max = 1)
+    @Column(nullable = false, length = 1)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
