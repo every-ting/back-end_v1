@@ -51,11 +51,30 @@ public class User {
     @Enumerated(EnumType.STRING)
     private MBTI mbti;
 
-    private float weight;
+    private Float weight;
 
-    private float height;
+    private Float height;
 
     @Column(name="ideal_photo")
     private String idealPhoto;
 
+    protected User() {}
+
+    private User(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.school = school;
+        this.major = major;
+        this.gender = gender;
+        this.birth = birth;
+        this.mbti = mbti;
+        this.weight = weight;
+        this.height = height;
+        this.idealPhoto = idealPhoto;
+    }
+
+    public static User of(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth) {
+        return new User(id, username, email, school, major, gender, birth, null, null, null, null);
+    }
 }
