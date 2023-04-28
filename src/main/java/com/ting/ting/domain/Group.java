@@ -57,6 +57,14 @@ public class Group {
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private Set<User> joinRequests = new LinkedHashSet<>();
 
+    @JoinTable(
+            name = "group_member",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<User> members = new LinkedHashSet<>();
+
     protected Group() {}
 
     private Group(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
@@ -75,5 +83,15 @@ public class Group {
     public void addJoinRequests(User user) { this.joinRequests.add(user); }
 
     public void removeJoinRequests(User user) { this.joinRequests.remove(user); }
+
+    public void addMember(User user) {
+        this.members.add(user);
+        user.getGroups().add(this);
+    }
+
+    public void removeMember(User user) {
+        this.members.remove(user);
+        user.getGroups().remove(this);
+    }
 }
 

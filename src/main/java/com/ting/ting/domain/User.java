@@ -10,6 +10,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -57,6 +59,9 @@ public class User {
 
     @Column(name="ideal_photo")
     private String idealPhoto;
+
+    @ManyToMany(mappedBy = "members")
+    private Set<Group> groups = new LinkedHashSet<>();
 
     protected User() {}
 
