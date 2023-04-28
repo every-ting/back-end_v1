@@ -11,6 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @Transactional
@@ -22,6 +26,12 @@ public class GroupService {
 
     public Page<GroupDto> list(Pageable pageable) {
         return groupRepository.findAll(pageable).map(GroupDto::from);
+    }
+
+    public Set<GroupDto> myList(Long userId) {
+        User user = userRepository.getReferenceById(userId);
+
+        return user.getGroups().stream().map(GroupDto::from).collect(Collectors.toSet());
     }
 
     public void saveGroup(GroupDto dto) {

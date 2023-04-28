@@ -8,6 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -19,6 +23,11 @@ public class GroupController {
     @GetMapping
     public Page<GroupResponse> list(Pageable pageable) {
         return groupService.list(pageable).map(GroupResponse::from);
+    }
+
+    @GetMapping("/my")
+    public List<GroupResponse> mylist() {
+        return groupService.myList(1L).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableList());
     }
 
     @PostMapping
