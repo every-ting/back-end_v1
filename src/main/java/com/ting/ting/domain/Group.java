@@ -6,10 +6,14 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Setter
 @Getter
-@Table(name = "\"group\"")
+@Table(name = "\"group\"", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_user", columnNames = {"leader_id"}),
+})
 @Entity
 public class Group {
 
@@ -18,8 +22,8 @@ public class Group {
     private Long id;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @OneToOne(optional = false)
+    @JoinColumn(name = "leader_id")
     private User leader;
 
     @NotNull @Size(min = 2, max = 20)
@@ -45,6 +49,14 @@ public class Group {
 
     private String memo;
 
+    @JoinTable(
+            name = "member_request",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    private Set<User> joinRequests = new LinkedHashSet<>();
+
     protected Group() {}
 
     private Group(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
@@ -59,5 +71,9 @@ public class Group {
     public static Group of(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
         return new Group(leader, groupName, gender, school, numOfMember, memo);
     }
+
+    public void addJoinRequests(User user) { this.joinRequests.add(user); }
+
+    public void removeJoinRequests(User user) { this.joinRequests.remove(user); }
 }
 
