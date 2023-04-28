@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,6 +104,26 @@ class GroupServiceTest {
                 .hasSize(1)
                 .extracting("id")
                 .containsExactly(request2.getId());
+    }
+
+    @DisplayName("과팅 - 내가 속한 팀 조회")
+    @Test
+    void givenUserId_whenSelectingListOfMyTeam_thenReturnsGroups() {
+        //Given
+        User user = createUser(1L);
+        Group group1 = createGroup(2L);
+        Group group2 = createGroup(3L);
+        group1.addMember(user);
+        group2.addMember(user);
+        Set<Long> expected = Set.of(group1.getId(), group2.getId());
+        given(userRepository.getReferenceById(user.getId())).willReturn(user);
+
+        // When
+        Set<Long> actual = groupService.myList(user.getId()).stream().map(GroupDto::getId).collect(Collectors.toSet());
+
+        // Then
+        assertThat(actual).hasSize(2);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private Group createGroup() {
