@@ -5,15 +5,12 @@ import com.ting.ting.dto.GroupDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.io.Serializable;
-
 @AllArgsConstructor
 @Getter
 public class GroupResponse {
 
     Long id;
     String groupName;
-    String leaderName;
     Gender gender;
     int numOfMember;
     String school;
@@ -24,7 +21,6 @@ public class GroupResponse {
         return new GroupResponse(
                 dto.getId(),
                 dto.getGroupName(),
-                dto.getLeaderDto().getUsername(),
                 dto.getGender(),
                 dto.getNumOfMember(),
                 dto.getSchool(),
