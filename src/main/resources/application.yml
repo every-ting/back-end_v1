@@ -8,3 +8,12 @@ spring:
     hibernate.ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
+
+---
+
+
+spring:
+  config.activate.on-profile: test
+  datasource.url: jdbc:h2:mem:testdb;NON_KEYWORDS=USER;DATABASE_TO_UPPER=false
+  jpa:
+    defer-datasource-initialization: true
