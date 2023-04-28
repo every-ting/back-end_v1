@@ -6,8 +6,11 @@ import com.ting.ting.dto.GroupDto;
 import com.ting.ting.repository.GroupRepository;
 import com.ting.ting.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @RequiredArgsConstructor
 @Transactional
@@ -17,10 +20,28 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
 
+    public Page<GroupDto> list(Pageable pageable) {
+        return groupRepository.findAll(pageable).map(GroupDto::from);
+    }
+
     public void saveGroup(GroupDto dto) {
-        User user = userRepository.getReferenceById(1L);
+        User user = userRepository.getReferenceById(9L);
 
         Group group = dto.toEntity(user);
         groupRepository.save(group);
+    }
+
+    public void createJoinRequest(long groupId) {
+        User user = userRepository.getReferenceById(groupId + 1);
+
+        Group group = groupRepository.getReferenceById(groupId);
+        group.addJoinRequests(user);
+    }
+
+    public void deleteJoinRequest(long groupId) {
+        User user = userRepository.getReferenceById(groupId + 1);
+
+        Group group = groupRepository.getReferenceById(groupId);
+        group.removeJoinRequests(user);
     }
 }
