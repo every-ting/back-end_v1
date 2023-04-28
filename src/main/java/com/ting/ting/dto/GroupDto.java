@@ -13,7 +13,6 @@ import lombok.Setter;
 public class GroupDto {
 
     Long id;
-    UserDto leaderDto;
     String groupName;
     Gender gender;
     int numOfMember;
@@ -22,7 +21,7 @@ public class GroupDto {
     String memo;
 
     public static GroupDto of(String groupName, Gender gender, int limit, String school, String memo) {
-        return new GroupDto(null, null, groupName, gender, limit, school, false, memo);
+        return new GroupDto(null, groupName, gender, limit, school, false, memo);
     }
 
     public Group toEntity(User leader) {
@@ -32,7 +31,6 @@ public class GroupDto {
     public static GroupDto from(Group entity) {
         return new GroupDto(
                 entity.getId(),
-                UserDto.from(entity.getLeader()),
                 entity.getGroupName(),
                 entity.getGender(),
                 entity.getNumOfMember(),
