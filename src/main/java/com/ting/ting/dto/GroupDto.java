@@ -14,18 +14,31 @@ public class GroupDto {
 
     Long id;
     UserDto leaderDto;
-    String name;
+    String groupName;
     Gender gender;
     int numOfMember;
     String school;
     boolean isMatched;
     String memo;
 
-    public static GroupDto of(String name, Gender gender, int limit, String school, String memo) {
-        return new GroupDto(null, null, name, gender, limit, school, false, memo);
+    public static GroupDto of(String groupName, Gender gender, int limit, String school, String memo) {
+        return new GroupDto(null, null, groupName, gender, limit, school, false, memo);
     }
 
     public Group toEntity(User leader) {
-        return Group.of(leader, name, gender, school, numOfMember, memo);
+        return Group.of(leader, groupName, gender, school, numOfMember, memo);
+    }
+
+    public static GroupDto from(Group entity) {
+        return new GroupDto(
+                entity.getId(),
+                UserDto.from(entity.getLeader()),
+                entity.getGroupName(),
+                entity.getGender(),
+                entity.getNumOfMember(),
+                entity.getSchool(),
+                entity.isMatched(),
+                entity.getMemo()
+        );
     }
 }
