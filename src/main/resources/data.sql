@@ -27,3 +27,8 @@ insert into `group` (id, leader_id, group_name, gender, school, num_of_member, i
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (6, 6, '과팅팀6', 'W', '건국대학교', 3, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (7, 7, '과팅팀7', 'W', '세종대학교', 2, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (8, 8, '과팅팀8', 'W', '홍익대학교', 4, false, '');
+
+insert into group_member (group_id, user_id) values (2, 1);
+insert into group_member (group_id, user_id) values (3, 1);
+insert into group_member (group_id, user_id) values (4, 1);
+insert into group_member (group_id, user_id) values (5, 1);
