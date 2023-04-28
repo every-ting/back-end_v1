@@ -1,6 +1,6 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.domain.User;
+import com.ting.ting.dto.BlindUsersInfoResponse;
 import com.ting.ting.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class BlindDateController {
     }
 
     @GetMapping("users")
-    public List<User> blindUsersInfo() {
+    public List<BlindUsersInfoResponse> blindUsersInfo() {
         return userService.usersInfo();
     }
 }
