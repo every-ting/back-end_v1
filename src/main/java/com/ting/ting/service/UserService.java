@@ -1,7 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.User;
-import com.ting.ting.dto.BlindUsersInfoResponse;
+import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
