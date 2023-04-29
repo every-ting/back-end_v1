@@ -2,6 +2,7 @@ package com.ting.ting.service;
 
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.exception.UserException;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
@@ -29,6 +30,7 @@ public class BlindRequestService {
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
         request.setToUser(toUser);
+        request.setStatus(RequestStatus.P);
         blindRequestRepository.save(request);
     }
 }
