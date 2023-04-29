@@ -33,9 +33,14 @@ public class BlindDateController {
         return "success";
     }
 
+    @DeleteMapping("/request/{blindRequestId}")
+    public String deleteRequest(@PathVariable long blindRequestId) {
+        blindRequestService.deleteRequest(blindRequestId);
+        return "success";
+    }
+
     @ExceptionHandler(UserException.class)
     public ResponseEntity<?> dbeHandler() {
         return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
     }
-
 }

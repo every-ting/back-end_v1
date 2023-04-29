@@ -33,4 +33,9 @@ public class BlindRequestService {
         request.setStatus(RequestStatus.P);
         blindRequestRepository.save(request);
     }
+
+    public void deleteRequest(long blindRequestId) {
+        BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() -> new UserException("해당 요청 정보가 존재하지 않습니다."));
+        blindRequestRepository.delete(request);
+    }
 }
