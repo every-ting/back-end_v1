@@ -33,6 +33,12 @@ public class BlindDateController {
         return "success";
     }
 
+    @PutMapping("/request/{blindRequestId}")
+    public String acceptRequest(@PathVariable long blindRequestId) {
+        blindRequestService.acceptRequest(blindRequestId);
+        return "success";
+    }
+
     @DeleteMapping("/request/{blindRequestId}")
     public String deleteRequest(@PathVariable long blindRequestId) {
         blindRequestService.deleteRequest(blindRequestId);
