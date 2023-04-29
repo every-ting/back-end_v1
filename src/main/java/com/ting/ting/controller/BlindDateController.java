@@ -2,8 +2,10 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
+import com.ting.ting.exception.UserException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,4 +32,10 @@ public class BlindDateController {
         blindRequestService.createJoinRequest(request.getFromUserId(), request.getToUserId());
         return "success";
     }
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<?> dbeHandler() {
+        return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
+    }
+
 }

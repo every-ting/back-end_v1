@@ -2,7 +2,7 @@ package com.ting.ting.service;
 
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
-import com.ting.ting.exception.DBException;
+import com.ting.ting.exception.UserException;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,11 @@ public class BlindRequestService {
     }
 
     public void createJoinRequest(long fromUserId, long toUserId) {
-        User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new DBException("잘못된 정보 입력"));
-        User toUser = userRepository.findById(toUserId).orElseThrow(() -> new DBException("잘못된 정보 입력"));
+        User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
+        User toUser = userRepository.findById(toUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
 
         if (fromUser.equals(toUser)) {
-            throw new DBException("잘못된 정보 입력");
+            throw new UserException("같은 사용자간의 요청 처리입니다.");
         }
 
         BlindRequest request = new BlindRequest();
