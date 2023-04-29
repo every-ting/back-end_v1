@@ -1,6 +1,5 @@
 package com.ting.ting.domain;
 
-import com.ting.ting.domain.constant.RequestStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,9 +22,4 @@ public class BlindRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_user_id")
     private User toUser;
-
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RequestStatus status;
 }
