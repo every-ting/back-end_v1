@@ -5,6 +5,7 @@ import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.exception.UserException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +23,14 @@ public class BlindDateController {
         this.blindRequestService = blindRequestService;
     }
 
-    @GetMapping("users")
-    public List<BlindUsersInfoResponse> blindUsersInfo() {
-        return userService.usersInfo();
+    @GetMapping("users/m")
+    public List<BlindUsersInfoResponse> blindMenUsersInfo(Pageable pageable) {
+        return userService.menUsersInfo(pageable);
+    }
+
+    @GetMapping("users/w")
+    public List<BlindUsersInfoResponse> blindWomenUsersInfo(Pageable pageable) {
+        return userService.womenUsersInfo(pageable);
     }
 
     @PostMapping("/request")
@@ -34,17 +40,10 @@ public class BlindDateController {
     }
 
     @PutMapping("/request/{blindRequestId}")
-    public String acceptRequest(@PathVariable long blindRequestId) {
-        blindRequestService.acceptRequest(blindRequestId);
-        return "success";
-    }
-
-    @PutMapping("/request/{blindRequestId}")
     public String rejectRequest(@PathVariable long blindRequestId) {
         blindRequestService.rejectRequest(blindRequestId);
         return "success";
     }
-
 
     @DeleteMapping("/request/{blindRequestId}")
     public String deleteRequest(@PathVariable long blindRequestId) {
