@@ -34,21 +34,21 @@ public class BlindDateController {
     }
 
     @PostMapping("/request")
-    public String sendBlindRequest(@RequestBody SendBlindRequest request) {
+    public ResponseEntity<String> sendBlindRequest(@RequestBody SendBlindRequest request) {
         blindRequestService.createJoinRequest(request.getFromUserId(), request.getToUserId());
-        return "success";
+        return ResponseEntity.ok("success");
     }
 
     @PutMapping("/request/{blindRequestId}")
-    public String rejectRequest(@PathVariable long blindRequestId) {
+    public ResponseEntity<String> rejectRequest(@PathVariable long blindRequestId) {
         blindRequestService.rejectRequest(blindRequestId);
-        return "success";
+        return ResponseEntity.ok("success");
     }
 
     @DeleteMapping("/request/{blindRequestId}")
-    public String deleteRequest(@PathVariable long blindRequestId) {
+    public ResponseEntity<String> deleteRequest(@PathVariable long blindRequestId) {
         blindRequestService.deleteRequest(blindRequestId);
-        return "success";
+        return ResponseEntity.ok("success");
     }
 
     @ExceptionHandler(UserException.class)
