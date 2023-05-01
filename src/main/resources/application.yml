@@ -5,7 +5,12 @@ spring:
     username: ${LOCAL_DB_USERNAME}
     password: ${LOCAL_DB_PASSWORD}
   sql.init.mode: always
+
   jpa:
     hibernate.ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
