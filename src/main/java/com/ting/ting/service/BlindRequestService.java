@@ -26,7 +26,7 @@ public class BlindRequestService {
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
         request.setToUser(toUser);
-        request.setStatus(RequestStatus.P);
+        request.setStatus(RequestStatus.PENDING);
         blindRequestRepository.save(request);
     }
 
@@ -37,13 +37,13 @@ public class BlindRequestService {
 
     public void acceptRequest(long blindRequestId) {
         BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() -> new UserException("해당 요청 정보가 존재하지 않습니다."));
-        request.setStatus(RequestStatus.S);
+        request.setStatus(RequestStatus.ACCEPTED);
         blindRequestRepository.save(request);
     }
 
     public void rejectRequest(long blindRequestId) {
         BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() -> new UserException("해당 요청 정보가 존재하지 않습니다."));
-        request.setStatus(RequestStatus.R);
+        request.setStatus(RequestStatus.REJECTED);
         blindRequestRepository.save(request);
     }
 }

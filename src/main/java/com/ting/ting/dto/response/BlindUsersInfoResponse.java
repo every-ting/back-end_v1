@@ -2,11 +2,13 @@ package com.ting.ting.dto.response;
 
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.MBTI;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class BlindUsersInfoResponse {
 
     private Long id;
@@ -16,12 +18,14 @@ public class BlindUsersInfoResponse {
     private float weight;
     private float height;
 
-    public BlindUsersInfoResponse(User user) {
-        this.id = user.getId();
-        this.school = user.getSchool();
-        this.major = user.getMajor();
-        this.mbti = user.getMbti();
-        this.weight = user.getWeight();
-        this.height = user.getHeight();
+    public static BlindUsersInfoResponse from(User entity) {
+        return new BlindUsersInfoResponse(
+                entity.getId(),
+                entity.getSchool(),
+                entity.getMajor(),
+                entity.getMbti(),
+                entity.getWeight(),
+                entity.getHeight()
+        );
     }
 }
