@@ -40,7 +40,7 @@ public class GroupController {
      * 그룹 생성
      */
     @PostMapping
-    public String groupSave(@RequestBody GroupRequest request) {
+    public String createGroup(@RequestBody GroupRequest request) {
         Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         groupService.saveGroup(userId, request.toDto());
         return "success";
@@ -50,7 +50,7 @@ public class GroupController {
      * 같은 성별인 팀에 요청
      */
     @PostMapping("/request/{groupId}")
-    public String requestToJoinSave(@PathVariable long groupId) {
+    public String sendJoinRequest(@PathVariable long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.saveJoinRequest(groupId, userId);
@@ -61,7 +61,7 @@ public class GroupController {
      * 같은 성별인 팀에 했던 요청을 취소
      */
     @DeleteMapping("/request/{groupId}")
-    public String requestToJoinDelete(@PathVariable long groupId) {
+    public String deleteJoinRequest(@PathVariable long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.deleteJoinRequest(groupId, userId);
