@@ -1,12 +1,14 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.Group;
+import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.dto.GroupDto;
+import com.ting.ting.repository.GroupMemberRepository;
+import com.ting.ting.repository.GroupMemberRequestRepository;
 import com.ting.ting.repository.GroupRepository;
 import com.ting.ting.repository.UserRepository;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,12 +20,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
 
 @DisplayName("비즈니스 조직 - 과팅")
 @ExtendWith(MockitoExtension.class)
@@ -32,98 +36,96 @@ class GroupServiceTest {
     @InjectMocks private GroupService groupService;
 
     @Mock private GroupRepository groupRepository;
+    @Mock private GroupMemberRepository groupMemberRepository;
+    @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
     @Mock private UserRepository userRepository;
 
-    @DisplayName("과팅 - 팀 조회")
+    @DisplayName("과팅 - 모든 팀 조회")
     @Test
-    void givenNothing_whenSearchingGroups_thenReturnsGroupPage() {
+    void givenNothing_whenSearchingAllGroups_thenReturnsGroupPage() {
         //Given
         Pageable pageable = Pageable.ofSize(20);
         given(groupRepository.findAll(pageable)).willReturn(Page.empty());
 
         // When
-        Page<GroupDto> groups = groupService.list(pageable);
+        Page<GroupDto> groups = groupService.findAllGroups(pageable);
 
         // Then
         assertThat(groups).isEmpty();
     }
 
+    @DisplayName("과팅 - 내가 속한 팀 조회")
+    @Test
+    void givenUserId_whenSearchingMyGroups_thenReturnsGroupSet() {
+        //Given
+        Long userId = 1L;
+        User user = createUser(userId);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(groupMemberRepository.findGroupByUserAndStatusAccepted(user)).willReturn(List.of(createGroup(2L)));
+
+        // When
+        Set<GroupDto> groups = groupService.findMyGroupList(userId);
+
+        // Then
+        assertThat(groups).hasSize(1);
+    }
+
     @DisplayName("과팅 - 생성이 성공한 경우")
     @Test
-    void givenGroupInfo_WhenSavingGroup_thenSavesGroup() {
+    void givenUserIdAndGroupDto_WhenSavingGroup_thenSavesGroup() {
         //Given
+        Long userId = 9L;
         GroupDto dto = createGroupDto();
+        User user = createUser(userId);
 
-        given(userRepository.getReferenceById((9L))).willReturn(createUser(9L));
-        given(groupRepository.save(any(Group.class))).willReturn(createGroup());
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(groupRepository.findByGroupName(dto.getGroupName())).willReturn(Optional.empty());
+        given(groupRepository.save(any(Group.class))).willReturn(any(Group.class));
 
         // When & Then
         assertThatCode(() -> {
-            groupService.saveGroup(createGroupDto());
+            groupService.saveGroup(userId, dto);
         }).doesNotThrowAnyException();
     }
 
     @DisplayName("과팅 - 멤버 가입 요청이 성공한 경우")
     @Test
-    void givenGroupId_whenRequestingJoin_thenRequests() {
+    void givenGroupIdAndUserId_whenRequestingJoin_thenSavesRequest() {
         //Given
-        Group group = createGroup(1L);
-        User user = createUser(2L);
+        Long groupId = 1L;
+        Long userId = 2L;
+        Group group = createGroup(groupId);
+        User user = createUser(userId);
 
-        given(userRepository.getReferenceById(user.getId())).willReturn(user);
-        given(groupRepository.getReferenceById(group.getId())).willReturn(group);
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(groupMemberRequestRepository.findByGroupAndUser(group, user)).willReturn(Optional.empty());
+        given(groupMemberRequestRepository.save(any(GroupMemberRequest.class))).willReturn(null);
 
         // When
-        groupService.createJoinRequest(group.getId());
+        groupService.saveJoinRequest(groupId, userId);
 
         // Then
-        assertThat(group)
-                .extracting("joinRequests", as(InstanceOfAssertFactories.COLLECTION))
-                .hasSize(1)
-                .extracting("id")
-                .containsExactly(user.getId());
+        then(userRepository).should().findById(userId);
+        then(groupRepository).should().findById(groupId);
+        then(groupMemberRequestRepository).should().findByGroupAndUser(group, user);
+        then(groupMemberRequestRepository).should().save(any(GroupMemberRequest.class));
     }
 
     @DisplayName("과팅 - 멤버 가입 요청을 취소")
     @Test
-    void givenGroupId_whenCancelingJoinRequest_thenDeletesJoinRequest() {
+    void givenGroupIdAndUserId_whenCancelingJoinRequest_thenDeletesJoinRequest() {
         //Given
-        Group group = createGroup(1L);
-        User request1 = createUser(2L);
-        User request2 = createUser(3L);
-        group.addJoinRequests(request1);
-        group.addJoinRequests(request2);
-        given(userRepository.getReferenceById(request1.getId())).willReturn(request1);
-        given(groupRepository.getReferenceById(group.getId())).willReturn(group);
+        Long groupId = 1L;
+        Long userId = 2L;
+        willDoNothing().given(groupMemberRequestRepository).deleteByGroup_IdAndUser_Id(groupId, userId);
 
         // When
-        groupService.deleteJoinRequest(group.getId());
+        groupService.deleteJoinRequest(groupId, userId);
 
         // Then
-        assertThat(group.getJoinRequests())
-                .hasSize(1)
-                .extracting("id")
-                .containsExactly(request2.getId());
-    }
-
-    @DisplayName("과팅 - 내가 속한 팀 조회")
-    @Test
-    void givenUserId_whenSelectingListOfMyTeam_thenReturnsGroups() {
-        //Given
-        User user = createUser(1L);
-        Group group1 = createGroup(2L);
-        Group group2 = createGroup(3L);
-        group1.addMember(user);
-        group2.addMember(user);
-        Set<Long> expected = Set.of(group1.getId(), group2.getId());
-        given(userRepository.getReferenceById(user.getId())).willReturn(user);
-
-        // When
-        Set<Long> actual = groupService.myList(user.getId()).stream().map(GroupDto::getId).collect(Collectors.toSet());
-
-        // Then
-        assertThat(actual).hasSize(2);
-        assertThat(actual).isEqualTo(expected);
+        then(groupMemberRequestRepository).should().deleteByGroup_IdAndUser_Id(groupId, userId);
     }
 
     private Group createGroup() {
@@ -153,9 +155,8 @@ class GroupServiceTest {
         );
     }
 
-    private User createUser(Long id) {
+    private User createUser() {
         return User.of(
-            id,
             "username",
             "username@dankook.ac.kr",
             "단국대학교",
@@ -163,5 +164,11 @@ class GroupServiceTest {
             Gender.M,
             LocalDate.now()
         );
+    }
+
+    private User createUser(Long id) {
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", id);
+        return user;
     }
 }
