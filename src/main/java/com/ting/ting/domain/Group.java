@@ -9,14 +9,10 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Setter
 @Getter
-@Table(name = "\"group\"", uniqueConstraints = {
-        @UniqueConstraint(name = "unique_user", columnNames = {"leader_id"}),
-})
+@Table(name = "\"group\"")
 @Entity
 public class Group {
 
@@ -30,7 +26,7 @@ public class Group {
     private User leader;
 
     @NotNull @Size(min = 2, max = 20)
-    @Column(name = "group_name", nullable = false, length = 20)
+    @Column(name = "group_name", unique = true, nullable = false, length = 20)
     private String groupName;
 
     @NotNull
@@ -52,22 +48,6 @@ public class Group {
 
     private String memo;
 
-    @JoinTable(
-            name = "member_request",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-    private Set<User> joinRequests = new LinkedHashSet<>();
-
-    @JoinTable(
-            name = "group_member",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @ManyToMany(fetch = FetchType.LAZY)
-    private Set<User> members = new LinkedHashSet<>();
-
     protected Group() {}
 
     private Group(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
@@ -83,18 +63,4 @@ public class Group {
         return new Group(leader, groupName, gender, school, numOfMember, memo);
     }
 
-    public void addJoinRequests(User user) { this.joinRequests.add(user); }
-
-    public void removeJoinRequests(User user) { this.joinRequests.remove(user); }
-
-    public void addMember(User user) {
-        this.members.add(user);
-        user.getGroups().add(this);
-    }
-
-    public void removeMember(User user) {
-        this.members.remove(user);
-        user.getGroups().remove(this);
-    }
 }
-
