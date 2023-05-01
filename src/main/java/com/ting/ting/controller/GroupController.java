@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -20,31 +19,52 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    /**
+     * 모든 팀 조회
+     */
     @GetMapping
-    public Page<GroupResponse> list(Pageable pageable) {
-        return groupService.list(pageable).map(GroupResponse::from);
+    public Page<GroupResponse> suggestedGroupList(Pageable pageable) {
+        return groupService.findAllGroups(pageable).map(GroupResponse::from);
     }
 
+    /**
+     * 내가 속한 팀 조회
+     */
     @GetMapping("/my")
-    public List<GroupResponse> mylist() {
-        return groupService.myList(1L).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableList());
+    public List<GroupResponse> myGroupList() {
+        // userId를 임의로 설정 TODO: user 구현 후 수정
+        return groupService.findMyGroupList(1L).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableList());
     }
 
+    /**
+     * 그룹 생성
+     */
     @PostMapping
-    public String create(@RequestBody GroupRequest request) {
-        groupService.saveGroup(request.toDto());
+    public String groupSave(@RequestBody GroupRequest request) {
+        Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        groupService.saveGroup(userId, request.toDto());
         return "success";
     }
 
+    /**
+     * 같은 성별인 팀에 요청
+     */
     @PostMapping("/request/{groupId}")
-    public String request(@PathVariable long groupId) {
-        groupService.createJoinRequest(groupId);
+    public String requestToJoinSave(@PathVariable long groupId) {
+        Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        groupService.saveJoinRequest(groupId, userId);
         return "success";
     }
 
+    /**
+     * 같은 성별인 팀에 했던 요청을 취소
+     */
     @DeleteMapping("/request/{groupId}")
-    public String deleteRequest(@PathVariable long groupId) {
-        groupService.deleteJoinRequest(groupId);
+    public String requestToJoinDelete(@PathVariable long groupId) {
+        Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        groupService.deleteJoinRequest(groupId, userId);
         return "success";
     }
 }
