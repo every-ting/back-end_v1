@@ -10,8 +10,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Setter
 @Getter
@@ -60,9 +58,6 @@ public class User {
     @Column(name="ideal_photo")
     private String idealPhoto;
 
-    @ManyToMany(mappedBy = "members")
-    private Set<Group> groups = new LinkedHashSet<>();
-
     protected User() {}
 
     private User(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
@@ -77,6 +72,10 @@ public class User {
         this.weight = weight;
         this.height = height;
         this.idealPhoto = idealPhoto;
+    }
+
+    public static User of(String username, String email, String school, String major, Gender gender, LocalDate birth) {
+        return User.of(null, username, email, school, major, gender, birth);
     }
 
     public static User of(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth) {
