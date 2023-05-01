@@ -6,4 +6,3 @@ public class UserException extends IllegalArgumentException {
         super(msg);
     }
 }
-
