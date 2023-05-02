@@ -29,6 +29,10 @@ public class BlindRequestService {
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
         User toUser = userRepository.findById(toUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
 
+        blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throw new UserException("이전에 보낸 요청이 있습니다.");
+        });
+
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
         request.setToUser(toUser);
