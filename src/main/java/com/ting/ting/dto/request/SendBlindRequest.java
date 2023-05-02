@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class SendBlindRequest {
 
+    /**
+     * 소개팅 상대 정보
+     */
     @NotNull
     private Long toUserId;
 }

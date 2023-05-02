@@ -18,6 +18,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
+     */
     public Page<BlindUsersInfoResponse> usersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException("유저가 존재하지 않습니다."));
         if (user.getGender().equals(Gender.M)) {
@@ -26,10 +29,16 @@ public class UserService {
         return menUsersInfo(pageable);
     }
 
+    /**
+     * 소개팅 상대편 조회 - 자신이 남자일 경우
+     */
     private Page<BlindUsersInfoResponse> womenUsersInfo(Pageable pageable) {
         return userRepository.findAllByGender(Gender.W, pageable).map(BlindUsersInfoResponse::from);
     }
 
+    /**
+     * 소개팅 상대편 조회 - 자신이 여자일 경우가
+     */
     private Page<BlindUsersInfoResponse> menUsersInfo(Pageable pageable) {
         return userRepository.findAllByGender(Gender.M, pageable).map(BlindUsersInfoResponse::from);
     }
