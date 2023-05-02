@@ -1,5 +1,6 @@
 package com.ting.ting.controller;
 
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.exception.UserException;
@@ -22,42 +23,39 @@ public class BlindDateController {
         this.blindRequestService = blindRequestService;
     }
 
-    @GetMapping("users/m")
-    public Page<BlindUsersInfoResponse> blindMenUsersInfo(Pageable pageable) {
-        return userService.menUsersInfo(pageable);
-    }
-
-    @GetMapping("users/w")
-    public Page<BlindUsersInfoResponse> blindWomenUsersInfo(Pageable pageable) {
-        return userService.womenUsersInfo(pageable);
+    @GetMapping("/users")
+    public Page<BlindUsersInfoResponse> blindUsersInfo(Pageable pageable) {
+        Gender userGender = Gender.W;  // userGender 임의로 설정 TODO: user 구현 후 수정
+        return userService.usersInfo(userGender, pageable);
     }
 
     @PostMapping("/request")
-    public ResponseEntity<String> sendBlindRequest(@RequestBody SendBlindRequest request) {
-        blindRequestService.createJoinRequest(request.getFromUserId(), request.getToUserId());
+    public ResponseEntity<String> sendJoinRequest(@RequestBody SendBlindRequest request) {
+        Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindRequestService.createJoinRequest(fromUserId, request.getToUserId());
         return ResponseEntity.ok("success");
     }
 
-    @PutMapping("/request/{blindRequestId}")
+    @PutMapping("/request/accept/{blindRequestId}")
     public ResponseEntity<String> acceptedRequest(@PathVariable long blindRequestId) {
         blindRequestService.acceptRequest(blindRequestId);
         return ResponseEntity.ok("success");
     }
 
-    @PutMapping("/request/{blindRequestId}")
+    @PutMapping("/request/reject/{blindRequestId}")
     public ResponseEntity<String> rejectRequest(@PathVariable long blindRequestId) {
         blindRequestService.rejectRequest(blindRequestId);
         return ResponseEntity.ok("success");
     }
 
     @DeleteMapping("/request/{blindRequestId}")
-    public ResponseEntity<String> deleteRequest(@PathVariable long blindRequestId) {
+    public ResponseEntity<String> deleteJoinRequest(@PathVariable long blindRequestId) {
         blindRequestService.deleteRequest(blindRequestId);
         return ResponseEntity.ok("success");
     }
 
     @ExceptionHandler(UserException.class)
-    public ResponseEntity<?> dbeHandler() {
+    public ResponseEntity<?> userExceptionHandler() {
         return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
     }
 }

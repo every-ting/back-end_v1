@@ -8,6 +8,8 @@ import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class BlindRequestService {
 
@@ -20,6 +22,10 @@ public class BlindRequestService {
     }
 
     public void createJoinRequest(long fromUserId, long toUserId) {
+        if (Objects.equals(fromUserId, toUserId)) {
+            throw new UserException("같은 사용자간의 요청 처리입니다.");
+        }
+
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
         User toUser = userRepository.findById(toUserId).orElseThrow(() -> new UserException("해당 사용자의 정보가 존재하지 않습니다."));
 
