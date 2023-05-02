@@ -1,6 +1,5 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.exception.UserException;
@@ -25,8 +24,8 @@ public class BlindDateController {
 
     @GetMapping("/users")
     public Page<BlindUsersInfoResponse> blindUsersInfo(Pageable pageable) {
-        Gender userGender = Gender.W;  // userGender 임의로 설정 TODO: user 구현 후 수정
-        return userService.usersInfo(userGender, pageable);
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        return userService.usersInfo(userId, pageable);
     }
 
     @PostMapping("/request")
