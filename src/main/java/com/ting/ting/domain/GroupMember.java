@@ -11,7 +11,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Table(name = "\"group_member\"", uniqueConstraints = {
-        @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "user_id"}),
+        @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "member_id"}),
 })
 @Entity
 public class GroupMember {
@@ -26,9 +26,9 @@ public class GroupMember {
     private Group group;
 
     @NotNull
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "member_id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private User user;
+    private User member;
 
     @NotNull
     @Column(name = "request_status", nullable = false, columnDefinition = "varchar(8) default 'PENDING'")
@@ -38,7 +38,7 @@ public class GroupMember {
     protected GroupMember() {}
 
     private GroupMember(Group group, User user) {
-        this.user = user;
+        this.member = user;
         this.group = group;
     }
 
@@ -51,7 +51,7 @@ public class GroupMember {
         if (this == o) return true;
         if (!(o instanceof GroupMember)) return false;
         GroupMember that = (GroupMember) o;
-        return this.getUser() != null && this.getUser().getId().equals(that.getUser().getId())
+        return this.getMember() != null && this.getMember().getId().equals(that.getMember().getId())
                 && this.getGroup() != null && this.getGroup().getId().equals(that.getGroup().getId());
     }
 

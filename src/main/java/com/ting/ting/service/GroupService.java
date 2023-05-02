@@ -48,9 +48,9 @@ public class GroupService {
      * 내가 속한 팀 조회 - request status : ACCEPTED
      */
     public Set<GroupDto> findMyGroupList(Long userId) {
-        User user = loadUserByUserId(userId);
+        User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findGroupByUserAndStatusAccepted(user).stream().map(GroupDto::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return groupMemberRepository.findGroupByMemberAndStatusAccepted(member).stream().map(GroupDto::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**

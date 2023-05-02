@@ -62,7 +62,7 @@ class GroupServiceTest {
         User user = createUser(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findGroupByUserAndStatusAccepted(user)).willReturn(List.of(createGroup(2L)));
+        given(groupMemberRepository.findGroupByMemberAndStatusAccepted(user)).willReturn(List.of(createGroup(2L)));
 
         // When
         Set<GroupDto> groups = groupService.findMyGroupList(userId);
