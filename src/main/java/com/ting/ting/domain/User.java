@@ -57,5 +57,4 @@ public class User {
 
     @Column(name="ideal_photo")
     private String idealPhoto;
-
 }
