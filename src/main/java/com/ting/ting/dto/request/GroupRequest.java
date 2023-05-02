@@ -14,19 +14,34 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 public class GroupRequest {
 
+    /**
+     * 과팅 팀 이름
+     */
     @NotNull @Size(min = 2, max = 20)
     String name;
 
+    /**
+     * 과팅 성별
+     */
     @NotNull
     Gender gender;
 
+    /**
+     * 과팅 팀 멤버 수
+     */
     @NotNull
     @Min(2) @Max(6)
     Integer numOfMember;
 
+    /**
+     * 과팅 팀의 학교
+     */
     @NotNull
     String school;
 
+    /**
+     * 과팅 팀 소개
+     */
     String memo;
 
     protected GroupRequest() {}
