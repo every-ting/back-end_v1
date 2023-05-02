@@ -4,6 +4,7 @@ import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.service.GroupService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class GroupController {
      * 모든 팀 조회
      */
     @GetMapping
-    public Page<GroupResponse> suggestedGroupList(Pageable pageable) {
+    public Page<GroupResponse> suggestedGroupList(@ParameterObject Pageable pageable) {
         return groupService.findAllGroups(pageable).map(GroupResponse::from);
     }
 
