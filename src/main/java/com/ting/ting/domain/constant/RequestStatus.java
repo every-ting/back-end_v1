@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum Gender {
-    M("MEN"),
-    W("WOMEN");
+public enum RequestStatus {
+    PENDING("요청중"),
+    ACCEPTED("성공"),
+    REJECTED("거절");
 
-    private final String gender;
+    private final String status;
 }
