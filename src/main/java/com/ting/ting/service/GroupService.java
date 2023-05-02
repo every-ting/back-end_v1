@@ -57,13 +57,13 @@ public class GroupService {
      * 그룹 생성
      */
     public void saveGroup(Long userId, GroupDto dto) {
-        User user = loadUserByUserId(userId);
+        User leader = loadUserByUserId(userId);
 
         groupRepository.findByGroupName(dto.getGroupName()).ifPresent(it -> {
             throw new RuntimeException("duplicated group name");
         });
 
-        Group group = dto.toEntity(user);
+        Group group = dto.toEntity(leader);
 
         groupRepository.save(group);
     }
