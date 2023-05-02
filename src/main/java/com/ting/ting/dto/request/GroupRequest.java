@@ -18,7 +18,7 @@ public class GroupRequest {
      * 과팅 팀 이름
      */
     @NotNull @Size(min = 2, max = 20)
-    String name;
+    String groupName;
 
     /**
      * 과팅 성별
@@ -47,6 +47,6 @@ public class GroupRequest {
     protected GroupRequest() {}
 
     public GroupDto toDto() {
-        return GroupDto.of(name, gender, numOfMember, school, memo);
+        return GroupDto.of(groupName, gender, numOfMember, school, memo);
     }
 }
