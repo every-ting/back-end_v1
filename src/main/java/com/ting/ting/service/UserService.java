@@ -16,11 +16,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Page<BlindUsersInfoResponse> womenUsersInfo(Pageable pageable) {
+    public Page<BlindUsersInfoResponse> usersInfo(Gender userGender, Pageable pageable) {
+        if (userGender.equals(Gender.M)) {
+            return womenUsersInfo(pageable);
+        }
+        return menUsersInfo(pageable);
+    }
+
+    private Page<BlindUsersInfoResponse> womenUsersInfo(Pageable pageable) {
         return userRepository.findAllByGender(Gender.W, pageable).map(BlindUsersInfoResponse::from);
     }
 
-    public Page<BlindUsersInfoResponse> menUsersInfo(Pageable pageable) {
+    private Page<BlindUsersInfoResponse> menUsersInfo(Pageable pageable) {
         return userRepository.findAllByGender(Gender.M, pageable).map(BlindUsersInfoResponse::from);
     }
 }
