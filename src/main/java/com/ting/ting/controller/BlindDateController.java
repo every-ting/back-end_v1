@@ -5,6 +5,7 @@ import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.exception.UserException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class BlindDateController {
      * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
      */
     @GetMapping("/users")
-    public Page<BlindUsersInfoResponse> blindUsersInfo(Pageable pageable) {
+    public Page<BlindUsersInfoResponse> blindUsersInfo(@ParameterObject Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return userService.usersInfo(userId, pageable);
     }
@@ -36,7 +37,6 @@ public class BlindDateController {
      */
     @PostMapping("/request")
     public ResponseEntity<String> sendJoinRequest(@RequestBody SendBlindRequest request) {
-        System.out.println(request.getToUserId());
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         blindRequestService.createJoinRequest(fromUserId, request.getToUserId());
         return ResponseEntity.ok("success");
