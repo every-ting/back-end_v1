@@ -2,7 +2,7 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
-import com.ting.ting.exception.UserException;
+import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
 import org.springdoc.api.annotations.ParameterObject;
@@ -69,8 +69,9 @@ public class BlindDateController {
         return ResponseEntity.ok("success");
     }
 
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<?> userExceptionHandler() {
+    @ExceptionHandler(TingApplicationException.class)
+    public ResponseEntity<?> tingExceptionHandler(TingApplicationException e) {
+        System.out.println(e.getMessage());
         return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
     }
 }
