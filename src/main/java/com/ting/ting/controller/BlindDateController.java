@@ -5,12 +5,14 @@ import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/blind")
 public class BlindDateController {
@@ -71,7 +73,7 @@ public class BlindDateController {
 
     @ExceptionHandler(TingApplicationException.class)
     public ResponseEntity<?> tingExceptionHandler(TingApplicationException e) {
-        System.out.println(e.getMessage());
+        log.error(e.getMessage());
         return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
     }
 }
