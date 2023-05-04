@@ -29,8 +29,8 @@ public class Group {
     @Column(name = "group_name", unique = true, nullable = false, length = 20)
     private String groupName;
 
-    @NotNull
-    @Column(nullable = false, length = 1)
+    @NotNull @Size(max = 5)
+    @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 

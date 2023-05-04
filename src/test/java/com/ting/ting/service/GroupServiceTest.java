@@ -132,7 +132,7 @@ class GroupServiceTest {
         return Group.of(
                 createUser(4L),
                 "팀 이름",
-                Gender.M,
+                Gender.MEN,
                 "단국대학교",
                 3,
                 ""
@@ -148,7 +148,7 @@ class GroupServiceTest {
     private GroupDto createGroupDto() {
         return GroupDto.of(
                 "팀 이름",
-                Gender.M,
+                Gender.MEN,
                 3,
                 "단국대학교",
                 ""
@@ -161,7 +161,7 @@ class GroupServiceTest {
             "username@dankook.ac.kr",
             "단국대학교",
             "컴퓨터 공학과",
-            Gender.M,
+            Gender.MEN,
             LocalDate.now()
         );
     }

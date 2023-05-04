@@ -23,7 +23,7 @@ public class UserService {
      */
     public Page<BlindUsersInfoResponse> usersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException("유저가 존재하지 않습니다."));
-        if (user.getGender().equals(Gender.M)) {
+        if (user.getGender().equals(Gender.MEN)) {
             return womenUsersInfo(pageable);
         }
         return menUsersInfo(pageable);
@@ -33,13 +33,13 @@ public class UserService {
      * 소개팅 상대편 조회 - 자신이 남자일 경우
      */
     private Page<BlindUsersInfoResponse> womenUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.W, pageable).map(BlindUsersInfoResponse::from);
+        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindUsersInfoResponse::from);
     }
 
     /**
      * 소개팅 상대편 조회 - 자신이 여자일 경우가
      */
     private Page<BlindUsersInfoResponse> menUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.M, pageable).map(BlindUsersInfoResponse::from);
+        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindUsersInfoResponse::from);
     }
 }
