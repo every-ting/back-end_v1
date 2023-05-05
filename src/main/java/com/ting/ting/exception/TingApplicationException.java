@@ -4,7 +4,7 @@ import com.ting.ting.service.ServiceType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class TingApplicationException extends IllegalArgumentException {
+public class TingApplicationException extends RuntimeException {
 
     private ErrorCode errorCode;
     private ServiceType serviceType;

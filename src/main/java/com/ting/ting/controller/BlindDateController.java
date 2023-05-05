@@ -2,7 +2,6 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
-import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -69,11 +68,5 @@ public class BlindDateController {
     public ResponseEntity<String> rejectRequest(@PathVariable long blindRequestId) {
         blindRequestService.rejectRequest(blindRequestId);
         return ResponseEntity.ok("success");
-    }
-
-    @ExceptionHandler(TingApplicationException.class)
-    public ResponseEntity<?> tingExceptionHandler(TingApplicationException e) {
-        log.error(e.getMessage());
-        return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
     }
 }
