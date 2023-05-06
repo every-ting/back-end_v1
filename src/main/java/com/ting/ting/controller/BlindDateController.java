@@ -2,13 +2,13 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
+import com.ting.ting.dto.response.Response;
 import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -28,45 +28,45 @@ public class BlindDateController {
      * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
      */
     @GetMapping("/users")
-    public Page<BlindUsersInfoResponse> blindUsersInfo(@ParameterObject Pageable pageable) {
+    public Response<Page<BlindUsersInfoResponse>> blindUsersInfo(@ParameterObject Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return userService.usersInfo(userId, pageable);
+        return Response.success(userService.usersInfo(userId, pageable));
     }
 
     /**
      * 소개팅 상대에게 요청
      */
     @PostMapping("/request")
-    public ResponseEntity<String> sendJoinRequest(@RequestBody SendBlindRequest request) {
+    public Response<Void> sendJoinRequest(@RequestBody SendBlindRequest request) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         blindRequestService.createJoinRequest(fromUserId, request.getToUserId());
-        return ResponseEntity.ok("success");
+        return Response.success();
     }
 
     /**
      * 소개팅 상대에게 한 요청 취소
      */
     @DeleteMapping("/request/{blindRequestId}")
-    public ResponseEntity<String> deleteJoinRequest(@PathVariable long blindRequestId) {
+    public Response<Void> deleteJoinRequest(@PathVariable long blindRequestId) {
         blindRequestService.deleteRequest(blindRequestId);
-        return ResponseEntity.ok("success");
+        return Response.success();
     }
 
     /**
      * 자신에게 온 요청 수락 -> 추가 구현 필요
      */
     @PutMapping("/request/accept/{blindRequestId}")
-    public ResponseEntity<String> acceptedRequest(@PathVariable long blindRequestId) {
+    public Response<Void> acceptedRequest(@PathVariable long blindRequestId) {
         blindRequestService.acceptRequest(blindRequestId);
-        return ResponseEntity.ok("success");
+        return Response.success();
     }
 
     /**
      * 자신에게 온 요청 거절 -> 추가 구현 필요
      */
     @PutMapping("/request/reject/{blindRequestId}")
-    public ResponseEntity<String> rejectRequest(@PathVariable long blindRequestId) {
+    public Response<Void> rejectRequest(@PathVariable long blindRequestId) {
         blindRequestService.rejectRequest(blindRequestId);
-        return ResponseEntity.ok("success");
+        return Response.success();
     }
 }
