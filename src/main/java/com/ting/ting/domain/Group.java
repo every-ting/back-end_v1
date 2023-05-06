@@ -30,11 +30,11 @@ public class Group {
     private String groupName;
 
     @NotNull
-    @Column(nullable = false, length = 1)
+    @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NotNull @Size(max = 70)
+    @NotNull @Max(70)
     @Column(length = 70, nullable = false)
     private String school;
 
