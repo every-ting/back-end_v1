@@ -17,13 +17,21 @@ public class TingApplicationException extends RuntimeException {
         this.serviceType = serviceType;
     }
 
-    @Override
-    public String getMessage() {
+    public String getMessageForServer() {
         if (message == null) {
-            return errorCode.getMessage();
+            message = errorCode.getMessage();
         }
 
         return String.format("[%s :: %s] : %s", errorCode, serviceType, message);
+    }
+
+    @Override
+    public String getMessage() {
+        if (message == null) {
+            message = errorCode.getMessage();
+        }
+
+        return message;
     }
 
     public HttpStatus getHttpStatus() {
