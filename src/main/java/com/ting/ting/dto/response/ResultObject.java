@@ -1,6 +1,5 @@
 package com.ting.ting.dto.response;
 
-import com.ting.ting.TingApplication;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
