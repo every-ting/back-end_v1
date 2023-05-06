@@ -39,7 +39,7 @@ public class User {
     @Column(length = 50, nullable = false)
     private String major;
 
-    @NotNull @Size(max = 5)
+    @NotNull
     @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -49,6 +49,7 @@ public class User {
     private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 4)
     private MBTI mbti;
 
     private Float weight;

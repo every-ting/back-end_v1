@@ -29,12 +29,12 @@ public class Group {
     @Column(name = "group_name", unique = true, nullable = false, length = 20)
     private String groupName;
 
-    @NotNull @Size(max = 5)
+    @NotNull
     @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NotNull @Size(max = 70)
+    @NotNull @Max(70)
     @Column(length = 70, nullable = false)
     private String school;
 
