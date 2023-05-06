@@ -4,6 +4,9 @@ import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.dto.GroupDto;
+import com.ting.ting.exception.ErrorCode;
+import com.ting.ting.exception.ServiceType;
+import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.repository.GroupMemberRepository;
 import com.ting.ting.repository.GroupMemberRequestRepository;
 import com.ting.ting.repository.GroupRepository;
@@ -60,7 +63,9 @@ public class GroupService {
         User leader = loadUserByUserId(userId);
 
         groupRepository.findByGroupName(dto.getGroupName()).ifPresent(it -> {
-            throw new RuntimeException("duplicated group name");
+            throw new TingApplicationException(
+                    ErrorCode.DUPLICATED_REQUEST, ServiceType.GROUP_MEETING, String.format("Group whose name is (%s) already exists", dto.getGroupName())
+            );
         });
 
         Group group = dto.toEntity(leader);
@@ -76,12 +81,17 @@ public class GroupService {
         User user = loadUserByUserId(userId);
 
         if (group.getGender() != user.getGender()) {
-            throw new RuntimeException("gender does not match");
+            throw new TingApplicationException(
+                    ErrorCode.GENDER_NOT_MATCH, ServiceType.GROUP_MEETING, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId)
+            );
         }
 
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
-            throw new RuntimeException("duplicated request");
+            throw new TingApplicationException(
+                    ErrorCode.DUPLICATED_REQUEST, ServiceType.GROUP_MEETING, String.format("User(id:%d) already requested to join the Group(id:%d)", userId, groupId)
+            );
         });
+
 
         groupMemberRequestRepository.save(GroupMemberRequest.of(group, user));
     }
@@ -95,13 +105,17 @@ public class GroupService {
 
     private Group loadGroupByGroupId(Long groupId) {
         return groupRepository.findById(groupId).orElseThrow(() ->
-                new RuntimeException("invalid groupId")
+                new TingApplicationException(
+                    ErrorCode.REQUEST_NOT_FOUND, ServiceType.GROUP_MEETING, String.format("Group(id: %d) not found", groupId)
+                )
         );
     }
 
     private User loadUserByUserId(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-                new RuntimeException("invalid userId")
+                new TingApplicationException(
+                        ErrorCode.REQUEST_NOT_FOUND, ServiceType.GROUP_MEETING, String.format("User(id: %d) not found", userId)
+                )
         );
     }
 }
