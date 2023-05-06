@@ -62,5 +62,4 @@ public class Group {
     public static Group of(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
         return new Group(leader, groupName, gender, school, numOfMember, memo);
     }
-
 }
