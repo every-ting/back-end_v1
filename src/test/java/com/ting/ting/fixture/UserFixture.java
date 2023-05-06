@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class UserFixture {
 
     public static User entity(Long userId) {
-        User user = User.of("username", "email", "단국대학교", "통계학과", Gender.W, LocalDate.now());
+        User user = User.of("username", "email", "단국대학교", "통계학과", Gender.WOMEN, LocalDate.now());
         ReflectionTestUtils.setField(user, "id", userId);
         return user;
     }
