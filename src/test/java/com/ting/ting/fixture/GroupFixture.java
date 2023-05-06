@@ -16,7 +16,7 @@ public class GroupFixture {
     }
 
     public static GroupDto dto() {
-        GroupDto dto = GroupDto.of("팀", Gender.W, 5, "단국대학교", "");
+        GroupDto dto = GroupDto.of("팀", Gender.WOMEN, 5, "단국대학교", "");
         return dto;
     }
 }

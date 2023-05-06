@@ -21,7 +21,7 @@ insert into user (id, username, school, major, gender, birth, email, weight, hei
 
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (1, 1, '과팅팀1', 'MEN', '단국대학교', 3, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (2, 2, '과팅팀2', 'WOMEN', '홍익대학교', 4, false, '');
-insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (3, 3, '과팅팀3', 'WEN', '동국대학교', 2, false, '');
+insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (3, 3, '과팅팀3', 'MEN', '동국대학교', 2, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (4, 4, '과팅팀4', 'MEN', '서울대학교', 5, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (5, 5, '과팅팀5', 'MEN', '연세대학교', 4, false, '');
 insert into `group` (id, leader_id, group_name, gender, school, num_of_member, is_matched, memo) values (6, 6, '과팅팀6', 'WOMEN', '건국대학교', 3, false, '');
