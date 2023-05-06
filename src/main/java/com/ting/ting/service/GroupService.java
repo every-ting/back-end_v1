@@ -56,7 +56,7 @@ public class GroupService {
     /**
      * 그룹 생성
      */
-    public void saveGroup(Long userId, GroupDto dto) {
+    public GroupDto saveGroup(Long userId, GroupDto dto) {
         User leader = loadUserByUserId(userId);
 
         groupRepository.findByGroupName(dto.getGroupName()).ifPresent(it -> {
@@ -65,7 +65,7 @@ public class GroupService {
 
         Group group = dto.toEntity(leader);
 
-        groupRepository.save(group);
+        return GroupDto.from(groupRepository.save(group));
     }
 
     /**
