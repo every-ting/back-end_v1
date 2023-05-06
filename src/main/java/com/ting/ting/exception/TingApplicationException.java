@@ -1,10 +1,11 @@
 package com.ting.ting.exception;
 
-import com.ting.ting.service.ServiceType;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
+@Getter
 public class TingApplicationException extends RuntimeException {
 
     private ErrorCode errorCode;

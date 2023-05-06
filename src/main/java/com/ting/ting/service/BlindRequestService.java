@@ -4,6 +4,7 @@ import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.exception.ErrorCode;
+import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
