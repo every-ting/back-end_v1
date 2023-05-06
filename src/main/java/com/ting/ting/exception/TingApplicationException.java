@@ -2,6 +2,7 @@ package com.ting.ting.exception;
 
 import com.ting.ting.service.ServiceType;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public class TingApplicationException extends RuntimeException {
@@ -22,5 +23,9 @@ public class TingApplicationException extends RuntimeException {
         }
 
         return String.format("[%s :: %s] : %s", errorCode, serviceType, message);
+    }
+
+    public HttpStatus getHttpStatus() {
+        return errorCode.getHttpStatus();
     }
 }

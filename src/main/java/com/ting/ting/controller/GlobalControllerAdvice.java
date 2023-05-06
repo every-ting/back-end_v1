@@ -13,6 +13,6 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(TingApplicationException.class)
     public ResponseEntity<?> tingExceptionHandler(TingApplicationException e) {
         log.error(e.getMessage());
-        return ResponseEntity.badRequest().body("잘못된 정보를 입력하였습니다.");
+        return ResponseEntity.status(e.getHttpStatus()).body("Invalid information entered.");
     }
 }
