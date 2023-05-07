@@ -52,7 +52,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     public Set<GroupResponse> findMyGroupList(Long userId) {
         User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findAllGroupByMemberAndStatusAccepted(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.findAllGroupByMemberAndStatusActive(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -63,8 +63,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", request.getGroupName()));
         });
 
-        Group group = request.toEntity(leader);
-        return GroupResponse.from(groupRepository.save(group));
+        Group group = groupRepository.save(request.toEntity());
+        groupMemberRepository.save(GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER));
+
+        return GroupResponse.from(group);
     }
 
     @Override
