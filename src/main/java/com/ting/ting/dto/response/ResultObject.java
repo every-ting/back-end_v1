@@ -34,7 +34,7 @@ public class ResultObject {
         this.message = e.getMessage();
     }
 
-    public static ResultObject success() {
-        return new ResultObject(HttpStatus.OK.value(), null, "success");
+    public static ResultObject success(ServiceType serviceType) {
+        return new ResultObject(HttpStatus.OK.value(), serviceType.name(), "success");
     }
 }

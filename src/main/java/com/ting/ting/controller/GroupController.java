@@ -3,7 +3,10 @@ package com.ting.ting.controller;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
+import com.ting.ting.exception.ServiceType;
+import com.ting.ting.service.BlindRequestService;
 import com.ting.ting.service.GroupService;
+import com.ting.ting.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -14,19 +17,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/groups")
-public class GroupController {
+public class GroupController extends AbstractController{
 
     private final GroupService groupService;
+
+    public GroupController(GroupService groupService) {
+        super(ServiceType.GROUP_MEETING);
+        this.groupService = groupService;
+    }
 
     /**
      * 모든 팀 조회
      */
     @GetMapping
     public Response<Page<GroupResponse>> suggestedGroupList(@ParameterObject Pageable pageable) {
-        return Response.success(groupService.findAllGroups(pageable).map(GroupResponse::from));
+        return success(groupService.findAllGroups(pageable).map(GroupResponse::from));
     }
 
     /**
@@ -35,7 +42,7 @@ public class GroupController {
     @GetMapping("/my")
     public Response<List<GroupResponse>> myGroupList() {
         // userId를 임의로 설정 TODO: user 구현 후 수정
-        return Response.success(groupService.findMyGroupList(1L).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableList()));
+        return success(groupService.findMyGroupList(1L).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableList()));
     }
 
     /**
@@ -44,7 +51,7 @@ public class GroupController {
     @PostMapping
     public Response<GroupResponse> createGroup(@RequestBody GroupRequest request) {
         Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        return Response.success(GroupResponse.from(groupService.saveGroup(userId, request.toDto())));
+        return success(GroupResponse.from(groupService.saveGroup(userId, request.toDto())));
     }
 
     /**
@@ -55,7 +62,8 @@ public class GroupController {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.saveJoinRequest(groupId, userId);
-        return Response.success();
+        System.out.println(serviceType + " in sendJoinRequest");
+        return success();
     }
 
     /**
@@ -66,6 +74,6 @@ public class GroupController {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.deleteJoinRequest(groupId, userId);
-        return Response.success();
+        return success();
     }
 }
