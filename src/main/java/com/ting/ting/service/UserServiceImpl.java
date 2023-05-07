@@ -9,10 +9,10 @@ import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class UserServiceImpl implements UserService{
+@Component
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 

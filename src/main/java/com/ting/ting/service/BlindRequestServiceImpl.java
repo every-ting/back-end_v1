@@ -7,11 +7,11 @@ import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-@Service
+@Component
 public class BlindRequestServiceImpl extends AbstractService implements BlindRequestService{
 
     private final UserRepository userRepository;

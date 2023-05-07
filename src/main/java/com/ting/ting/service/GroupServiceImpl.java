@@ -10,8 +10,10 @@ import com.ting.ting.repository.GroupMemberRepository;
 import com.ting.ting.repository.GroupMemberRequestRepository;
 import com.ting.ting.repository.GroupRepository;
 import com.ting.ting.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 
 
 @Transactional
-@Service
+@Component
 public class GroupServiceImpl extends AbstractService implements GroupService {
 
     private final GroupRepository groupRepository;
