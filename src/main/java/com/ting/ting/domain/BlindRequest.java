@@ -24,7 +24,7 @@ public class BlindRequest {
     @JoinColumn(name = "to_user_id")
     private User toUser;
 
+    @Column(name = "request_status", nullable = false, columnDefinition = "varchar(8) default 'PENDING'")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RequestStatus status;
+    private RequestStatus status = RequestStatus.PENDING;
 }

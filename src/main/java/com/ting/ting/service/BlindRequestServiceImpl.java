@@ -5,6 +5,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
+import com.ting.ting.dto.response.BlindRequestResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
@@ -14,7 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class BlindRequestServiceImpl extends AbstractService implements BlindRequestService {
@@ -66,7 +70,6 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
         request.setToUser(toUser);
-        request.setStatus(RequestStatus.PENDING);
         blindRequestRepository.save(request);
     }
 
