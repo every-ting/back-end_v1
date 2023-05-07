@@ -4,7 +4,6 @@ import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -53,11 +52,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     public Set<GroupResponse> findMyGroupList(Long userId) {
         User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findAllGroupByMemberAndStatusActive(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.findAllGroupByMemberAndStatusAccepted(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public GroupDto saveGroup(Long userId, GroupDto dto) {
+    public GroupResponse saveGroup(Long userId, GroupRequest request) {
         User leader = loadUserByUserId(userId);
 
         groupRepository.findByGroupName(request.getGroupName()).ifPresent(it -> {
