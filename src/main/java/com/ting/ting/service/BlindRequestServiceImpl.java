@@ -4,7 +4,6 @@ import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.BlindUsersInfoResponse;
 import com.ting.ting.dto.response.BlindRequestResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -33,7 +32,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public Page<BlindUsersInfoResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Page<BlindRequestResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
@@ -44,12 +43,12 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         return menBlindUsersInfo(pageable);
     }
 
-    private Page<BlindUsersInfoResponse> womenBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindUsersInfoResponse::from);
+    private Page<BlindRequestResponse> womenBlindUsersInfo(Pageable pageable) {
+        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindRequestResponse::from);
     }
 
-    private Page<BlindUsersInfoResponse> menBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindUsersInfoResponse::from);
+    private Page<BlindRequestResponse> menBlindUsersInfo(Pageable pageable) {
+        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindRequestResponse::from);
     }
 
     @Override
@@ -79,6 +78,27 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
 
         blindRequestRepository.delete(request);
+    }
+
+    @Override
+    public Set<BlindRequestResponse> myRequest(long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
+
+        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUser(user);
+
+        LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
+
+        for (BlindRequest requestToMeUserInfo : usersOfRequestedInfo) {
+            Long toUserId = requestToMeUserInfo.getToUser().getId();
+            User toUser = userRepository.findById(toUserId).orElseThrow(() ->
+                    throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", requestToMeUserInfo.getId())));
+
+            usersOfRequested.add(toUser);
+        }
+
+        return usersOfRequested.stream().map(BlindRequestResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
