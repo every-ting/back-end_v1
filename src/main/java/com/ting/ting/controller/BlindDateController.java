@@ -35,7 +35,13 @@ public interface BlindDateController {
      * 내가 한 요청 확인
      */
     @GetMapping("/confirm/myRequest")
-    Response<List<BlindRequestResponse>> confirmMyRequest();
+    Response<List<BlindRequestResponse>> confirmOfMyRequest();
+
+    /**
+     * 나에게 온 요청 확인
+     */
+    @GetMapping("/confirm/request/toMe")
+    Response<List<BlindRequestResponse>> confirmOfRequestToMe();
 
     /**
      * 자신에게 온 요청 수락 -> 추가 구현 필요
