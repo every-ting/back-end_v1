@@ -32,7 +32,7 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class GroupServiceTest {
 
-    @InjectMocks private GroupService groupService;
+    @InjectMocks private GroupServiceImpl groupService;
 
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
