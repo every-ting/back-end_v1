@@ -34,7 +34,7 @@ public class Group {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NotNull @Max(70)
+    @NotNull @Size(max = 70)
     @Column(length = 70, nullable = false)
     private String school;
 
