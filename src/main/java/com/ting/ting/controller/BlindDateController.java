@@ -44,7 +44,7 @@ public interface BlindDateController {
     Response<List<BlindRequestResponse>> confirmOfRequestToMe();
 
     /**
-     * 자신에게 온 요청 수락 -> 추가 구현 필요
+     * 자신에게 온 요청 수락
      */
     @PutMapping("/request/accept/{blindRequestId}")
     Response<Void> acceptedRequest(@PathVariable long blindRequestId);
