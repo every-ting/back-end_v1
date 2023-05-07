@@ -32,7 +32,7 @@ public class GroupMemberRequest {
 
     @Column(name = "request_status", nullable = false, columnDefinition = "varchar(8) default 'PENDING'")
     @Enumerated(EnumType.STRING)
-    RequestStatus status = RequestStatus.PENDING;
+    private RequestStatus status = RequestStatus.PENDING;
 
     protected GroupMemberRequest() {}
 

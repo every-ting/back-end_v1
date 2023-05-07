@@ -1,4 +1,4 @@
-package com.ting.ting.service;
+package com.ting.ting.exception;
 
 public enum ServiceType {
     BLIND,

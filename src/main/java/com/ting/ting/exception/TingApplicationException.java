@@ -1,10 +1,10 @@
 package com.ting.ting.exception;
 
-import com.ting.ting.service.ServiceType;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class TingApplicationException extends RuntimeException {
 
     private ErrorCode errorCode;
@@ -19,13 +19,17 @@ public class TingApplicationException extends RuntimeException {
     @Override
     public String getMessage() {
         if (message == null) {
-            return errorCode.getMessage();
+            message = errorCode.getMessage();
+        }
+
+        return message;
+    }
+
+    public String getMessageForServer() {
+        if (message == null) {
+            message = errorCode.getMessage();
         }
 
         return String.format("[%s :: %s] : %s", errorCode, serviceType, message);
-    }
-
-    public HttpStatus getHttpStatus() {
-        return errorCode.getHttpStatus();
     }
 }
