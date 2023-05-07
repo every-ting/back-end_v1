@@ -99,7 +99,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public Set<BlindRequestResponse> requestToMe(long toUserId) {
-        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUser(getUserById(toUserId));
+        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
 
         LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
 
