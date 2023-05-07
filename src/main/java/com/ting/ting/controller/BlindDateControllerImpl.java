@@ -67,7 +67,8 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
 
     @Override
     public Response<Void> rejectRequest(@PathVariable long blindRequestId) {
-        blindRequestService.rejectRequest(blindRequestId);
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindRequestService.rejectRequest(userId, blindRequestId);
         return success();
     }
 }
