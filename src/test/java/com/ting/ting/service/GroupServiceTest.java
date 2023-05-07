@@ -4,6 +4,8 @@ import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
@@ -63,6 +65,22 @@ class GroupServiceTest {
 
         // When & Then
         assertThat(groupService.findMyGroupList(userId)).hasSize(2);
+    }
+
+    @DisplayName("과팅 - 팀 멤버 조회")
+    @Test
+    void givenGroupId_whenSearchingGroupMembers_thenReturnsGroupMemberSet() {
+        //Given
+        Long groupId = 1L;
+        Group group = GroupFixture.entity(groupId);
+        GroupMember groupMemberRecord1 = GroupMember.of(group, UserFixture.entity(1L), MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember groupMemberRecord2 = GroupMember.of(group, UserFixture.entity(2L), MemberStatus.ACTIVE, MemberRole.LEADER);
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(groupMemberRepository.findAllByGroup(group)).willReturn(List.of(groupMemberRecord1, groupMemberRecord2));
+
+        // When & Then
+        assertThat(groupService.findGroupMemberList(groupId)).hasSize(2);
     }
 
     @DisplayName("과팅 - 생성이 성공한 경우")

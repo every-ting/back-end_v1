@@ -1,6 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
 import org.springdoc.api.annotations.ParameterObject;
@@ -8,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RequestMapping("/groups")
@@ -25,6 +25,12 @@ public interface GroupController {
      */
     @GetMapping("/my")
     Response<Set<GroupResponse>> myGroupList();
+
+    /**
+     * 팀 멤버 조회(팀장 포함)
+     */
+    @GetMapping("/{groupId}/members")
+    Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
      * 그룹 생성

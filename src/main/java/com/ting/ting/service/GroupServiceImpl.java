@@ -1,9 +1,13 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.Group;
+import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -53,6 +57,13 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User member = loadUserByUserId(userId);
 
         return groupMemberRepository.findAllGroupByMemberAndStatusActive(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Override
+    public Set<GroupMemberResponse> findGroupMemberList(Long groupId) {
+        Group group = loadGroupByGroupId(groupId);
+
+        return groupMemberRepository.findAllByGroup(group).stream().map(GroupMemberResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

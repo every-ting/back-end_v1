@@ -1,6 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
@@ -34,6 +35,11 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<Set<GroupResponse>> myGroupList() {
         // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(groupService.findMyGroupList(1L));
+    }
+
+    @Override
+    public Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId) {
+        return success(groupService.findGroupMemberList(groupId));
     }
 
     @Override

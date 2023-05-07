@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,11 @@ public interface GroupService {
      * 내가 속한 팀 조회 - request status : ACCEPTED
      */
     Set<GroupResponse> findMyGroupList(Long userId);
+
+    /**
+     * 팀 멤버 조회
+     */
+    Set<GroupMemberResponse> findGroupMemberList(Long groupId);
 
     /**
      * 그룹 생성
