@@ -2,7 +2,6 @@ package com.ting.ting.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Getter
@@ -17,14 +16,6 @@ public class TingApplicationException extends RuntimeException {
         this.serviceType = serviceType;
     }
 
-    public String getMessageForServer() {
-        if (message == null) {
-            message = errorCode.getMessage();
-        }
-
-        return String.format("[%s :: %s] : %s", errorCode, serviceType, message);
-    }
-
     @Override
     public String getMessage() {
         if (message == null) {
@@ -34,7 +25,11 @@ public class TingApplicationException extends RuntimeException {
         return message;
     }
 
-    public HttpStatus getHttpStatus() {
-        return errorCode.getHttpStatus();
+    public String getMessageForServer() {
+        if (message == null) {
+            message = errorCode.getMessage();
+        }
+
+        return String.format("[%s :: %s] : %s", errorCode, serviceType, message);
     }
 }
