@@ -1,7 +1,6 @@
 package com.ting.ting.service;
 
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -58,7 +58,7 @@ class GroupServiceTest {
         User user = UserFixture.entity(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMemberAndStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
+        given(groupMemberRepository.findAllGroupByMemberAndStatusAccepted(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
 
         // When & Then
         assertThat(groupService.findMyGroupList(userId)).hasSize(2);
