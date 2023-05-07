@@ -23,7 +23,7 @@ public interface GroupController {
      * 내가 속한 팀 조회
      */
     @GetMapping("/my")
-    Response<List<GroupResponse>> myGroupList();
+    Response<Set<GroupResponse>> myGroupList();
 
     /**
      * 그룹 생성
