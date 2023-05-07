@@ -13,7 +13,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Request information is not founded"),
     GENDER_NOT_MATCH(HttpStatus.FORBIDDEN, "gender values do not match"),
-    REQUEST_NOT_MATCH(HttpStatus.BAD_REQUEST,"This is not the request information that came to me");
+    REQUEST_NOT_MINE(HttpStatus.BAD_REQUEST,"This is not the request information that came to me");
 
     private final HttpStatus httpStatus;
     private final String message;

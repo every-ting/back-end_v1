@@ -134,7 +134,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     private void validateRequestToMe(long userId, BlindRequest request) {
         if(request.getToUser().getId() != userId) {
-            throwException(ErrorCode.REQUEST_NOT_MATCH);
+            throwException(ErrorCode.REQUEST_NOT_MINE);
         }
     }
 
