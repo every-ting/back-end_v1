@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.Group;
+import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.dto.request.GroupRequest;
@@ -58,7 +59,7 @@ class GroupServiceTest {
         User user = UserFixture.entity(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMemberAndStatusAccepted(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
+        given(groupMemberRepository.findAllGroupByMemberAndStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
 
         // When & Then
         assertThat(groupService.findMyGroupList(userId)).hasSize(2);
@@ -72,7 +73,7 @@ class GroupServiceTest {
         GroupRequest request = GroupFixture.request();
 
         User leader = UserFixture.entity(userId);
-        Group entity = request.toEntity(leader);
+        Group entity = request.toEntity();
 
         given(userRepository.findById(userId)).willReturn(Optional.of(leader));
         given(groupRepository.findByGroupName(request.getGroupName())).willReturn(Optional.empty());
@@ -83,6 +84,7 @@ class GroupServiceTest {
 
         // Then
         assertThat(actual.getGroupName()).isSameAs(entity.getGroupName());
+        then(groupMemberRepository).should().save(any(GroupMember.class));
     }
 
     @DisplayName("과팅 - 멤버 가입 요청 기능 테스트")
