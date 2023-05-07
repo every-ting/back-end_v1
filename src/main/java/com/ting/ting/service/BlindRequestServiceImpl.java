@@ -81,23 +81,39 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public Set<BlindRequestResponse> myRequest(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
+    public Set<BlindRequestResponse> myRequest(long fromUserId) {
+        User fromUser = getUserById(fromUserId);
 
-        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUser(user);
+        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUser(fromUser);
 
         LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
 
         for (BlindRequest requestToMeUserInfo : usersOfRequestedInfo) {
             Long toUserId = requestToMeUserInfo.getToUser().getId();
-            User toUser = userRepository.findById(toUserId).orElseThrow(() ->
-                    throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", requestToMeUserInfo.getId())));
-
+            User toUser = getUserById(toUserId);
             usersOfRequested.add(toUser);
         }
 
         return usersOfRequested.stream().map(BlindRequestResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public Set<BlindRequestResponse> requestToMe(long toUserId) {
+        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUser(getUserById(toUserId));
+
+        LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
+
+        for (BlindRequest requestToMeUserInfo : usersOfRequestedInfo) {
+            Long fromUserId = requestToMeUserInfo.getFromUser().getId();
+            usersOfRequested.add(getUserById(fromUserId));
+        }
+
+        return usersOfRequested.stream().map(BlindRequestResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 
     @Override
