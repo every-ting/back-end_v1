@@ -82,7 +82,6 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public Set<BlindRequestResponse> myRequest(long userId) {
-
         User user = userRepository.findById(userId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
