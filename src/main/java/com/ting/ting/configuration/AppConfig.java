@@ -17,11 +17,6 @@ public class AppConfig {
     private final BlindRequestRepository blindRequestRepository;
 
     @Bean
-    public UserService userService() {
-        return new UserServiceImpl(userRepository);
-    }
-
-    @Bean
     public GroupService groupService() {
         return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, userRepository);
     }
