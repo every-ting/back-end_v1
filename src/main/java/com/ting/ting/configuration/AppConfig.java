@@ -1,4 +1,4 @@
-package com.ting.ting;
+package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
@@ -15,11 +15,6 @@ public class AppConfig {
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final BlindRequestRepository blindRequestRepository;
-
-    @Bean
-    public UserService userService() {
-        return new UserServiceImpl(userRepository);
-    }
 
     @Bean
     public GroupService groupService() {
