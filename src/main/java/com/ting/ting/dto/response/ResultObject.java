@@ -18,18 +18,18 @@ public class ResultObject {
     private String message;
 
     public ResultObject(ErrorCode errorCode) {
-        this.resultCode = errorCode.getHttpStatus().value();
+        this.resultCode = errorCode.getHttpStatus();
         this.message = errorCode.getMessage();
     }
 
     public ResultObject(ErrorCode errorCode, ServiceType serviceType) {
-        this.resultCode = errorCode.getHttpStatus().value();
+        this.resultCode = errorCode.getHttpStatus();
         this.serviceType = serviceType.name();
         this.message = errorCode.getMessage();
     }
 
     public ResultObject(TingApplicationException e) {
-        this.resultCode = e.getHttpStatus().value();
+        this.resultCode = e.getErrorCode().getHttpStatus();
         this.serviceType = e.getServiceType().name();
         this.message = e.getMessage();
     }
