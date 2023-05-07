@@ -3,21 +3,20 @@ package com.ting.ting.service;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
-import com.ting.ting.dto.GroupDto;
+import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
+import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.GroupMemberRepository;
 import com.ting.ting.repository.GroupMemberRequestRepository;
 import com.ting.ting.repository.GroupRepository;
 import com.ting.ting.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,33 +39,33 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<GroupDto> findAllGroups(Pageable pageable) {
-        return groupRepository.findAll(pageable).map(GroupDto::from);
+    public Page<GroupResponse> findAllGroups(Pageable pageable) {
+        return groupRepository.findAll(pageable).map(GroupResponse::from);
     }
 
     @Override
-    public Page<GroupDto> findSuggestedGroupList(Pageable pageable) {
+    public Page<GroupResponse> findSuggestedGroupList(Pageable pageable) {
         // TODO : 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회 구현
         return null;
     }
 
     @Override
-    public Set<GroupDto> findMyGroupList(Long userId) {
+    public Set<GroupResponse> findMyGroupList(Long userId) {
         User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findGroupByMemberAndStatusAccepted(member).stream().map(GroupDto::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return groupMemberRepository.findAllGroupByMemberAndStatusActive(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public GroupDto saveGroup(Long userId, GroupDto dto) {
         User leader = loadUserByUserId(userId);
 
-        groupRepository.findByGroupName(dto.getGroupName()).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", dto.getGroupName()));
+        groupRepository.findByGroupName(request.getGroupName()).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", request.getGroupName()));
         });
 
-        Group group = dto.toEntity(leader);
-        return GroupDto.from(groupRepository.save(group));
+        Group group = request.toEntity(leader);
+        return GroupResponse.from(groupRepository.save(group));
     }
 
     @Override

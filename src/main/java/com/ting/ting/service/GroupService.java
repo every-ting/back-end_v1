@@ -1,6 +1,8 @@
 package com.ting.ting.service;
 
-import com.ting.ting.dto.GroupDto;
+import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
+import com.ting.ting.dto.response.GroupResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,22 +13,22 @@ public interface GroupService {
     /**
      * 모든 팀 조회
      */
-    Page<GroupDto> findAllGroups(Pageable pageable);
+    Page<GroupResponse> findAllGroups(Pageable pageable);
 
     /**
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
-    Page<GroupDto> findSuggestedGroupList(Pageable pageable);
+    Page<GroupResponse> findSuggestedGroupList(Pageable pageable);
 
     /**
      * 내가 속한 팀 조회 - request status : ACCEPTED
      */
-    Set<GroupDto> findMyGroupList(Long userId);
+    Set<GroupResponse> findMyGroupList(Long userId);
 
     /**
      * 그룹 생성
      */
-    GroupDto saveGroup(Long userId, GroupDto dto);
+    GroupResponse saveGroup(Long userId, GroupRequest request);
 
     /**
      * 같은 성별인 팀에 요청

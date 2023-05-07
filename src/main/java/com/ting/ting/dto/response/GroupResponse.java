@@ -1,7 +1,7 @@
 package com.ting.ting.dto.response;
 
+import com.ting.ting.domain.Group;
 import com.ting.ting.domain.constant.Gender;
-import com.ting.ting.dto.GroupDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,15 +17,15 @@ public class GroupResponse {
     boolean isMatched;
     String memo;
 
-    public static GroupResponse from(GroupDto dto) {
+    public static GroupResponse from(Group entity) {
         return new GroupResponse(
-                dto.getId(),
-                dto.getGroupName(),
-                dto.getGender(),
-                dto.getNumOfMember(),
-                dto.getSchool(),
-                dto.isMatched(),
-                dto.getMemo()
+                entity.getId(),
+                entity.getGroupName(),
+                entity.getGender(),
+                entity.getNumOfMember(),
+                entity.getSchool(),
+                entity.isMatched(),
+                entity.getMemo()
         );
     }
 }

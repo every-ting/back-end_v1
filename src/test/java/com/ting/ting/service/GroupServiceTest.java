@@ -3,7 +3,8 @@ package com.ting.ting.service;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMemberRequest;
 import com.ting.ting.domain.User;
-import com.ting.ting.dto.GroupDto;
+import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.GroupMemberRepository;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,11 +46,8 @@ class GroupServiceTest {
         Pageable pageable = Pageable.ofSize(20);
         given(groupRepository.findAll(pageable)).willReturn(Page.empty());
 
-        // When
-        Page<GroupDto> groups = groupService.findAllGroups(pageable);
-
-        // Then
-        assertThat(groups).isEmpty();
+        // When & Then
+        assertThat(groupService.findAllGroups(pageable)).isEmpty();
     }
 
     @DisplayName("과팅 - 내가 속한 팀 조회")
@@ -61,13 +58,10 @@ class GroupServiceTest {
         User user = UserFixture.entity(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findGroupByMemberAndStatusAccepted(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
+        given(groupMemberRepository.findAllGroupByMemberAndStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
 
-        // When
-        Set<GroupDto> groups = groupService.findMyGroupList(userId);
-
-        // Then
-        assertThat(groups).hasSize(2);
+        // When & Then
+        assertThat(groupService.findMyGroupList(userId)).hasSize(2);
     }
 
     @DisplayName("과팅 - 생성이 성공한 경우")
@@ -75,17 +69,17 @@ class GroupServiceTest {
     void givenUserIdAndGroupDto_WhenSavingGroup_thenSavesGroup() {
         //Given
         Long userId = 9L;
-        GroupDto dto = GroupFixture.dto();
+        GroupRequest request = GroupFixture.request();
 
         User leader = UserFixture.entity(userId);
-        Group entity = dto.toEntity(leader);
+        Group entity = request.toEntity(leader);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(leader));
-        given(groupRepository.findByGroupName(dto.getGroupName())).willReturn(Optional.empty());
+        given(groupRepository.findByGroupName(request.getGroupName())).willReturn(Optional.empty());
         given(groupRepository.save(any(Group.class))).willReturn(entity);
 
         // When
-        GroupDto actual = groupService.saveGroup(userId, dto);
+        GroupResponse actual = groupService.saveGroup(userId, request);
 
         // Then
         assertThat(actual.getGroupName()).isSameAs(entity.getGroupName());

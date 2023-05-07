@@ -1,9 +1,11 @@
 package com.ting.ting.dto.request;
 
+import com.ting.ting.domain.Group;
+import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
-import com.ting.ting.dto.GroupDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -11,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class GroupRequest {
 
@@ -44,9 +47,7 @@ public class GroupRequest {
      */
     String memo;
 
-    protected GroupRequest() {}
-
-    public GroupDto toDto() {
-        return GroupDto.of(groupName, gender, numOfMember, school, memo);
+    public Group toEntity(User leader) {
+        return Group.of(leader, groupName, gender, school,  numOfMember, memo);
     }
 }
