@@ -125,10 +125,11 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public void rejectRequest(long blindRequestId) {
+    public void rejectRequest(long userId, long blindRequestId) {
         BlindRequest request = getRequestById(blindRequestId);
-        request.setStatus(RequestStatus.REJECTED);
+        validateRequestToMe(userId, request);
 
+        request.setStatus(RequestStatus.REJECTED);
         blindRequestRepository.save(request);
     }
 

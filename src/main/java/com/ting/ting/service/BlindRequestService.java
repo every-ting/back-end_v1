@@ -41,6 +41,6 @@ public interface BlindRequestService {
     /**
      * 자신에게 온 요청 거절 -> 추가 구현 필요
      */
-    void rejectRequest(long blindRequestId);
+    void rejectRequest(long userId, long blindRequestId);
 
 }
