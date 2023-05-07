@@ -47,11 +47,16 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<List<BlindRequestResponse>> confirmMyRequest() {
+    public Response<List<BlindRequestResponse>> confirmOfMyRequest() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindRequestService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
     }
 
+    @Override
+    public Response<List<BlindRequestResponse>> confirmOfRequestToMe() {
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        return success(blindRequestService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
+    }
 
     @Override
     public Response<Void> acceptedRequest(@PathVariable long blindRequestId) {
