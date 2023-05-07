@@ -2,11 +2,14 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
+import com.ting.ting.dto.response.BlindRequestResponse;
 import com.ting.ting.dto.response.Response;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/blind")
 public interface BlindDateController {
@@ -28,6 +31,12 @@ public interface BlindDateController {
      */
     @DeleteMapping("/request/{blindRequestId}")
     Response<Void> deleteJoinRequest(@PathVariable long blindRequestId);
+
+    /**
+     * 내가 한 요청 확인
+     */
+    @GetMapping("/confirm/myRequest")
+    Response<List<BlindRequestResponse>> confirmMyRequest();
 
     /**
      * 자신에게 온 요청 수락 -> 추가 구현 필요

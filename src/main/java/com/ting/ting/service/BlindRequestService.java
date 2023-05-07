@@ -1,8 +1,11 @@
 package com.ting.ting.service;
 
 import com.ting.ting.dto.response.BlindUsersInfoResponse;
+import com.ting.ting.dto.response.BlindRequestResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 
 public interface BlindRequestService {
 
@@ -20,6 +23,11 @@ public interface BlindRequestService {
      * 소개팅 상대에게 한 요청 취소
      */
     void deleteRequest(long blindRequestId);
+
+    /**
+     * 자신에게 온 요청 확인(자신에게 소개팅 요청을 한 사람의 정보를 가져옴)
+     */
+    Set<BlindRequestResponse> myRequest(long fromUserId);
 
     /**
      * 자신에게 온 요청 수락 -> 추가 구현 필요
