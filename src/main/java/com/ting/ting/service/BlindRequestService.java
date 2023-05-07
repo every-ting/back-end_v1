@@ -34,9 +34,9 @@ public interface BlindRequestService {
     Set<BlindRequestResponse> requestToMe(long toUserId);
 
     /**
-     * 자신에게 온 요청 수락 -> 추가 구현 필요
+     * 자신에게 온 요청 수락
      */
-    void acceptRequest(long blindRequestId);
+    void acceptRequest(long userId, long blindRequestId);
 
     /**
      * 자신에게 온 요청 거절 -> 추가 구현 필요

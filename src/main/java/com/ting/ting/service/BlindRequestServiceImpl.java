@@ -74,8 +74,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void deleteRequest(long blindRequestId) {
-        BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND));
+        BlindRequest request = getRequestById(blindRequestId);
 
         blindRequestRepository.delete(request);
     }
@@ -117,20 +116,30 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public void acceptRequest(long blindRequestId) {
-        BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND));
-        request.setStatus(RequestStatus.ACCEPTED);
+    public void acceptRequest(long userId, long blindRequestId) {
+        BlindRequest request = getRequestById(blindRequestId);
+        validateRequestToMe(userId, request);
 
+        request.setStatus(RequestStatus.ACCEPTED);
         blindRequestRepository.save(request);
     }
 
     @Override
     public void rejectRequest(long blindRequestId) {
-        BlindRequest request = blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND));
+        BlindRequest request = getRequestById(blindRequestId);
         request.setStatus(RequestStatus.REJECTED);
 
         blindRequestRepository.save(request);
+    }
+
+    private void validateRequestToMe(long userId, BlindRequest request) {
+        if(request.getToUser().getId() != userId) {
+            throwException(ErrorCode.REQUEST_NOT_MINE);
+        }
+    }
+
+    private BlindRequest getRequestById(long blindRequestId) {
+        return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
 }
