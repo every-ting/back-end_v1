@@ -1,4 +1,4 @@
-package com.ting.ting;
+package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
