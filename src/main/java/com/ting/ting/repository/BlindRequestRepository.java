@@ -2,6 +2,7 @@ package com.ting.ting.repository;
 
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -14,5 +15,7 @@ public interface BlindRequestRepository extends JpaRepository<BlindRequest, Long
 
     Optional<BlindRequest> findByFromUserAndToUser(User fromUser, User toUser);
 
-    Set<BlindRequest> findAllByFromUser(User FromUser);
+    Set<BlindRequest> findAllByFromUserAndStatus(User FromUser, RequestStatus status);
+
+    Set<BlindRequest> findAllByToUserAndStatus(User toUser, RequestStatus status);
 }

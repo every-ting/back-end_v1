@@ -24,9 +24,14 @@ public interface BlindRequestService {
     void deleteRequest(long blindRequestId);
 
     /**
-     * 자신에게 온 요청 확인(자신에게 소개팅 요청을 한 사람의 정보를 가져옴)
+     * 내가 한 요청 확인
      */
     Set<BlindRequestResponse> myRequest(long fromUserId);
+
+    /**
+     * 나에게 온 요청 확인
+     */
+    Set<BlindRequestResponse> requestToMe(long toUserId);
 
     /**
      * 자신에게 온 요청 수락 -> 추가 구현 필요
@@ -37,4 +42,5 @@ public interface BlindRequestService {
      * 자신에게 온 요청 거절 -> 추가 구현 필요
      */
     void rejectRequest(long blindRequestId);
+
 }
