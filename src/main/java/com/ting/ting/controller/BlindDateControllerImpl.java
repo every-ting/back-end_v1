@@ -1,7 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
-import com.ting.ting.dto.response.BlindRequestResponse;
+import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.BlindRequestService;
@@ -28,7 +28,7 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Page<BlindRequestResponse>> blindUsersInfo(@ParameterObject Pageable pageable) {
+    public Response<Page<BlindDateResponse>> blindUsersInfo(@ParameterObject Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindRequestService.blindUsersInfo(userId, pageable));
     }
@@ -47,13 +47,13 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<List<BlindRequestResponse>> confirmOfMyRequest() {
+    public Response<List<BlindDateResponse>> confirmOfMyRequest() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindRequestService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
     }
 
     @Override
-    public Response<List<BlindRequestResponse>> confirmOfRequestToMe() {
+    public Response<List<BlindDateResponse>> confirmOfRequestToMe() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindRequestService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
     }

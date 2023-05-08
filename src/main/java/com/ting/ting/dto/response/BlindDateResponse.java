@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class BlindRequestResponse {
+public class BlindDateResponse {
 
     private Long id;
     private String username;
@@ -17,8 +17,8 @@ public class BlindRequestResponse {
     private Float height;
     private String idealPhoto;
 
-    public static BlindRequestResponse from(User entity) {
-        return new BlindRequestResponse(
+    public static BlindDateResponse from(User entity) {
+        return new BlindDateResponse(
                 entity.getId(),
                 entity.getUsername(),
                 entity.getMajor(),

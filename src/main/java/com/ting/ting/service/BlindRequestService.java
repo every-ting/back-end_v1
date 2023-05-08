@@ -1,6 +1,6 @@
 package com.ting.ting.service;
 
-import com.ting.ting.dto.response.BlindRequestResponse;
+import com.ting.ting.dto.response.BlindDateResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,7 +11,7 @@ public interface BlindRequestService {
     /**
      * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
      */
-    Page<BlindRequestResponse> blindUsersInfo(Long userId, Pageable pageable);
+    Page<BlindDateResponse> blindUsersInfo(Long userId, Pageable pageable);
 
     /**
      * 소개팅 상대에게 요청
@@ -26,12 +26,12 @@ public interface BlindRequestService {
     /**
      * 내가 한 요청 확인
      */
-    Set<BlindRequestResponse> myRequest(long fromUserId);
+    Set<BlindDateResponse> myRequest(long fromUserId);
 
     /**
      * 나에게 온 요청 확인
      */
-    Set<BlindRequestResponse> requestToMe(long toUserId);
+    Set<BlindDateResponse> requestToMe(long toUserId);
 
     /**
      * 자신에게 온 요청 수락

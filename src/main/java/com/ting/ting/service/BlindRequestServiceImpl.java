@@ -4,7 +4,7 @@ import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.BlindRequestResponse;
+import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
@@ -32,7 +32,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public Page<BlindRequestResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Page<BlindDateResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
@@ -43,12 +43,12 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         return menBlindUsersInfo(pageable);
     }
 
-    private Page<BlindRequestResponse> womenBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindRequestResponse::from);
+    private Page<BlindDateResponse> womenBlindUsersInfo(Pageable pageable) {
+        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindDateResponse::from);
     }
 
-    private Page<BlindRequestResponse> menBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindRequestResponse::from);
+    private Page<BlindDateResponse> menBlindUsersInfo(Pageable pageable) {
+        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindDateResponse::from);
     }
 
     @Override
@@ -74,13 +74,13 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void deleteRequest(long blindRequestId) {
-        BlindRequest request = getRequestById(blindRequestId);
+        BlindRequest request = geBlindRequestById(blindRequestId);
 
         blindRequestRepository.delete(request);
     }
 
     @Override
-    public Set<BlindRequestResponse> myRequest(long fromUserId) {
+    public Set<BlindDateResponse> myRequest(long fromUserId) {
         User fromUser = getUserById(fromUserId);
 
         Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUserAndStatus(fromUser, RequestStatus.PENDING);
@@ -93,11 +93,11 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
             usersOfRequested.add(toUser);
         }
 
-        return usersOfRequested.stream().map(BlindRequestResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
-    public Set<BlindRequestResponse> requestToMe(long toUserId) {
+    public Set<BlindDateResponse> requestToMe(long toUserId) {
         Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
 
         LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
@@ -107,7 +107,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
             usersOfRequested.add(getUserById(fromUserId));
         }
 
-        return usersOfRequested.stream().map(BlindRequestResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private User getUserById(long userId) {
@@ -117,7 +117,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void acceptRequest(long userId, long blindRequestId) {
-        BlindRequest request = getRequestById(blindRequestId);
+        BlindRequest request = geBlindRequestById(blindRequestId);
         validateRequestToMe(userId, request);
 
         request.setStatus(RequestStatus.ACCEPTED);
@@ -126,7 +126,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void rejectRequest(long userId, long blindRequestId) {
-        BlindRequest request = getRequestById(blindRequestId);
+        BlindRequest request = geBlindRequestById(blindRequestId);
         validateRequestToMe(userId, request);
 
         request.setStatus(RequestStatus.REJECTED);
@@ -134,12 +134,12 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     private void validateRequestToMe(long userId, BlindRequest request) {
-        if(request.getToUser().getId() != userId) {
+        if (request.getToUser().getId() != userId) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
         }
     }
 
-    private BlindRequest getRequestById(long blindRequestId) {
+    private BlindRequest geBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
