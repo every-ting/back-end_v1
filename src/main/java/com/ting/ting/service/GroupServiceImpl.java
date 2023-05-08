@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,6 +100,29 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     @Override
     public void deleteJoinRequest(long groupId, long userId) {
         groupMemberRequestRepository.deleteByGroup_IdAndUser_Id(groupId, userId);
+    }
+
+    @Override
+    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long memberId) {
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(leaderId);
+        User member = loadUserByUserId(memberId);
+
+        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndMemberAndStatusActive(group, leader).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", leaderId, groupId))
+        );
+        GroupMember groupMemberInfoOfMember = groupMemberRepository.findByGroupAndMemberAndStatusActive(group, member).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", memberId, groupId))
+        );
+
+        if (!groupMemberInfoOfLeader.getRole().equals(MemberRole.LEADER)) {
+            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupId));
+        }
+
+        groupMemberInfoOfLeader.setRole(MemberRole.MEMBER);
+        groupMemberInfoOfMember.setRole(MemberRole.LEADER);
+
+        return groupMemberRepository.saveAllAndFlush(List.of(groupMemberInfoOfLeader, groupMemberInfoOfMember)).stream().map(GroupMemberResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     private Group loadGroupByGroupId(Long groupId) {

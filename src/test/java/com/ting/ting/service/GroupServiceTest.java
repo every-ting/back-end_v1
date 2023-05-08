@@ -7,6 +7,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
@@ -23,9 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -127,9 +128,43 @@ class GroupServiceTest {
         //Given
         Long groupId = 1L;
         Long userId = 2L;
+
         willDoNothing().given(groupMemberRequestRepository).deleteByGroup_IdAndUser_Id(groupId, userId);
 
         // When & Then
         Assertions.assertDoesNotThrow(() -> groupService.deleteJoinRequest(groupId, userId));
+    }
+
+    @DisplayName("과팅 - 팀장 역할 넘기기 기능 테스트")
+    @Test
+    void givenGroupIdAndLeaderIdAndMemberId_whenChangingLeaderRequest_thenChangesLeader() {
+        //Given
+        Long groupId = 1L;
+        Long memberId = 1L;
+        Long leaderId = 2L;
+        Group group = GroupFixture.entity(groupId);
+        User member = UserFixture.entity(memberId);
+        User leader = UserFixture.entity(leaderId);
+        GroupMember groupMemberRecord = GroupMember.of(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember groupLeaderRecord = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+
+        HashMap<Long, MemberRole> map = new LinkedHashMap<>();
+        map.put(memberId, groupMemberRecord.getRole());
+        map.put(leaderId, groupLeaderRecord.getRole());
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(groupMemberRepository.findByGroupAndMemberAndStatusActive(group, leader)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndMemberAndStatusActive(group, member)).willReturn(Optional.of(groupMemberRecord));
+        given(groupMemberRepository.saveAllAndFlush(List.of(groupLeaderRecord, groupMemberRecord))).willReturn(List.of(groupLeaderRecord, groupMemberRecord));
+
+        // When
+        Set<GroupMemberResponse> actual = groupService.changeGroupLeader(groupId, leaderId, memberId);
+
+        // Then
+        Iterator<GroupMemberResponse> iter = actual.iterator();
+        GroupMemberResponse response = iter.next();
+        assertThat(map.get(response.getMember().getId())).isNotSameAs(response.getRole());
     }
 }
