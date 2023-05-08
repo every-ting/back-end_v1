@@ -44,4 +44,9 @@ public interface GroupService {
      * 같은 성별인 팀에 했던 요청을 취소
      */
     void deleteJoinRequest(long groupId, long userId);
+
+    /**
+     * 팀장 넘기기
+     */
+    Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long memberId);
 }
