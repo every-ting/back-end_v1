@@ -7,11 +7,9 @@ import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.GroupService;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
@@ -66,9 +64,9 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long memberId) {
+    public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long newLeaderId) {
         Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(groupService.changeGroupLeader(groupId, leaderId, memberId));
+        return success(groupService.changeGroupLeader(groupId, leaderId, newLeaderId));
     }
 
     @Override
