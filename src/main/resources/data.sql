@@ -43,6 +43,6 @@ insert into group_member (group_id, member_id, status, role) values (3, 1, 'ACTI
 insert into group_member (group_id, member_id, status, role) values (4, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (5, 1, 'ACTIVE', 'MEMBER');
 
-insert into group_member_request (group_id, user_id) values (1, 3);
+insert into group_member_request (group_id, user_id) values (1, 5);
 insert into group_member_request (group_id, user_id) values (1, 4);
 insert into group_member_request (group_id, user_id) values (2, 3);
