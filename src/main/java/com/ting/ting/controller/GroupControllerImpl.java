@@ -43,6 +43,12 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
+    public Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId) {
+        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        return success(groupService.changeGroupLeader(groupId, leaderId, memberId));
+    }
+
+    @Override
     public Response<GroupResponse> createGroup(@RequestBody GroupRequest request) {
         Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(groupService.saveGroup(userId, request));

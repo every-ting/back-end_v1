@@ -33,6 +33,12 @@ public interface GroupController {
     Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
+     * 팀장 넘기기
+     */
+    @PutMapping("/{groupId}/leader/{memberId}")
+    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId);
+
+    /**
      * 그룹 생성
      */
     @PostMapping
