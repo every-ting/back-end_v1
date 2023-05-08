@@ -61,7 +61,7 @@ class GroupServiceTest {
         User user = UserFixture.entity(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMemberWithStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
+        given(groupMemberRepository.findAllGroupByMemberAndStatus(user, MemberStatus.ACTIVE)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
 
         // When & Then
         assertThat(groupService.findMyGroupList(userId)).hasSize(2);
@@ -155,8 +155,8 @@ class GroupServiceTest {
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
         given(userRepository.findById(memberId)).willReturn(Optional.of(member));
-        given(groupMemberRepository.findByGroupAndMemberWithStatusActive(group, leader)).willReturn(Optional.of(groupLeaderRecord));
-        given(groupMemberRepository.findByGroupAndMemberWithStatusActive(group, member)).willReturn(Optional.of(groupMemberRecord));
+        given(groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndMemberAndStatus(group, member, MemberStatus.ACTIVE)).willReturn(Optional.of(groupMemberRecord));
         given(groupMemberRepository.saveAllAndFlush(List.of(groupLeaderRecord, groupMemberRecord))).willReturn(List.of(groupLeaderRecord, groupMemberRecord));
 
         // When
@@ -183,7 +183,7 @@ class GroupServiceTest {
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
-        given(groupMemberRepository.findByGroupWithRoleLeader(group)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(groupLeaderRecord));
         given(groupMemberRequestRepository.findByGroup(group)).willReturn(List.of(groupMemberRequest1, groupMemberRequest2));
 
         // When & Then

@@ -58,7 +58,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     public Set<GroupResponse> findMyGroupList(Long userId) {
         User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findAllGroupByMemberWithStatusActive(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.findAllGroupByMemberAndStatus(member, MemberStatus.ACTIVE).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -91,6 +91,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
         }
 
+        //TODO : 이미 팀원인 경우 -> 에러
+
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id:%d) already requested to join the Group(id:%d)", userId, groupId));
         });
@@ -104,17 +106,17 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long memberId) {
+    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long newLeaderId) {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(leaderId);
-        User member = loadUserByUserId(memberId);
+        User newLeader = loadUserByUserId(newLeaderId);
 
-        // leader와 member가 실제 group에 포함되어 있는 유저인지 확인
-        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndMemberWithStatusActive(group, leader).orElseThrow(() ->
+        // leader와 newLeader가 실제 group에 포함되어 있는 유저인지 확인
+        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", leaderId, groupId))
         );
-        GroupMember groupMemberInfoOfMember = groupMemberRepository.findByGroupAndMemberWithStatusActive(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", memberId, groupId))
+        GroupMember groupMemberInfoOfMember = groupMemberRepository.findByGroupAndMemberAndStatus(group, newLeader, MemberStatus.ACTIVE).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", newLeaderId, groupId))
         );
 
         // leaderId를 가진 user가 group 멤버면서, 리더는 아닌 경우 -> 에러
@@ -134,8 +136,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User leader = loadUserByUserId(leaderId);
 
         // 과팅 팀의 팀장을 조회
-        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupWithRoleLeader(group).orElseThrow(() -> {
-            groupRepository.delete(group);
+        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER).orElseThrow(() -> {
+            groupRepository.delete(group); // TODO : 팀장이 없는 팀은 일단 삭제하는 것으로 구현 -> 다른 멤버에게 팀장을 넘기는 로직으로 수정
             return throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId));
         });
 

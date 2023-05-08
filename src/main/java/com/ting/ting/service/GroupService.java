@@ -49,7 +49,7 @@ public interface GroupService {
     /**
      * 팀장 넘기기
      */
-    Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long memberId);
+    Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long newLeaderId);
 
     /**
      * 내가 팀장인 팀에 온 멤버 가입 요청을 조회
