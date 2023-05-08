@@ -12,14 +12,15 @@ import java.util.Optional;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
 
-    @Query(value = "select entity.group from GroupMember entity where entity.member = :user and entity.status = com.ting.ting.domain.constant.MemberStatus.ACTIVE")
-    List<Group> findAllGroupByMemberAndStatusActive(@Param("user") User user);
-
-    List<GroupMember> findAllByGroup(Group group);
-
-    @Query(value = "select entity from GroupMember entity where entity.group = :group and entity.status = com.ting.ting.domain.constant.MemberStatus.ACTIVE")
-    List<GroupMember> findAllByGroupAndStatusActive(@Param("group") Group group);
+    @Query(value = "select entity from GroupMember entity where entity.group = :group and entity.role = com.ting.ting.domain.constant.MemberRole.LEADER")
+    Optional<GroupMember> findByGroupWithRoleLeader(@Param("group") Group group);
 
     @Query(value = "select entity from GroupMember entity where entity.group = :group and entity.member = :user and entity.status = com.ting.ting.domain.constant.MemberStatus.ACTIVE")
-    Optional<GroupMember> findByGroupAndMemberAndStatusActive(@Param("group") Group group, @Param("user") User user);
+    Optional<GroupMember> findByGroupAndMemberWithStatusActive(@Param("group") Group group, @Param("user") User user);
+
+    @Query(value = "select entity from GroupMember entity join fetch entity.member where entity.group = :group")
+    List<GroupMember> findAllByGroup(@Param("group") Group group);
+
+    @Query(value = "select entity.group from GroupMember entity where entity.member = :user and entity.status = com.ting.ting.domain.constant.MemberStatus.ACTIVE")
+    List<Group> findAllGroupByMemberWithStatusActive(@Param("user") User user);
 }
