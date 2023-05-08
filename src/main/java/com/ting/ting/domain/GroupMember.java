@@ -3,10 +3,10 @@ package com.ting.ting.domain;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
 
 @Getter
 @Table(name = "\"group_member\"", uniqueConstraints = {
@@ -29,11 +29,13 @@ public class GroupMember {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User member;
 
+    @Setter
     @NotNull
     @Column(name = "status", length = 7)
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
+    @Setter
     @NotNull
     @Column(name = "role", length = 6)
     @Enumerated(EnumType.STRING)
