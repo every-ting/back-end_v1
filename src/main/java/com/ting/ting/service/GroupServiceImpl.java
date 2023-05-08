@@ -149,6 +149,28 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         return groupMemberRequestRepository.findByGroup(group).stream().map(GroupMemberRequestResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
+    @Override
+    public GroupMemberResponse acceptMemberJoinRequest(long leaderId, long groupMemberRequestId) {
+        User leader = loadUserByUserId(leaderId);
+        GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
+            throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
+        );
+
+        // 주어진 사용자가 팀장인 팀 조회
+        Group group = groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER).orElseThrow(() ->
+            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) has no permission regarding GroupMemberRequest(id: %d)", leaderId, groupMemberRequestId))
+        );
+
+        // 주어진 사용자가 팀장인 팀과 주어진 groupMemberRequest 의 팀이 일치하지 않는 경우 -> 에러
+        if (!group.equals(groupMemberRequest.getGroup())) {
+            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) has no permission regarding GroupMemberRequest(id: %d)", leaderId, groupMemberRequestId));
+        }
+
+        GroupMember created = groupMemberRepository.save(GroupMember.of(group, groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
+        groupMemberRequestRepository.delete(groupMemberRequest);
+        return GroupMemberResponse.from(created);
+    }
+
     private Group loadGroupByGroupId(Long groupId) {
         return groupRepository.findById(groupId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId))
