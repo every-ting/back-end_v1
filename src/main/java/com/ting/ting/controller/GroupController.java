@@ -54,12 +54,12 @@ public interface GroupController {
     /**
      * 팀장 넘기기
      */
-    @PutMapping("/{groupId}/leader/{memberId}")
-    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId);
+    @PutMapping("/{groupId}/leader/{newLeaderId}")
+    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long newLeaderId);
 
     /**
      * 팀 멤버 가입 요청 조회
      */
-    @GetMapping("/request/{groupId}")
+    @GetMapping("/{groupId}/members/requests")
     Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(@PathVariable Long groupId);
 }
