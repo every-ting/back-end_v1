@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -62,7 +61,7 @@ class GroupServiceTest {
         User user = UserFixture.entity(userId);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMemberAndStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
+        given(groupMemberRepository.findAllGroupByMemberWithStatusActive(user)).willReturn(List.of(GroupFixture.entity(1L), GroupFixture.entity(2L)));
 
         // When & Then
         assertThat(groupService.findMyGroupList(userId)).hasSize(2);
@@ -135,13 +134,14 @@ class GroupServiceTest {
         Assertions.assertDoesNotThrow(() -> groupService.deleteJoinRequest(groupId, userId));
     }
 
-    @DisplayName("과팅 - 팀장 역할 넘기기 기능 테스트")
+    @DisplayName("과팅 - [팀장] : 팀장 넘기기 기능 테스트")
     @Test
     void givenGroupIdAndLeaderIdAndMemberId_whenChangingLeaderRequest_thenChangesLeader() {
         //Given
         Long groupId = 1L;
         Long memberId = 1L;
         Long leaderId = 2L;
+
         Group group = GroupFixture.entity(groupId);
         User member = UserFixture.entity(memberId);
         User leader = UserFixture.entity(leaderId);
@@ -155,8 +155,8 @@ class GroupServiceTest {
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
         given(userRepository.findById(memberId)).willReturn(Optional.of(member));
-        given(groupMemberRepository.findByGroupAndMemberAndStatusActive(group, leader)).willReturn(Optional.of(groupLeaderRecord));
-        given(groupMemberRepository.findByGroupAndMemberAndStatusActive(group, member)).willReturn(Optional.of(groupMemberRecord));
+        given(groupMemberRepository.findByGroupAndMemberWithStatusActive(group, leader)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndMemberWithStatusActive(group, member)).willReturn(Optional.of(groupMemberRecord));
         given(groupMemberRepository.saveAllAndFlush(List.of(groupLeaderRecord, groupMemberRecord))).willReturn(List.of(groupLeaderRecord, groupMemberRecord));
 
         // When
@@ -166,5 +166,27 @@ class GroupServiceTest {
         Iterator<GroupMemberResponse> iter = actual.iterator();
         GroupMemberResponse response = iter.next();
         assertThat(map.get(response.getMember().getId())).isNotSameAs(response.getRole());
+    }
+
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 조회")
+    @Test
+    void givenGroupIdAndLeaderId_whenSearchingMemberJoinRequest_thenReturnsGroupMemberRequestSet() {
+        //Given
+        Long groupId = 1L;
+        Long leaderId = 1L;
+
+        Group group = GroupFixture.entity(groupId);
+        User leader = UserFixture.entity(leaderId);
+        GroupMember groupLeaderRecord = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+        GroupMemberRequest groupMemberRequest1 = GroupMemberRequest.of(group, UserFixture.entity(2L));
+        GroupMemberRequest groupMemberRequest2 = GroupMemberRequest.of(group, UserFixture.entity(3L));
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRepository.findByGroupWithRoleLeader(group)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRequestRepository.findByGroup(group)).willReturn(List.of(groupMemberRequest1, groupMemberRequest2));
+
+        // When & Then
+        assertThat(groupService.findMemberJoinRequest(groupId, leaderId)).hasSize(2);
     }
 }
