@@ -37,6 +37,7 @@ insert into group_member (group_id, member_id, status, role) values (6, 6, 'ACTI
 insert into group_member (group_id, member_id, status, role) values (7, 7, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (8, 8, 'ACTIVE', 'LEADER');
 
+insert into group_member (group_id, member_id, status, role) values (1, 2, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (3, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (4, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (5, 1, 'ACTIVE', 'MEMBER');
