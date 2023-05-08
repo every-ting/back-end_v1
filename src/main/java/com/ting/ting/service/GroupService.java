@@ -55,4 +55,9 @@ public interface GroupService {
      * 내가 팀장인 팀에 온 멤버 가입 요청을 조회
      */
     Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long leaderId);
+
+    /**
+     * 내가 팀장인 팀에 온 멤버 가입 요청을 수락
+     */
+    GroupMemberResponse acceptMemberJoinRequest(long leaderId, long groupMemberRequestId);
 }

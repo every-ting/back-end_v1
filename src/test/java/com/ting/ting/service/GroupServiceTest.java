@@ -189,4 +189,31 @@ class GroupServiceTest {
         // When & Then
         assertThat(groupService.findMemberJoinRequest(groupId, leaderId)).hasSize(2);
     }
+
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락")
+    @Test
+    void givenLeaderIdAndGroupMemberRequestId_whenAcceptingMemberJoinRequest_thenReturnsCreatedGroupMemberResponse() {
+        //Given
+        Long leaderId = 1L;
+        Long groupMemberRequestId = 1L;
+
+        User leader = UserFixture.entity(leaderId);
+        User member = UserFixture.entity(leaderId + 1);
+        Group group = GroupFixture.entity(1L);
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
+        GroupMember groupMember = GroupMember.of(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
+        given(groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER)).willReturn(Optional.of(group));
+        given(groupMemberRepository.save(any())).willReturn(groupMember);
+
+        // When
+        GroupMemberResponse actual = groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId);
+
+        // Then
+        assertThat(actual.getMember().getUsername()).isSameAs(member.getUsername());
+        then(groupMemberRepository).should().save(any(GroupMember.class));
+        then(groupMemberRequestRepository).should().delete(any());
+    }
 }
