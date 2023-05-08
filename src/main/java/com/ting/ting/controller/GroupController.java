@@ -1,6 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
@@ -33,12 +34,6 @@ public interface GroupController {
     Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
-     * 팀장 넘기기
-     */
-    @PutMapping("/{groupId}/leader/{memberId}")
-    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId);
-
-    /**
      * 그룹 생성
      */
     @PostMapping
@@ -55,4 +50,16 @@ public interface GroupController {
      */
     @DeleteMapping("/request/{groupId}")
     Response<Void> deleteJoinRequest(@PathVariable long groupId);
+
+    /**
+     * 팀장 넘기기
+     */
+    @PutMapping("/{groupId}/leader/{memberId}")
+    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId);
+
+    /**
+     * 팀 멤버 가입 요청 조회
+     */
+    @GetMapping("/request/{groupId}")
+    Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(@PathVariable Long groupId);
 }

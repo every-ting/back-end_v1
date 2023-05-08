@@ -1,6 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupMemberRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.dto.response.Response;
@@ -27,7 +28,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Page<GroupResponse>> suggestedGroupList(@ParameterObject Pageable pageable) {
+    public Response<Page<GroupResponse>> suggestedGroupList(Pageable pageable) {
         return success(groupService.findAllGroups(pageable));
     }
 
@@ -38,24 +39,18 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId) {
+    public Response<Set<GroupMemberResponse>> getGroupMemberList(Long groupId) {
         return success(groupService.findGroupMemberList(groupId));
     }
 
     @Override
-    public Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long memberId) {
-        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(groupService.changeGroupLeader(groupId, leaderId, memberId));
-    }
-
-    @Override
-    public Response<GroupResponse> createGroup(@RequestBody GroupRequest request) {
+    public Response<GroupResponse> createGroup(GroupRequest request) {
         Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(groupService.saveGroup(userId, request));
     }
 
     @Override
-    public Response<Void> sendJoinRequest(@PathVariable long groupId) {
+    public Response<Void> sendJoinRequest(long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.saveJoinRequest(groupId, userId);
@@ -63,10 +58,22 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Void> deleteJoinRequest(@PathVariable long groupId) {
+    public Response<Void> deleteJoinRequest(long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.deleteJoinRequest(groupId, userId);
         return success();
+    }
+
+    @Override
+    public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long memberId) {
+        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        return success(groupService.changeGroupLeader(groupId, leaderId, memberId));
+    }
+
+    @Override
+    public Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(Long groupId) {
+        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        return success(groupService.findMemberJoinRequest(groupId, leaderId));
     }
 }
