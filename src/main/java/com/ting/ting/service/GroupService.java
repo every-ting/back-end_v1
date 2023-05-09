@@ -70,5 +70,5 @@ public interface GroupService {
     /**
      * 내가 팀장인 팀에 온 과팅 요청 조회
      */
-    Set<GroupDateRequestResponse> findAllGroupDataRequest(long groupId, long leaderId);
+    Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long leaderId);
 }

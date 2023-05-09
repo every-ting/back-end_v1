@@ -89,6 +89,6 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<Set<GroupDateRequestResponse>> getGroupDateRequest(Long groupId) {
         Long leaderId = 1L;
 
-        return success(groupService.findAllGroupDataRequest(groupId, leaderId));
+        return success(groupService.findAllGroupDateRequest(groupId, leaderId));
     }
 }
