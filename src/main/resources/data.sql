@@ -28,6 +28,11 @@ insert into `group` (id, group_name, gender, school, num_of_member, is_matched, 
 insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (7, '과팅팀7', 'WOMEN', '세종대학교', 2, false, '');
 insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (8, '과팅팀8', 'WOMEN', '홍익대학교', 4, false, '');
 
+insert into group_date_request(id, from_id, to_id) values (1, 2, 1);
+insert into group_date_request(id, from_id, to_id) values (2, 6, 1);
+insert into group_date_request(id, from_id, to_id) values (3, 7, 1);
+insert into group_date_request(id, from_id, to_id) values (4, 8, 1);
+
 insert into group_member (group_id, member_id, status, role) values (1, 1, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (2, 2, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (3, 3, 'ACTIVE', 'LEADER');
