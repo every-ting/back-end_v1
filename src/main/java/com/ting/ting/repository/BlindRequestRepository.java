@@ -5,6 +5,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,4 +19,6 @@ public interface BlindRequestRepository extends JpaRepository<BlindRequest, Long
     Set<BlindRequest> findAllByFromUserAndStatus(User FromUser, RequestStatus status);
 
     Set<BlindRequest> findAllByToUserAndStatus(User toUser, RequestStatus status);
+
+    List<BlindRequest> findAllByFromUserOrToUser(User fromUser, User toUser);
 }
