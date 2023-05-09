@@ -1,15 +1,11 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupMemberRequestResponse;
-import com.ting.ting.dto.response.GroupMemberResponse;
-import com.ting.ting.dto.response.GroupResponse;
-import com.ting.ting.dto.response.Response;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.GroupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
@@ -87,5 +83,12 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
         groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
         return success();
+    }
+
+    @Override
+    public Response<Set<GroupDateRequestResponse>> getGroupDateRequest(Long groupId) {
+        Long leaderId = 1L;
+
+        return success(groupService.findAllGroupDataRequest(groupId, leaderId));
     }
 }
