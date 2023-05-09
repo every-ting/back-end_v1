@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupDateRequestResponse;
 import com.ting.ting.dto.response.GroupMemberRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
@@ -65,4 +66,9 @@ public interface GroupService {
      * 내가 팀장인 팀에 온 멤버 가입 요청을 거절
      */
     void rejectMemberJoinRequest(long leaderId, long groupMemberRequestId);
+
+    /**
+     * 내가 팀장인 팀에 온 과팅 요청 조회
+     */
+    Set<GroupDateRequestResponse> findAllGroupDataRequest(long groupId, long leaderId);
 }
