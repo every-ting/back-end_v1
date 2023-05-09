@@ -32,3 +32,6 @@ insert into group_member (group_id, member_id, request_status) values (2, 1, 'AC
 insert into group_member (group_id, member_id, request_status) values (3, 1, 'ACCEPTED');
 insert into group_member (group_id, member_id, request_status) values (4, 1, 'ACCEPTED');
 insert into group_member (group_id, member_id, request_status) values (5, 1, 'ACCEPTED');
+
+insert into blind_request(from_user_id, to_user_id, request_status) values(13, 9, 'PENDING');
+insert into blind_request(from_user_id, to_user_id, request_status) values(16, 9, 'PENDING');
