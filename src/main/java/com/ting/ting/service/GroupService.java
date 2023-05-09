@@ -60,4 +60,9 @@ public interface GroupService {
      * 내가 팀장인 팀에 온 멤버 가입 요청을 수락
      */
     GroupMemberResponse acceptMemberJoinRequest(long leaderId, long groupMemberRequestId);
+
+    /**
+     * 내가 팀장인 팀에 온 멤버 가입 요청을 거절
+     */
+    void rejectMemberJoinRequest(long leaderId, long groupMemberRequestId);
 }

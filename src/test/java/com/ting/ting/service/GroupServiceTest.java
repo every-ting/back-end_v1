@@ -216,4 +216,26 @@ class GroupServiceTest {
         then(groupMemberRepository).should().save(any(GroupMember.class));
         then(groupMemberRequestRepository).should().delete(any());
     }
+
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 거절")
+    @Test
+    void givenLeaderIdAndGroupMemberRequestId_whenRejectingMemberJoinRequest_thenDeletesMemberJoinRequest() {
+        //Given
+        Long leaderId = 1L;
+        Long groupMemberRequestId = 1L;
+
+        User leader = UserFixture.entity(leaderId);
+        Group group = GroupFixture.entity(1L);
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, leader);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
+        given(groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER)).willReturn(Optional.of(group));
+
+        // When
+        groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
+
+        // Then
+        then(groupMemberRequestRepository).should().delete(any());
+    }
 }
