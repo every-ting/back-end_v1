@@ -8,11 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Page<User> findAllByGender(Gender gender, Pageable pageable);
+    Page<User> findAllByGenderAndIdNotIn(Gender gender, Set<Long> usersId, Pageable pageable);
 
     @Override
     Optional<User> findById(Long id);
