@@ -1,10 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupMemberRequestResponse;
-import com.ting.ting.dto.response.GroupMemberResponse;
-import com.ting.ting.dto.response.GroupResponse;
-import com.ting.ting.dto.response.Response;
+import com.ting.ting.dto.response.*;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,4 +71,10 @@ public interface GroupController {
      */
     @DeleteMapping("members/requests/{groupMemberRequestId}")
     Response<Void> rejectJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
+
+    /**
+     * 다른 팀에게 온 미팅 요청 조회
+     */
+    @GetMapping("/{groupId}/dates/requests")
+    Response<Set<GroupDateRequestResponse>> getGroupDateRequest(@PathVariable Long groupId);
 }
