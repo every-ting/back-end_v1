@@ -14,9 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,18 +35,38 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
         if (user.getGender().equals(Gender.MEN)) {
-            return womenBlindUsersInfo(pageable);
+            return womenBlindUsersInfo(user, pageable);
         }
 
-        return menBlindUsersInfo(pageable);
+        return menBlindUsersInfo(user, pageable);
     }
 
-    private Page<BlindDateResponse> womenBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindDateResponse::from);
+    private Page<BlindDateResponse> womenBlindUsersInfo(User user, Pageable pageable) {
+        List<BlindRequest> usersRelatedToMeInfo = blindRequestRepository.findAllByFromUserOrToUser(user, user);
+
+        Set<Long> idOfUsersRelatedToMe = getIdOfUsersRelatedToMe(user, usersRelatedToMeInfo);
+
+        return userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idOfUsersRelatedToMe, pageable).map(BlindDateResponse::from);
     }
 
-    private Page<BlindDateResponse> menBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindDateResponse::from);
+    private Page<BlindDateResponse> menBlindUsersInfo(User user, Pageable pageable) {
+        List<BlindRequest> usersRelatedToMeInfo = blindRequestRepository.findAllByFromUserOrToUser(user, user);
+
+        Set<Long> idOfUsersRelatedToMe = getIdOfUsersRelatedToMe(user, usersRelatedToMeInfo);
+
+        return userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idOfUsersRelatedToMe, pageable).map(BlindDateResponse::from);
+    }
+
+    private Set<Long> getIdOfUsersRelatedToMe(User user, List<BlindRequest> allByFromUserOrToUser) {
+        Set<Long> idOfPeopleRelatedToMe = new HashSet<>();
+
+        for (BlindRequest request : allByFromUserOrToUser) {
+            idOfPeopleRelatedToMe.add(request.getToUser().getId());
+            idOfPeopleRelatedToMe.add(request.getFromUser().getId());
+        }
+        idOfPeopleRelatedToMe.remove(user.getId());
+
+        return idOfPeopleRelatedToMe;
     }
 
     @Override
