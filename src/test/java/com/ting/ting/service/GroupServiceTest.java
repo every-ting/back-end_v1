@@ -255,6 +255,6 @@ class GroupServiceTest {
         given(groupDateRequestRepository.findByToGroup(group)).willReturn(List.of(groupDateRequest1, groupDateRequest2));
 
         // When & Then
-        assertThat(groupService.findAllGroupDataRequest(groupId, leaderId)).hasSize(2);
+        assertThat(groupService.findAllGroupDateRequest(groupId, leaderId)).hasSize(2);
     }
 }

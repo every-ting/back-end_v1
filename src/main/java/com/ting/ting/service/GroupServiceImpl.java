@@ -167,7 +167,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupDateRequestResponse> findAllGroupDataRequest(long groupId, long leaderId) {
+    public Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long leaderId) {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(leaderId);
 
