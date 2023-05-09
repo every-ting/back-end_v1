@@ -68,4 +68,10 @@ public interface GroupController {
      */
     @PostMapping("members/requests/{groupMemberRequestId}")
     Response<GroupMemberResponse> acceptJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
+
+    /**
+     * 팀 멤버 가입 요청 거절
+     */
+    @DeleteMapping("members/requests/{groupMemberRequestId}")
+    Response<Void> rejectJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
 }

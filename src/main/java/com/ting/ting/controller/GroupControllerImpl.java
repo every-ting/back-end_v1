@@ -80,4 +80,12 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
         Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
     }
+
+    @Override
+    public Response<Void> rejectJoinRequestToMyGroup(Long groupMemberRequestId) {
+        Long leaderId = 1L;
+
+        groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
+        return success();
+    }
 }
