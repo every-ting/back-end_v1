@@ -7,15 +7,13 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupDateRequestResponse;
 import com.ting.ting.dto.response.GroupMemberRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
-import com.ting.ting.repository.GroupMemberRepository;
-import com.ting.ting.repository.GroupMemberRequestRepository;
-import com.ting.ting.repository.GroupRepository;
-import com.ting.ting.repository.UserRepository;
+import com.ting.ting.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -33,13 +31,15 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
+    private final GroupDateRequestRepository groupDateRequestRepository;
     private final UserRepository userRepository;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, UserRepository userRepository) {
+    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository) {
         super(ServiceType.GROUP_MEETING);
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
+        this.groupDateRequestRepository = groupDateRequestRepository;
         this.userRepository = userRepository;
     }
 
@@ -112,22 +112,22 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User newLeader = loadUserByUserId(newLeaderId);
 
         // leader와 newLeader가 실제 group에 포함되어 있는 유저인지 확인
-        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE).orElseThrow(() ->
+        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", leaderId, groupId))
         );
-        GroupMember groupMemberInfoOfMember = groupMemberRepository.findByGroupAndMemberAndStatus(group, newLeader, MemberStatus.ACTIVE).orElseThrow(() ->
+        GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, newLeader, MemberStatus.ACTIVE).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", newLeaderId, groupId))
         );
 
         // leaderId를 가진 user가 group 멤버면서, 리더는 아닌 경우 -> 에러
-        if (!groupMemberInfoOfLeader.getRole().equals(MemberRole.LEADER)) {
+        if (!memberRecordOfLeader.getRole().equals(MemberRole.LEADER)) {
             throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupId));
         }
 
-        groupMemberInfoOfLeader.setRole(MemberRole.MEMBER);
-        groupMemberInfoOfMember.setRole(MemberRole.LEADER);
+        memberRecordOfLeader.setRole(MemberRole.MEMBER);
+        memberRecordOfNewLeader.setRole(MemberRole.LEADER);
 
-        return groupMemberRepository.saveAllAndFlush(List.of(groupMemberInfoOfLeader, groupMemberInfoOfMember)).stream().map(GroupMemberResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.saveAllAndFlush(List.of(memberRecordOfLeader, memberRecordOfNewLeader)).stream().map(GroupMemberResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -135,16 +135,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(leaderId);
 
-        // 과팅 팀의 팀장을 조회
-        GroupMember groupMemberInfoOfLeader = groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER).orElseThrow(() -> {
-            groupRepository.delete(group); // TODO : 팀장이 없는 팀은 일단 삭제하는 것으로 구현 -> 다른 멤버에게 팀장을 넘기는 로직으로 수정
-            return throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId));
-        });
-
-        // 과팅 팀의 팀장과 leaderId를 가진 유저가 같은 사람이 아닌 경우 -> 에러
-        if (!groupMemberInfoOfLeader.getMember().equals(leader)) {
-            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupId));
-        }
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
         return groupMemberRequestRepository.findByGroup(group).stream().map(GroupMemberRequestResponse::from).collect(Collectors.toUnmodifiableSet());
     }
@@ -156,17 +147,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
 
-        // 주어진 사용자가 팀장인 팀 조회
-        Group group = groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER).orElseThrow(() ->
-            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupMemberRequest.getGroup().getId()))
-        );
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
-        // 주어진 사용자가 팀장인 팀과 주어진 groupMemberRequest 의 팀이 일치하지 않는 경우 -> 에러
-        if (!group.equals(groupMemberRequest.getGroup())) {
-            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupMemberRequest.getGroup().getId()));
-        }
-
-        GroupMember created = groupMemberRepository.save(GroupMember.of(group, groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
+        GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
         return GroupMemberResponse.from(created);
     }
@@ -178,17 +161,32 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
 
-        // 주어진 사용자가 팀장인 팀 조회
-        Group group = groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER).orElseThrow(() ->
-                throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupMemberRequest.getGroup().getId()))
-        );
-
-        // 주어진 사용자가 팀장인 팀과 주어진 groupMemberRequest 의 팀이 일치하지 않는 경우 -> 에러
-        if (!group.equals(groupMemberRequest.getGroup())) {
-            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupMemberRequest.getGroup().getId()));
-        }
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
         groupMemberRequestRepository.delete(groupMemberRequest);
+    }
+
+    @Override
+    public Set<GroupDateRequestResponse> findAllGroupDataRequest(long groupId, long leaderId) {
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(leaderId);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
+
+        return groupDateRequestRepository.findByToGroup(group).stream().map(GroupDateRequestResponse::from).collect(Collectors.toUnmodifiableSet());
+    }
+
+    private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {
+        // 과팅 팀의 팀장을 조회
+        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER).orElseThrow(() -> {
+            groupRepository.delete(group); // TODO : 팀장이 없는 팀은 일단 삭제하는 것으로 구현 -> 다른 멤버에게 팀장을 넘기는 로직으로 수정
+            return throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", group.getId()));
+        });
+
+        // 과팅 팀의 팀장과 leaderId를 가진 유저가 같은 사람이 아닌 경우 -> 에러
+        if (!memberRecordOfLeader.getMember().equals(leader)) {
+            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leader.getId(), group.getId()));
+        }
     }
 
     private Group loadGroupByGroupId(Long groupId) {

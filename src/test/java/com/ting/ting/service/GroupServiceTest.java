@@ -1,9 +1,6 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.Group;
-import com.ting.ting.domain.GroupMember;
-import com.ting.ting.domain.GroupMemberRequest;
-import com.ting.ting.domain.User;
+import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
@@ -11,10 +8,7 @@ import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
-import com.ting.ting.repository.GroupMemberRepository;
-import com.ting.ting.repository.GroupMemberRequestRepository;
-import com.ting.ting.repository.GroupRepository;
-import com.ting.ting.repository.UserRepository;
+import com.ting.ting.repository.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +34,7 @@ class GroupServiceTest {
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
+    @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private UserRepository userRepository;
 
     @DisplayName("과팅 - 모든 팀 조회")
@@ -177,13 +172,13 @@ class GroupServiceTest {
 
         Group group = GroupFixture.entity(groupId);
         User leader = UserFixture.entity(leaderId);
-        GroupMember groupLeaderRecord = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupMemberRequest groupMemberRequest1 = GroupMemberRequest.of(group, UserFixture.entity(2L));
         GroupMemberRequest groupMemberRequest2 = GroupMemberRequest.of(group, UserFixture.entity(3L));
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
-        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRequestRepository.findByGroup(group)).willReturn(List.of(groupMemberRequest1, groupMemberRequest2));
 
         // When & Then
@@ -201,11 +196,12 @@ class GroupServiceTest {
         User member = UserFixture.entity(leaderId + 1);
         Group group = GroupFixture.entity(1L);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupMember groupMember = GroupMember.of(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER);
 
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
-        given(groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER)).willReturn(Optional.of(group));
+        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.save(any())).willReturn(groupMember);
 
         // When
@@ -227,15 +223,38 @@ class GroupServiceTest {
         User leader = UserFixture.entity(leaderId);
         Group group = GroupFixture.entity(1L);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, leader);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
 
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
-        given(groupMemberRepository.findGroupByMemberAndRole(leader, MemberRole.LEADER)).willReturn(Optional.of(group));
+        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
 
         // When
         groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
 
         // Then
         then(groupMemberRequestRepository).should().delete(any());
+    }
+
+    @DisplayName("과팅 - [팀장] : 과팅 요청 조회")
+    @Test
+    void givenLeaderIdAndGroupId_whenSearchingGroupDateRequest_thenReturnsGroupDateRequestResponseSet() {
+        //Given
+        Long leaderId = 1L;
+        Long groupId = 1L;
+
+        User leader = UserFixture.entity(1L);
+        Group group = GroupFixture.entity(1L);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+        GroupDateRequest groupDateRequest1 = GroupDateRequest.of(GroupFixture.entity(2L), group);
+        GroupDateRequest groupDateRequest2 = GroupDateRequest.of(GroupFixture.entity(3L), group);
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupDateRequestRepository.findByToGroup(group)).willReturn(List.of(groupDateRequest1, groupDateRequest2));
+
+        // When & Then
+        assertThat(groupService.findAllGroupDataRequest(groupId, leaderId)).hasSize(2);
     }
 }
