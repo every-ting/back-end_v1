@@ -12,7 +12,7 @@ public enum ErrorCode {
     DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "Request information that already exists."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Request information is not founded"),
-    GENDER_NOT_MATCH(HttpStatus.FORBIDDEN, "gender values do not match"),
+    GENDER_NOT_MATCH(HttpStatus.FORBIDDEN, "Gender values do not match"),
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid")
     ;
 
