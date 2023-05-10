@@ -7,7 +7,7 @@ insert into user (id, username, school, major, gender, birth, email, weight, hei
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (7, 'Annamarie', 'University of Northern Washington', 'Services', 'WOMEN', '2013-08-18', 'alavers6@google.ca', 124, 173.1, 'http://dummyimage.com/157x100.png/cc0000/ffffff', 'ESTJ');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (8, 'Quintilla', 'Pennsylvania State University at Erie - Behrend College', 'Business Development', 'WOMEN', '1996-11-04', 'qeldrett7@google.com.br', 58, 150.2, 'http://dummyimage.com/136x100.png/ff4444/ffffff', 'ESTP');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (9, 'Normand', 'Université d''Alger 3', 'Marketing', 'MEN', '2018-10-19', 'nshimmans8@printfriendly.com', 61, 165.7, 'http://dummyimage.com/227x100.png/5fa2dd/ffffff', 'INFJ');
-insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (10, 'Annissa', 'University of Great Falls', 'Marketing', 'WEN', '2023-03-18', 'anapton9@miibeian.gov.cn', 47, 187.2, 'http://dummyimage.com/170x100.png/cc0000/ffffff', 'INFP');
+insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (10, 'Annissa', 'University of Great Falls', 'Marketing', 'MEN', '2023-03-18', 'anapton9@miibeian.gov.cn', 47, 187.2, 'http://dummyimage.com/170x100.png/cc0000/ffffff', 'INFP');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (11, 'Lek', 'Perm State Technical University', 'Support', 'MEN', '2010-10-06', 'lrickisa@mlb.com', 37, 176.3, 'http://dummyimage.com/169x100.png/5fa2dd/ffffff', 'INTJ');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (12, 'Gib', 'Ondokuz Mayis University Samsun', 'Support', 'MEN', '2011-10-31', 'gepiscopiob@unc.edu', 176, 165.7, 'http://dummyimage.com/250x100.png/dddddd/000000', 'INTP');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (13, 'Gwenore', 'University of Lucerne', 'Marketing', 'WOMEN', '2013-09-24', 'gcarhartc@jiathis.com', 172, 147.2, 'http://dummyimage.com/139x100.png/cc0000/ffffff', 'ISFJ');
@@ -35,15 +35,15 @@ insert into group_date_request(id, from_id, to_id) values (4, 8, 1);
 
 insert into group_member (group_id, member_id, status, role) values (1, 1, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (2, 2, 'ACTIVE', 'LEADER');
-insert into group_member (group_id, member_id, status, role) values (3, 3, 'ACTIVE', 'LEADER');
-insert into group_member (group_id, member_id, status, role) values (4, 4, 'ACTIVE', 'LEADER');
+insert into group_member (group_id, member_id, status, role) values (3, 10, 'ACTIVE', 'LEADER');
+insert into group_member (group_id, member_id, status, role) values (4, 18, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (5, 5, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (6, 6, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (7, 7, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (8, 8, 'ACTIVE', 'LEADER');
 
-insert into group_member (group_id, member_id, status, role) values (1, 2, 'ACTIVE', 'MEMBER');
-insert into group_member (group_id, member_id, status, role) values (1, 3, 'PENDING', 'MEMBER');
+insert into group_member (group_id, member_id, status, role) values (1, 14, 'ACTIVE', 'MEMBER');
+insert into group_member (group_id, member_id, status, role) values (1, 10, 'PENDING', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (3, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (4, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (5, 1, 'ACTIVE', 'MEMBER');
