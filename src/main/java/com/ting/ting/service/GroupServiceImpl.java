@@ -201,6 +201,18 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         return GroupDateResponse.from(created);
     }
 
+    @Override
+    public void rejectGroupDateRequest(long leaderId, long groupDateRequestId) {
+        User leader = loadUserByUserId(leaderId);
+        GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
+        );
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
+
+        groupDateRequestRepository.delete(groupDateRequest);
+    }
+
     private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {
         // 과팅 팀의 팀장을 조회
         GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER).orElseThrow(() -> {
