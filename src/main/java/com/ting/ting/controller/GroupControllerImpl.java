@@ -98,4 +98,12 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
         return success(groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
     }
+
+    @Override
+    public Response<Void> rejectGroupDateRequest(Long groupDateRequestId) {
+        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        groupService.rejectGroupDateRequest(leaderId, groupDateRequestId);
+        return success();
+    }
 }

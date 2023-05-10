@@ -83,4 +83,10 @@ public interface GroupController {
      */
     @PostMapping("/dates/requests/{groupDateRequestId}")
     Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
+
+    /**
+     * 과팅 요청 거절
+     */
+    @DeleteMapping("/dates/requests/{groupDateRequestId}")
+    Response<Void> rejectGroupDateRequest(@PathVariable Long groupDateRequestId);
 }
