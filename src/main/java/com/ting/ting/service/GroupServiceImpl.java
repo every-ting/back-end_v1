@@ -144,6 +144,14 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
 
+        if (groupMemberRepository.existsByGroupAndMember(groupMemberRequest.getGroup(), groupMemberRequest.getUser())) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", groupMemberRequest.getUser().getId(), groupMemberRequest.getGroup().getId()));
+        }
+
+        if (groupMemberRepository.countByGroup(groupMemberRequest.getGroup()) >= groupMemberRequest.getGroup().getNumOfMember()) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getNumOfMember()));
+        }
+
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
@@ -181,8 +189,6 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
         );
 
-        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
-
         if (leader.getGender().equals(Gender.MEN)) {
             menGroup = groupDateRequest.getToGroup();
             womenGroup = groupDateRequest.getFromGroup();
@@ -194,6 +200,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         if (groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)) {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("GroupDate of fromGroup(id: %d) or toGroup(id: %d) already exists", groupDateRequest.getFromGroup().getId(), groupDateRequest.getToGroup().getId()));
         }
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
 
         menGroup.setMatched(true);
         womenGroup.setMatched(true);

@@ -18,6 +18,10 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     Optional<GroupMember> findByGroupAndMemberAndStatus(Group group, User user, MemberStatus status);
 
+    boolean existsByGroupAndMember(Group group, User member);
+
+    long countByGroup(Group group);
+
     @Query(value = "select entity from GroupMember entity join fetch entity.member where entity.group = :group")
     List<GroupMember> findAllByGroup(@Param("group") Group group);
 

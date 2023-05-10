@@ -192,7 +192,7 @@ class GroupServiceTest {
         assertThat(groupService.findMemberJoinRequest(groupId, leaderId)).hasSize(2);
     }
 
-    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락")
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 성공")
     @Test
     void givenLeaderIdAndGroupMemberRequestId_whenAcceptingMemberJoinRequest_thenReturnsCreatedGroupMemberResponse() {
         //Given
@@ -209,6 +209,7 @@ class GroupServiceTest {
         given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
         given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(false);
         given(groupMemberRepository.save(any())).willReturn(groupMember);
 
         // When
@@ -218,6 +219,58 @@ class GroupServiceTest {
         assertThat(actual.getMember().getUsername()).isSameAs(member.getUsername());
         then(groupMemberRepository).should().save(any(GroupMember.class));
         then(groupMemberRequestRepository).should().delete(any());
+    }
+
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 에러 - 요청한 유저가 이미 멤버인 경우")
+    @Test
+    void givenLeaderIdAndGroupMemberRequestIdWhoIsAlreadyMemberOfGroup_whenAcceptingMemberJoinRequest_thenThrows() {
+        //Given
+        Long leaderId = 1L;
+        Long groupMemberRequestId = 1L;
+
+        User leader = UserFixture.entityById(leaderId);
+        User member = UserFixture.entityById(leaderId + 1);
+        Group group = GroupFixture.entityById(1L);
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
+        given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(true);
+
+        // When
+        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
+
+        // Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);
+    }
+
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 에러 - 팀의 가능한 멤버수가 꽉찬 경우")
+    @Test
+    void givenGroupInfoWhichHasNoCapacityForNewMember_whenAcceptingMemberJoinRequest_thenThrows() {
+        //Given
+        Long leaderId = 1L;
+        Long groupMemberRequestId = 1L;
+
+        User leader = UserFixture.entityById(leaderId);
+        User member = UserFixture.entityById(leaderId + 1);
+        Group group = GroupFixture.entityById(1L);
+        group.setNumOfMember(2);
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
+        given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(false);
+        given(groupMemberRepository.countByGroup(group)).willReturn(2L);
+
+        // When
+        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
+
+        // Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REACHED_MEMBERS_SIZE_LIMIT);
     }
 
     @DisplayName("과팅 - [팀장] : 멤버 가입 요청 거절")
@@ -300,8 +353,8 @@ class GroupServiceTest {
 
     @DisplayName("과팅 - [팀장] : 과팅 요청 수락 에러- 이미 매칭된 과팅이 있는 경우")
     @Test
-    void givenLeaderIdAndGroupDateRequestIdWhichContainsAlreadyMatchedGroupMeeting_whenAcceptingGroupDateRequest_thenReturnsCreatedGroupDateResponse() {
-    //Given
+    void givenLeaderIdAndGroupDateRequestIdWhichContainsAlreadyMatchedGroupMeeting_whenAcceptingGroupDateRequest_thenThrows() {
+        //Given
         Long leaderId = 1L;
         Long groupDateRequestId = 1L;
 
@@ -309,16 +362,15 @@ class GroupServiceTest {
         Group menGroup = GroupFixture.entityByGender(Gender.MEN);
         Group womenGroup = GroupFixture.entityByGender(Gender.WOMEN);
         GroupDateRequest groupDateRequest = GroupDateRequest.of(menGroup, womenGroup);
-        GroupMember memberRecordOfLeader = GroupMember.of(groupDateRequest.getToGroup(), leader, MemberStatus.ACTIVE, MemberRole.LEADER);
 
         given(userRepository.findById(any())).willReturn(Optional.of(leader));
         given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
-        given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)).willReturn(true);
 
-    // When
+        // When
         Throwable t = catchThrowable(() -> groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
-                // Then
+
+        // Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);

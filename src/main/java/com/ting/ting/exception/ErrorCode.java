@@ -13,7 +13,8 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Request information is not founded"),
     GENDER_NOT_MATCH(HttpStatus.FORBIDDEN, "Gender values do not match"),
-    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid")
+    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid"),
+    REACHED_MEMBERS_SIZE_LIMIT(HttpStatus.CONFLICT, "Maximum group capacity of the number of members reached")
     ;
 
     private final HttpStatus httpStatus;
