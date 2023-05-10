@@ -298,6 +298,32 @@ class GroupServiceTest {
         then(groupDateRequestRepository).should().delete(any());
     }
 
+    @DisplayName("과팅 - [팀장] : 과팅 요청 수락 에러- 이미 매칭된 과팅이 있는 경우")
+    @Test
+    void givenLeaderIdAndGroupDateRequestIdWhichContainsAlreadyMatchedGroupMeeting_whenAcceptingGroupDateRequest_thenReturnsCreatedGroupDateResponse() {
+    //Given
+        Long leaderId = 1L;
+        Long groupDateRequestId = 1L;
+
+        User leader = UserFixture.entityById(leaderId);
+        Group menGroup = GroupFixture.entityByGender(Gender.MEN);
+        Group womenGroup = GroupFixture.entityByGender(Gender.WOMEN);
+        GroupDateRequest groupDateRequest = GroupDateRequest.of(menGroup, womenGroup);
+        GroupMember memberRecordOfLeader = GroupMember.of(groupDateRequest.getToGroup(), leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+
+        given(userRepository.findById(any())).willReturn(Optional.of(leader));
+        given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
+        given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)).willReturn(true);
+
+    // When
+        Throwable t = catchThrowable(() -> groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
+                // Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);
+    }
+
     @DisplayName("과팅 - [팀장] : 과팅 요청 삭제")
     @Test
     void givenLeaderIdAndGroupDateRequestId_whenRejectingGroupDateRequest_thenDeletedGroupDateRequestRecord() {
