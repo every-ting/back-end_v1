@@ -1,16 +1,11 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.Group;
-import com.ting.ting.domain.GroupMember;
-import com.ting.ting.domain.GroupMemberRequest;
-import com.ting.ting.domain.User;
+import com.ting.ting.domain.*;
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupDateRequestResponse;
-import com.ting.ting.dto.response.GroupMemberRequestResponse;
-import com.ting.ting.dto.response.GroupMemberResponse;
-import com.ting.ting.dto.response.GroupResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
@@ -31,14 +26,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
+    private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final UserRepository userRepository;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository) {
+    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository) {
         super(ServiceType.GROUP_MEETING);
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
+        this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
         this.userRepository = userRepository;
     }
@@ -174,6 +171,34 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
         return groupDateRequestRepository.findByToGroup(group).stream().map(GroupDateRequestResponse::from).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Override
+    public GroupDateResponse acceptGroupDateRequest(long leaderId, long groupDateRequestId) {
+        User leader = loadUserByUserId(leaderId);
+        Group menGroup, womenGroup;
+        GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
+        );
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
+
+        if (leader.getGender().equals(Gender.MEN)) {
+            menGroup = groupDateRequest.getToGroup();
+            womenGroup = groupDateRequest.getFromGroup();
+        } else {
+            menGroup = groupDateRequest.getFromGroup();
+            womenGroup = groupDateRequest.getToGroup();
+        }
+
+        if (groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("GroupDate of fromGroup(id: %d) or toGroup(id: %d) already exists"));
+        }
+
+        GroupDate created = groupDateRepository.save(GroupDate.of(menGroup, womenGroup));
+        groupDateRequestRepository.delete(groupDateRequest);
+
+        return GroupDateResponse.from(created);
     }
 
     private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {

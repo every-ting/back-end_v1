@@ -257,4 +257,37 @@ class GroupServiceTest {
         // When & Then
         assertThat(groupService.findAllGroupDateRequest(groupId, leaderId)).hasSize(2);
     }
+
+    @DisplayName("과팅 - [팀장] : 과팅 요청 수락")
+    @Test
+    void givenLeaderIdAndGroupDateRequestId_whenAcceptingGroupDateRequest_thenReturnsGroupDateResponse() {
+        //Given
+        Long leaderId = 1L;
+        Long groupDateRequestId = 1L;
+
+        User leader = UserFixture.entity(leaderId);
+        Group menGroup = GroupFixture.entity(1L);
+        ReflectionTestUtils.setField(menGroup, "gender", Gender.MEN);
+        Group womenGroup = GroupFixture.entity(2L);
+        ReflectionTestUtils.setField(womenGroup, "gender", Gender.WOMEN);
+        GroupDateRequest groupDateRequest = GroupDateRequest.of(menGroup, womenGroup);
+        GroupMember memberRecordOfLeader = GroupMember.of(groupDateRequest.getToGroup(), leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+        GroupDate expected = GroupDate.of(menGroup, womenGroup);
+        ReflectionTestUtils.setField(expected, "id", 1L);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
+        given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)).willReturn(false);
+        given(groupDateRepository.save(any())).willReturn(expected);
+
+        // When
+        GroupDateResponse actual = groupService.acceptGroupDateRequest(leaderId, groupDateRequestId);
+
+        // Then
+        assertThat(actual.getMenGroup().getId()).isSameAs(menGroup.getId());
+        assertThat(actual.getWomenGroup().getId()).isSameAs(womenGroup.getId());
+        then(groupDateRepository).should().save(any(GroupDate.class));
+        then(groupDateRequestRepository).should().delete(any());
+    }
 }

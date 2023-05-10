@@ -1,10 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupDateRequestResponse;
-import com.ting.ting.dto.response.GroupMemberRequestResponse;
-import com.ting.ting.dto.response.GroupMemberResponse;
-import com.ting.ting.dto.response.GroupResponse;
+import com.ting.ting.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -71,4 +68,9 @@ public interface GroupService {
      * 내가 팀장인 팀에 온 과팅 요청 조회
      */
     Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long leaderId);
+
+    /**
+     * 내가 팀장인 팀에 온 과팅 요청 수락
+     */
+    GroupDateResponse acceptGroupDateRequest(long groupId, long groupDateRequestId);
 }
