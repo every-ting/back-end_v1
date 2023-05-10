@@ -1,9 +1,11 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.*;
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupDateResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -34,6 +37,7 @@ class GroupServiceTest {
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
+    @Mock private GroupDateRepository groupDateRepository;
     @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private UserRepository userRepository;
 
@@ -213,7 +217,7 @@ class GroupServiceTest {
         then(groupMemberRequestRepository).should().delete(any());
     }
 
-    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 거절")
+    @DisplayName("과팅 - [팀장] : 멤버 가입 요청 거절")
     @Test
     void givenLeaderIdAndGroupMemberRequestId_whenRejectingMemberJoinRequest_thenDeletesMemberJoinRequest() {
         //Given
@@ -243,8 +247,8 @@ class GroupServiceTest {
         Long leaderId = 1L;
         Long groupId = 1L;
 
-        User leader = UserFixture.entity(1L);
-        Group group = GroupFixture.entity(1L);
+        User leader = UserFixture.entity(leaderId);
+        Group group = GroupFixture.entity(groupId);
         GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupDateRequest groupDateRequest1 = GroupDateRequest.of(GroupFixture.entity(2L), group);
         GroupDateRequest groupDateRequest2 = GroupDateRequest.of(GroupFixture.entity(3L), group);
