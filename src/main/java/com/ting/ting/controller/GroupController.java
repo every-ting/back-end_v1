@@ -77,4 +77,10 @@ public interface GroupController {
      */
     @GetMapping("/{groupId}/dates/requests")
     Response<Set<GroupDateRequestResponse>> getGroupDateRequest(@PathVariable Long groupId);
+
+    /**
+     * 과팅 요청 수락
+     */
+    @PostMapping("/dates/requests/{groupDateRequestId}")
+    Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
 }
