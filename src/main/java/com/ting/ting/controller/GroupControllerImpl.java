@@ -62,24 +62,27 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     @Override
     public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long newLeaderId) {
         Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
         return success(groupService.changeGroupLeader(groupId, leaderId, newLeaderId));
     }
 
     @Override
     public Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(Long groupId) {
         Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
         return success(groupService.findMemberJoinRequest(groupId, leaderId));
     }
 
     @Override
     public Response<GroupMemberResponse> acceptJoinRequestToMyGroup(Long groupMemberRequestId) {
         Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
         return success(groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
     }
 
     @Override
     public Response<Void> rejectJoinRequestToMyGroup(Long groupMemberRequestId) {
-        Long leaderId = 1L;
+        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
         return success();
@@ -87,14 +90,14 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
     @Override
     public Response<Set<GroupDateRequestResponse>> getGroupDateRequest(Long groupId) {
-        Long leaderId = 1L;
+        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findAllGroupDateRequest(groupId, leaderId));
     }
 
     @Override
     public Response<GroupDateResponse> acceptGroupDateRequest(Long groupDateRequestId) {
-        Long leaderId = 1L;
+        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
     }

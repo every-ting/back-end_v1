@@ -19,13 +19,13 @@ insert into user (id, username, school, major, gender, birth, email, weight, hei
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (19, 'Gabie', 'Alsadrain University', 'Business Development', 'MEN', '2014-12-18', 'ggrayeri@forbes.com', 51, 147.2, 'http://dummyimage.com/246x100.png/ff4444/ffffff', 'INTP');
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti) values (20, 'Celisse', 'Aleksander Gieysztor School of Humanities in Pultusk', 'Product Management', 'WOMEN', '1999-08-19', 'cmckeej@netlog.com', 82, 193.3, 'http://dummyimage.com/120x100.png/cc0000/ffffff', 'INFP');
 
-insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (1, '과팅팀1', 'MEN', '단국대학교', 3, false, '');
+insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (1, '과팅팀1', 'MEN', '단국대학교', 4, false, '');
 insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (2, '과팅팀2', 'WOMEN', '홍익대학교', 4, false, '');
-insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (3, '과팅팀3', 'MEN', '동국대학교', 2, false, '');
-insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (4, '과팅팀4', 'MEN', '서울대학교', 5, false, '');
+insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (3, '과팅팀3', 'MEN', '동국대학교', 4, false, '');
+insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (4, '과팅팀4', 'MEN', '서울대학교', 4, false, '');
 insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (5, '과팅팀5', 'MEN', '연세대학교', 4, false, '');
-insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (6, '과팅팀6', 'WOMEN', '건국대학교', 3, false, '');
-insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (7, '과팅팀7', 'WOMEN', '세종대학교', 2, false, '');
+insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (6, '과팅팀6', 'WOMEN', '건국대학교', 4, false, '');
+insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (7, '과팅팀7', 'WOMEN', '세종대학교', 4, false, '');
 insert into `group` (id, group_name, gender, school, num_of_member, is_matched, memo) values (8, '과팅팀8', 'WOMEN', '홍익대학교', 4, false, '');
 
 insert into group_date_request(id, from_id, to_id) values (1, 2, 1);

@@ -72,7 +72,7 @@ public interface GroupService {
     /**
      * 내가 팀장인 팀에 온 과팅 요청 수락
      */
-    GroupDateResponse acceptGroupDateRequest(long groupId, long groupDateRequestId);
+    GroupDateResponse acceptGroupDateRequest(long leaderId, long groupDateRequestId);
 
     /**
      * 내가 팀장인 팀에 온 과팅 요청 거절
