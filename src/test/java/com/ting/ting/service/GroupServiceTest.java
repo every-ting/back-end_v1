@@ -264,7 +264,7 @@ class GroupServiceTest {
 
     @DisplayName("과팅 - [팀장] : 과팅 요청 수락")
     @Test
-    void givenLeaderIdAndGroupDateRequestId_whenAcceptingGroupDateRequest_thenReturnsGroupDateResponse() {
+    void givenLeaderIdAndGroupDateRequestId_whenAcceptingGroupDateRequest_thenReturnsCreatedGroupDateResponse() {
         //Given
         Long leaderId = 1L;
         Long groupDateRequestId = 1L;
