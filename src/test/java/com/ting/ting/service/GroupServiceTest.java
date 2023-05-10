@@ -294,4 +294,26 @@ class GroupServiceTest {
         then(groupDateRepository).should().save(any(GroupDate.class));
         then(groupDateRequestRepository).should().delete(any());
     }
+
+    @DisplayName("과팅 - [팀장] : 과팅 요청 삭제")
+    @Test
+    void givenLeaderIdAndGroupDateRequestId_whenRejectingGroupDateRequest_thenDeletedGroupDateRequestRecord() {
+        //Given
+        Long leaderId = 1L;
+        Long groupDateRequestId = 1L;
+
+        User leader = UserFixture.entity(leaderId);
+        GroupDateRequest groupDateRequest = GroupDateRequest.of(GroupFixture.entity(1L), GroupFixture.entity(1L));
+        GroupMember memberRecordOfLeader = GroupMember.of(groupDateRequest.getToGroup(), leader, MemberStatus.ACTIVE, MemberRole.LEADER);
+
+        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
+        given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
+
+        // When
+        groupService.rejectGroupDateRequest(leaderId, groupDateRequestId);
+
+        // Then
+        then(groupDateRequestRepository).should().delete(any());
+    }
 }
