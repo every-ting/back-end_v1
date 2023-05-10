@@ -91,4 +91,11 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
         return success(groupService.findAllGroupDateRequest(groupId, leaderId));
     }
+
+    @Override
+    public Response<GroupDateResponse> acceptGroupDateRequest(Long groupDateRequestId) {
+        Long leaderId = 1L;
+
+        return success(groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
+    }
 }
