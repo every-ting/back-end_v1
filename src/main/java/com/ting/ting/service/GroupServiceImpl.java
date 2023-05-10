@@ -195,6 +195,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("GroupDate of fromGroup(id: %d) or toGroup(id: %d) already exists", groupDateRequest.getFromGroup().getId(), groupDateRequest.getToGroup().getId()));
         }
 
+        menGroup.setMatched(true);
+        womenGroup.setMatched(true);
+
         GroupDate created = groupDateRepository.save(GroupDate.of(menGroup, womenGroup));
         groupDateRequestRepository.delete(groupDateRequest);
 
