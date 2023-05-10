@@ -14,6 +14,7 @@ public class AppConfig {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
+    private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final BlindRequestRepository blindRequestRepository;
 
@@ -24,7 +25,7 @@ public class AppConfig {
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRequestRepository, userRepository);
+        return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, userRepository);
     }
 
     @Bean
