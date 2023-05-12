@@ -1,14 +1,13 @@
 package com.ting.ting.domain;
 
-import com.ting.ting.domain.constant.RequestStatus;
+import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.MemberStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
 
-@Setter
 @Getter
 @Table(name = "\"group_member\"", uniqueConstraints = {
         @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "member_id"}),
@@ -30,31 +29,28 @@ public class GroupMember {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User member;
 
+    @Setter
     @NotNull
-    @Column(name = "request_status", nullable = false, columnDefinition = "varchar(8) default 'PENDING'")
+    @Column(name = "status", length = 7)
     @Enumerated(EnumType.STRING)
-    RequestStatus status = RequestStatus.PENDING;
+    private MemberStatus status;
+
+    @Setter
+    @NotNull
+    @Column(name = "role", length = 6)
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
 
     protected GroupMember() {}
 
-    private GroupMember(Group group, User user) {
+    private GroupMember(Group group, User user, MemberStatus status, MemberRole role) {
         this.member = user;
         this.group = group;
+        this.status = status;
+        this.role = role;
     }
 
-    public static GroupMember of(Group group, User user) {
-        return new GroupMember(group, user);
+    public static GroupMember of(Group group, User user, MemberStatus status, MemberRole role) {
+        return new GroupMember(group, user, status, role);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GroupMember)) return false;
-        GroupMember that = (GroupMember) o;
-        return this.getMember() != null && this.getMember().getId().equals(that.getMember().getId())
-                && this.getGroup() != null && this.getGroup().getId().equals(that.getGroup().getId());
-    }
-
-    @Override
-    public int hashCode() { return Objects.hash(this.getId()); }
 }

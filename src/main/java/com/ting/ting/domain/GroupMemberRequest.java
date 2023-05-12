@@ -44,16 +44,4 @@ public class GroupMemberRequest {
     public static GroupMemberRequest of(Group group, User user) {
         return new GroupMemberRequest(group, user);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GroupMemberRequest)) return false;
-        GroupMemberRequest that = (GroupMemberRequest) o;
-        return this.getUser() != null && this.getUser().getId().equals(that.getUser().getId())
-                && this.getGroup() != null && this.getGroup().getId().equals(that.getGroup().getId());
-    }
-
-    @Override
-    public int hashCode() { return Objects.hash(this.getId()); }
 }
