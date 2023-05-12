@@ -4,28 +4,28 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.MBTI;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class BlindUsersInfoResponse {
+@Getter
+public class BlindDateResponse {
 
     private Long id;
-    private String school;
+    private String username;
     private String major;
     private MBTI mbti;
-    private float weight;
-    private float height;
+    private Float weight;
+    private Float height;
+    private String idealPhoto;
 
-    public static BlindUsersInfoResponse from(User entity) {
-        return new BlindUsersInfoResponse(
+    public static BlindDateResponse from(User entity) {
+        return new BlindDateResponse(
                 entity.getId(),
-                entity.getSchool(),
+                entity.getUsername(),
                 entity.getMajor(),
                 entity.getMbti(),
                 entity.getWeight(),
-                entity.getHeight()
+                entity.getHeight(),
+                entity.getIdealPhoto()
         );
     }
 }

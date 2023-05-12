@@ -103,23 +103,21 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long newLeaderId) {
-        Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(leaderId);
-        User newLeader = loadUserByUserId(newLeaderId);
-
-        // leader와 newLeader가 실제 group에 포함되어 있는 유저인지 확인
-        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", leaderId, groupId))
-        );
-        GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndStatus(group, newLeader, MemberStatus.ACTIVE).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", newLeaderId, groupId))
-        );
-
-        // leaderId를 가진 user가 group 멤버면서, 리더는 아닌 경우 -> 에러
-        if (!memberRecordOfLeader.getRole().equals(MemberRole.LEADER)) {
-            throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leaderId, groupId));
+    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader) {
+        if (userIdOfLeader == userIdOfNewLeader) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is unable to transfer ownership to themselves.", userIdOfLeader));
         }
+
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(userIdOfLeader);
+        User newLeader = loadUserByUserId(userIdOfNewLeader);
+
+        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not the leader of Group(id: %d)", userIdOfLeader, groupId))
+        );
+        GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, newLeader, MemberStatus.ACTIVE, MemberRole.MEMBER).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", userIdOfNewLeader, groupId))
+        );
 
         memberRecordOfLeader.setRole(MemberRole.MEMBER);
         memberRecordOfNewLeader.setRole(MemberRole.LEADER);
@@ -128,9 +126,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long leaderId) {
+    public Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long userIdOfLeader) {
         Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(leaderId);
+        User leader = loadUserByUserId(userIdOfLeader);
 
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
@@ -138,8 +136,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public GroupMemberResponse acceptMemberJoinRequest(long leaderId, long groupMemberRequestId) {
-        User leader = loadUserByUserId(leaderId);
+    public GroupMemberResponse acceptMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId) {
+        User leader = loadUserByUserId(userIdOfLeader);
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
             throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
@@ -160,8 +158,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public void rejectMemberJoinRequest(long leaderId, long groupMemberRequestId) {
-        User leader = loadUserByUserId(leaderId);
+    public void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId) {
+        User leader = loadUserByUserId(userIdOfLeader);
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
@@ -172,9 +170,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long leaderId) {
+    public Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader) {
         Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(leaderId);
+        User leader = loadUserByUserId(userIdOfLeader);
 
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
@@ -182,8 +180,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public GroupDateResponse acceptGroupDateRequest(long leaderId, long groupDateRequestId) {
-        User leader = loadUserByUserId(leaderId);
+    public GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId) {
+        User leader = loadUserByUserId(userIdOfLeader);
         Group menGroup, womenGroup;
         GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
@@ -213,8 +211,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public void rejectGroupDateRequest(long leaderId, long groupDateRequestId) {
-        User leader = loadUserByUserId(leaderId);
+    public void rejectGroupDateRequest(long userIdOfLeader, long groupDateRequestId) {
+        User leader = loadUserByUserId(userIdOfLeader);
         GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
         );
@@ -231,7 +229,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             return throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", group.getId()));
         });
 
-        // 과팅 팀의 팀장과 leaderId를 가진 유저가 같은 사람이 아닌 경우 -> 에러
+        // 과팅 팀의 팀장과 주어진 매개변수 leader 가 같은 사람이 아닌 경우 -> 에러
         if (!memberRecordOfLeader.getMember().equals(leader)) {
             throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leader.getId(), group.getId()));
         }
