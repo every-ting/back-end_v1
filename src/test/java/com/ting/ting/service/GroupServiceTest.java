@@ -141,28 +141,28 @@ class GroupServiceTest {
     void givenGroupIdAndLeaderIdAndMemberId_whenChangingLeaderRequest_thenChangesLeader() {
         //Given
         Long groupId = 1L;
-        Long memberId = 1L;
-        Long leaderId = 2L;
+        Long userIdOrMember = 1L;
+        Long userIdOrLeader = 2L;
 
         Group group = GroupFixture.entityById(groupId);
-        User member = UserFixture.entityById(memberId);
-        User leader = UserFixture.entityById(leaderId);
+        User member = UserFixture.entityById(userIdOrMember);
+        User leader = UserFixture.entityById(userIdOrLeader);
         GroupMember groupMemberRecord = GroupMember.of(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER);
         GroupMember groupLeaderRecord = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
 
         HashMap<Long, MemberRole> map = new LinkedHashMap<>();
-        map.put(memberId, groupMemberRecord.getRole());
-        map.put(leaderId, groupLeaderRecord.getRole());
+        map.put(userIdOrMember, groupMemberRecord.getRole());
+        map.put(userIdOrLeader, groupLeaderRecord.getRole());
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
-        given(userRepository.findById(memberId)).willReturn(Optional.of(member));
-        given(groupMemberRepository.findByGroupAndMemberAndStatus(group, leader, MemberStatus.ACTIVE)).willReturn(Optional.of(groupLeaderRecord));
-        given(groupMemberRepository.findByGroupAndMemberAndStatus(group, member, MemberStatus.ACTIVE)).willReturn(Optional.of(groupMemberRecord));
+        given(userRepository.findById(userIdOrLeader)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOrMember)).willReturn(Optional.of(member));
+        given(groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER)).willReturn(Optional.of(groupLeaderRecord));
+        given(groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER)).willReturn(Optional.of(groupMemberRecord));
         given(groupMemberRepository.saveAllAndFlush(List.of(groupLeaderRecord, groupMemberRecord))).willReturn(List.of(groupLeaderRecord, groupMemberRecord));
 
         // When
-        Set<GroupMemberResponse> actual = groupService.changeGroupLeader(groupId, leaderId, memberId);
+        Set<GroupMemberResponse> actual = groupService.changeGroupLeader(groupId, userIdOrLeader, userIdOrMember);
 
         // Then
         Iterator<GroupMemberResponse> iter = actual.iterator();
@@ -175,45 +175,45 @@ class GroupServiceTest {
     void givenGroupIdAndLeaderId_whenSearchingMemberJoinRequest_thenReturnsGroupMemberRequestSet() {
         //Given
         Long groupId = 1L;
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
 
         Group group = GroupFixture.entityById(groupId);
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupMemberRequest groupMemberRequest1 = GroupMemberRequest.of(group, UserFixture.entityById(2L));
         GroupMemberRequest groupMemberRequest2 = GroupMemberRequest.of(group, UserFixture.entityById(3L));
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRequestRepository.findByGroup(group)).willReturn(List.of(groupMemberRequest1, groupMemberRequest2));
 
         // When & Then
-        assertThat(groupService.findMemberJoinRequest(groupId, leaderId)).hasSize(2);
+        assertThat(groupService.findMemberJoinRequest(groupId, userIdOfLeader)).hasSize(2);
     }
 
     @DisplayName("과팅 - [팀장] : 멤버 가입 요청 수락 성공")
     @Test
     void givenLeaderIdAndGroupMemberRequestId_whenAcceptingMemberJoinRequest_thenReturnsCreatedGroupMemberResponse() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupMemberRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
-        User member = UserFixture.entityById(leaderId + 1);
+        User leader = UserFixture.entityById(userIdOfLeader);
+        User member = UserFixture.entityById(userIdOfLeader + 1);
         Group group = GroupFixture.entityById(1L);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
         GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupMember groupMember = GroupMember.of(group, member, MemberStatus.ACTIVE, MemberRole.MEMBER);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
         given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(false);
         given(groupMemberRepository.save(any())).willReturn(groupMember);
 
         // When
-        GroupMemberResponse actual = groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId);
+        GroupMemberResponse actual = groupService.acceptMemberJoinRequest(userIdOfLeader, groupMemberRequestId);
 
         // Then
         assertThat(actual.getMember().getUsername()).isSameAs(member.getUsername());
@@ -225,20 +225,20 @@ class GroupServiceTest {
     @Test
     void givenLeaderIdAndGroupMemberRequestIdWhoIsAlreadyMemberOfGroup_whenAcceptingMemberJoinRequest_thenThrows() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupMemberRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
-        User member = UserFixture.entityById(leaderId + 1);
+        User leader = UserFixture.entityById(userIdOfLeader);
+        User member = UserFixture.entityById(userIdOfLeader + 1);
         Group group = GroupFixture.entityById(1L);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
         given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(true);
 
         // When
-        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
+        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(userIdOfLeader, groupMemberRequestId));
 
         // Then
         assertThat(t)
@@ -250,22 +250,22 @@ class GroupServiceTest {
     @Test
     void givenGroupInfoWhichHasNoCapacityForNewMember_whenAcceptingMemberJoinRequest_thenThrows() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupMemberRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
-        User member = UserFixture.entityById(leaderId + 1);
+        User leader = UserFixture.entityById(userIdOfLeader);
+        User member = UserFixture.entityById(userIdOfLeader + 1);
         Group group = GroupFixture.entityById(1L);
         group.setNumOfMember(2);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, member);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
         given(groupMemberRepository.existsByGroupAndMember(group, member)).willReturn(false);
         given(groupMemberRepository.countByGroup(group)).willReturn(2L);
 
         // When
-        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
+        Throwable t = catchThrowable(() ->  groupService.acceptMemberJoinRequest(userIdOfLeader, groupMemberRequestId));
 
         // Then
         assertThat(t)
@@ -277,20 +277,20 @@ class GroupServiceTest {
     @Test
     void givenLeaderIdAndGroupMemberRequestId_whenRejectingMemberJoinRequest_thenDeletesMemberJoinRequest() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupMemberRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         Group group = GroupFixture.entityById(1L);
         GroupMemberRequest groupMemberRequest = GroupMemberRequest.of(group, leader);
         GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRequestRepository.findById(groupMemberRequestId)).willReturn(Optional.of(groupMemberRequest));
         given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
 
         // When
-        groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
+        groupService.rejectMemberJoinRequest(userIdOfLeader, groupMemberRequestId);
 
         // Then
         then(groupMemberRequestRepository).should().delete(any());
@@ -300,32 +300,32 @@ class GroupServiceTest {
     @Test
     void givenLeaderIdAndGroupId_whenSearchingGroupDateRequest_thenReturnsGroupDateRequestResponseSet() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         Group group = GroupFixture.entityById(groupId);
         GroupMember memberRecordOfLeader = GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER);
         GroupDateRequest groupDateRequest1 = GroupDateRequest.of(GroupFixture.entityById(2L), group);
         GroupDateRequest groupDateRequest2 = GroupDateRequest.of(GroupFixture.entityById(3L), group);
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupMemberRepository.findByGroupAndRole(group, MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupDateRequestRepository.findByToGroup(group)).willReturn(List.of(groupDateRequest1, groupDateRequest2));
 
         // When & Then
-        assertThat(groupService.findAllGroupDateRequest(groupId, leaderId)).hasSize(2);
+        assertThat(groupService.findAllGroupDateRequest(groupId, userIdOfLeader)).hasSize(2);
     }
 
     @DisplayName("과팅 - [팀장] : 과팅 요청 수락 성공")
     @Test
     void givenLeaderIdAndGroupDateRequestId_whenAcceptingGroupDateRequest_thenReturnsCreatedGroupDateResponse() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupDateRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         Group menGroup = GroupFixture.entityByGender(Gender.MEN);
         Group womenGroup = GroupFixture.entityByGender(Gender.WOMEN);
         GroupDateRequest groupDateRequest = GroupDateRequest.of(menGroup, womenGroup);
@@ -333,14 +333,14 @@ class GroupServiceTest {
         GroupDate expected = GroupDate.of(menGroup, womenGroup);
         ReflectionTestUtils.setField(expected, "id", 1L);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
         given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
         given(groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)).willReturn(false);
         given(groupDateRepository.save(any())).willReturn(expected);
 
         // When
-        GroupDateResponse actual = groupService.acceptGroupDateRequest(leaderId, groupDateRequestId);
+        GroupDateResponse actual = groupService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId);
 
         // Then
         assertThat(actual.getMenGroup().getId()).isSameAs(menGroup.getId());
@@ -355,10 +355,10 @@ class GroupServiceTest {
     @Test
     void givenLeaderIdAndGroupDateRequestIdWhichContainsAlreadyMatchedGroupMeeting_whenAcceptingGroupDateRequest_thenThrows() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupDateRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         Group menGroup = GroupFixture.entityByGender(Gender.MEN);
         Group womenGroup = GroupFixture.entityByGender(Gender.WOMEN);
         GroupDateRequest groupDateRequest = GroupDateRequest.of(menGroup, womenGroup);
@@ -368,7 +368,7 @@ class GroupServiceTest {
         given(groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)).willReturn(true);
 
         // When
-        Throwable t = catchThrowable(() -> groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
+        Throwable t = catchThrowable(() -> groupService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId));
 
         // Then
         assertThat(t)
@@ -380,19 +380,19 @@ class GroupServiceTest {
     @Test
     void givenLeaderIdAndGroupDateRequestId_whenRejectingGroupDateRequest_thenDeletedGroupDateRequestRecord() {
         //Given
-        Long leaderId = 1L;
+        Long userIdOfLeader = 1L;
         Long groupDateRequestId = 1L;
 
-        User leader = UserFixture.entityById(leaderId);
+        User leader = UserFixture.entityById(userIdOfLeader);
         GroupDateRequest groupDateRequest = GroupDateRequest.of(GroupFixture.entityById(1L), GroupFixture.entityById(1L));
         GroupMember memberRecordOfLeader = GroupMember.of(groupDateRequest.getToGroup(), leader, MemberStatus.ACTIVE, MemberRole.LEADER);
 
-        given(userRepository.findById(leaderId)).willReturn(Optional.of(leader));
+        given(userRepository.findById(userIdOfLeader)).willReturn(Optional.of(leader));
         given(groupDateRequestRepository.findById(groupDateRequestId)).willReturn(Optional.of(groupDateRequest));
         given(groupMemberRepository.findByGroupAndRole(groupDateRequest.getToGroup(), MemberRole.LEADER)).willReturn(Optional.of(memberRecordOfLeader));
 
         // When
-        groupService.rejectGroupDateRequest(leaderId, groupDateRequestId);
+        groupService.rejectGroupDateRequest(userIdOfLeader, groupDateRequestId);
 
         // Then
         then(groupDateRequestRepository).should().delete(any());

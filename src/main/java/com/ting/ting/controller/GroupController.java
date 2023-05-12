@@ -51,8 +51,8 @@ public interface GroupController {
     /**
      * 팀장 넘기기
      */
-    @PutMapping("/{groupId}/leader/{newLeaderId}")
-    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long newLeaderId);
+    @PutMapping("/{groupId}/leader/{userIdOfNewLeader}")
+    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long userIdOfNewLeader);
 
     /**
      * 팀 멤버 가입 요청 조회

@@ -47,35 +47,35 @@ public interface GroupService {
     /**
      * 팀장 넘기기
      */
-    Set<GroupMemberResponse> changeGroupLeader(long groupId, long leaderId, long newLeaderId);
+    Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader);
 
     /**
      * 내가 팀장인 팀에 온 멤버 가입 요청을 조회
      */
-    Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long leaderId);
+    Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long userIdOfLeader);
 
     /**
      * 내가 팀장인 팀에 온 멤버 가입 요청을 수락
      */
-    GroupMemberResponse acceptMemberJoinRequest(long leaderId, long groupMemberRequestId);
+    GroupMemberResponse acceptMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
      * 내가 팀장인 팀에 온 멤버 가입 요청을 거절
      */
-    void rejectMemberJoinRequest(long leaderId, long groupMemberRequestId);
+    void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
      * 내가 팀장인 팀에 온 과팅 요청 조회
      */
-    Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long leaderId);
+    Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader);
 
     /**
      * 내가 팀장인 팀에 온 과팅 요청 수락
      */
-    GroupDateResponse acceptGroupDateRequest(long leaderId, long groupDateRequestId);
+    GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId);
 
     /**
      * 내가 팀장인 팀에 온 과팅 요청 거절
      */
-    void rejectGroupDateRequest(long leaderId, long groupDateRequestId);
+    void rejectGroupDateRequest(long userIdOfLeader, long groupDateRequestId);
 }

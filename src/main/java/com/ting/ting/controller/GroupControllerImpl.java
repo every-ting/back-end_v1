@@ -60,53 +60,53 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long newLeaderId) {
-        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+    public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long userIdOfNewLeader) {
+        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.changeGroupLeader(groupId, leaderId, newLeaderId));
+        return success(groupService.changeGroupLeader(groupId, userIdOfLeader, userIdOfNewLeader));
     }
 
     @Override
     public Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(Long groupId) {
-        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findMemberJoinRequest(groupId, leaderId));
+        return success(groupService.findMemberJoinRequest(groupId, userIdOfLeader));
     }
 
     @Override
     public Response<GroupMemberResponse> acceptJoinRequestToMyGroup(Long groupMemberRequestId) {
-        Long leaderId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.acceptMemberJoinRequest(leaderId, groupMemberRequestId));
+        return success(groupService.acceptMemberJoinRequest(userIdOfLeader, groupMemberRequestId));
     }
 
     @Override
     public Response<Void> rejectJoinRequestToMyGroup(Long groupMemberRequestId) {
-        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        groupService.rejectMemberJoinRequest(leaderId, groupMemberRequestId);
+        groupService.rejectMemberJoinRequest(userIdOfLeader, groupMemberRequestId);
         return success();
     }
 
     @Override
     public Response<Set<GroupDateRequestResponse>> getGroupDateRequest(Long groupId) {
-        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findAllGroupDateRequest(groupId, leaderId));
+        return success(groupService.findAllGroupDateRequest(groupId, userIdOfLeader));
     }
 
     @Override
     public Response<GroupDateResponse> acceptGroupDateRequest(Long groupDateRequestId) {
-        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.acceptGroupDateRequest(leaderId, groupDateRequestId));
+        return success(groupService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId));
     }
 
     @Override
     public Response<Void> rejectGroupDateRequest(Long groupDateRequestId) {
-        Long leaderId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        groupService.rejectGroupDateRequest(leaderId, groupDateRequestId);
+        groupService.rejectGroupDateRequest(userIdOfLeader, groupDateRequestId);
         return success();
     }
 }
