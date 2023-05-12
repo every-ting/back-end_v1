@@ -51,3 +51,6 @@ insert into group_member (group_id, member_id, status, role) values (5, 1, 'ACTI
 insert into group_member_request (group_id, user_id) values (1, 5);
 insert into group_member_request (group_id, user_id) values (1, 4);
 insert into group_member_request (group_id, user_id) values (2, 3);
+
+insert into blind_request(from_user_id, to_user_id, request_status) values(13, 9, 'PENDING');
+insert into blind_request(from_user_id, to_user_id, request_status) values(16, 9, 'PENDING');
