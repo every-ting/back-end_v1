@@ -36,18 +36,13 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
-        if (user.getGender().equals(Gender.MEN)) {
-            return womenBlindUsersInfo(pageable);
+        return getBlindUsersInfo(user.getGender(), pageable);
+    }
+
+    private Page<BlindDateResponse> getBlindUsersInfo(Gender userGender, Pageable pageable) {
+        if (userGender == Gender.MEN) {
+            return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindDateResponse::from);
         }
-
-        return menBlindUsersInfo(pageable);
-    }
-
-    private Page<BlindDateResponse> womenBlindUsersInfo(Pageable pageable) {
-        return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindDateResponse::from);
-    }
-
-    private Page<BlindDateResponse> menBlindUsersInfo(Pageable pageable) {
         return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindDateResponse::from);
     }
 
