@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -36,14 +37,24 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
-        return getBlindUsersInfo(user.getGender(), pageable);
+        return getBlindUsersInfo(user, pageable);
     }
 
-    private Page<BlindDateResponse> getBlindUsersInfo(Gender userGender, Pageable pageable) {
-        if (userGender == Gender.MEN) {
-            return userRepository.findAllByGender(Gender.WOMEN, pageable).map(BlindDateResponse::from);
+    private Page<BlindDateResponse> getBlindUsersInfo(User user, Pageable pageable) {
+        Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
+
+        if (user.getGender() == Gender.MEN) {
+            return userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
         }
-        return userRepository.findAllByGender(Gender.MEN, pageable).map(BlindDateResponse::from);
+        return userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
+    }
+
+    private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
+        Set<Long> userIdOfRequestToMe = new HashSet<>();
+        for (BlindRequest user1 : allByToUser) {
+            userIdOfRequestToMe.add(user1.getFromUser().getId());
+        }
+        return userIdOfRequestToMe;
     }
 
     @Override
