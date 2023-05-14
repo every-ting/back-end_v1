@@ -65,6 +65,11 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", fromUserId)));
+
+        if (blindRequestRepository.countByFromUserAndStatus(fromUser, RequestStatus.PENDING) >= 5) {
+            throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
+        }
+
         User toUser = userRepository.findById(toUserId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
 
@@ -72,7 +77,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
             throwException(ErrorCode.DUPLICATED_REQUEST);
         });
 
-        if(fromUser.getGender() == toUser.getGender()) {
+        if (fromUser.getGender() == toUser.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
 
