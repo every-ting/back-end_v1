@@ -72,6 +72,10 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
             throwException(ErrorCode.DUPLICATED_REQUEST);
         });
 
+        if(fromUser.getGender() == toUser.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
+
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
         request.setToUser(toUser);
