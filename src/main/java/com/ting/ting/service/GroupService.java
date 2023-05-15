@@ -80,6 +80,11 @@ public interface GroupService {
     GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
 
     /**
+     * 다른 팀에 했던 과팅 요청을 취소
+     */
+    void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
+
+    /**
      * 내가 팀장인 팀에 온 과팅 요청 수락
      */
     GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId);

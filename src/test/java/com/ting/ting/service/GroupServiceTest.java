@@ -506,6 +506,24 @@ class GroupServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
     }
 
+    @DisplayName("[팀장] : 과팅 요청 취소 기능 테스트")
+    @Test
+    void Given_FromGroupAndToGroup_When_DeleteGroupDateRequest_Then_DeletesGroupDateRequest() {
+        //Given
+        Long fromGroupId = 1L;
+        Long toGroupId = 2L;
+
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+
+        //When
+        groupService.deleteGroupDateRequest(user.getId(), fromGroupId, toGroupId);
+
+        //Then
+        then(groupDateRequestRepository).should().deleteByFromGroup_IdAndToGroup_Id(any(), any());
+    }
+
     @DisplayName("[팀장] : 과팅 요청 수락 기능 테스트")
     @Test
     void Given_GroupDateRequest_When_AcceptGroupDateRequest_Then_ReturnsCreatedGroupDateResponse() {
