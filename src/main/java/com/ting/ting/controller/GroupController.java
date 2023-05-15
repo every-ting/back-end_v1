@@ -40,13 +40,19 @@ public interface GroupController {
      * 같은 성별인 팀에 요청
      */
     @PostMapping("/request/{groupId}")
-    Response<Void> sendJoinRequest(@PathVariable long groupId);
+    Response<Void> sendJoinRequest(@PathVariable Long groupId);
 
     /**
      * 같은 성별인 팀에 했던 요청을 취소
      */
     @DeleteMapping("/request/{groupId}")
-    Response<Void> deleteJoinRequest(@PathVariable long groupId);
+    Response<Void> deleteJoinRequest(@PathVariable Long groupId);
+
+    /**
+     * 팀 나가기
+     */
+    @DeleteMapping("/{groupId}/members")
+    Response<Void> deleteGroupMember(@PathVariable Long groupId);
 
     /**
      * 팀장 넘기기

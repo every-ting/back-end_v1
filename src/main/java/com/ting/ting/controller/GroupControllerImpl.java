@@ -44,7 +44,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Void> sendJoinRequest(long groupId) {
+    public Response<Void> sendJoinRequest(Long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.saveJoinRequest(groupId, userId);
@@ -52,10 +52,18 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Void> deleteJoinRequest(long groupId) {
+    public Response<Void> deleteJoinRequest(Long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupService.deleteJoinRequest(groupId, userId);
+        return success();
+    }
+    
+    @Override
+    public Response<Void> deleteGroupMember(Long groupId) {
+        Long userId = 1L;
+
+        groupService.deleteGroupMember(groupId, userId);
         return success();
     }
 
