@@ -75,6 +75,11 @@ public interface GroupService {
     Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader);
 
     /**
+     * 다른 팀에 과팅 요청
+     */
+    GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
+
+    /**
      * 내가 팀장인 팀에 온 과팅 요청 수락
      */
     GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId);

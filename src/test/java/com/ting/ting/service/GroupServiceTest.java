@@ -5,6 +5,7 @@ import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.response.GroupDateRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
@@ -129,8 +130,13 @@ class GroupServiceTest {
         //Given
         Long groupId = 1L;
 
-        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
+        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
+        ReflectionTestUtils.setField(group, "isJoinable", true);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRequestRepository.findByGroupAndUser(any(), any())).willReturn(Optional.empty());
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
         given(groupMemberRequestRepository.save(any())).willReturn(any(GroupMemberRequest.class));
@@ -168,8 +174,11 @@ class GroupServiceTest {
         //Given
         Long groupId = 1L;
 
-        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "isJoinable", true);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRequestRepository.findByGroupAndUser(any(), any())).willReturn(Optional.of(mock(GroupMemberRequest.class)));
 
         //When
@@ -188,8 +197,11 @@ class GroupServiceTest {
         //Given
         Long groupId = 1L;
 
-        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "isJoinable", true);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRequestRepository.findByGroupAndUser(any(), any())).willReturn(Optional.empty());
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(true);
 
@@ -421,7 +433,7 @@ class GroupServiceTest {
 
     @DisplayName("[팀장] : 과팅 요청 조회 기능 테스트")
     @Test
-    void Given_Group_When_FindAllGroupDateRequest_thenReturnsGroupDateRequestResponseSet() {
+    void Given_Group_When_FindAllGroupDateRequest_Then_ReturnsGroupDateRequestResponseSet() {
         //Given
         Long groupId = 1L;
 
@@ -436,6 +448,58 @@ class GroupServiceTest {
 
         //When & Then
         assertThat(groupService.findAllGroupDateRequest(groupId, user.getId())).hasSize(2);
+    }
+
+    @DisplayName("[팀장] : 과팅 요청 기능 테스트")
+    @Test
+    void Given_FromGroupAndToGroup_When_SaveGroupDateRequest_Then_ReturnsCreatedGroupDateRequestResponse() {
+        //Given
+        Long fromGroupId = 1L;
+        Long toGroupId = 2L;
+
+        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
+        Group fromGroup = GroupFixture.createGroupById(fromGroupId);
+        ReflectionTestUtils.setField(fromGroup, "gender", Gender.WOMEN);
+        Group toGroup = GroupFixture.createGroupById(toGroupId);
+        ReflectionTestUtils.setField(toGroup, "gender", Gender.MEN);
+
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupRepository.findById(any())).willReturn(Optional.of(fromGroup)).willReturn(Optional.of(toGroup));
+        given(groupDateRequestRepository.existsByFromGroupAndToGroup(any(), any())).willReturn(false);
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupDateRequestRepository.existsByFromGroupAndToGroup(any(), any())).willReturn(false);
+        given(groupDateRequestRepository.save(any())).willReturn(GroupDateRequest.of(fromGroup, toGroup));
+
+        //When
+        GroupDateRequestResponse created = groupService.saveGroupDateRequest(user.getId(), fromGroupId, toGroupId);
+
+        //Then
+        assertThat(created.getFromGroup().getId()).isSameAs(fromGroup.getId());
+        assertThat(created.getToGroup().getId()).isSameAs(toGroup.getId());
+    }
+
+    @DisplayName("[팀장] : 과팅 요청 기능 테스트 - 같은 성별인 팀에 요청을 보낼 경우")
+    @Test
+    void Given_FromGroupAndToGroupWhoseGendersAreTheSame_When_SaveGroupDateRequest_Then_ThrowsException() {
+        //Given
+        Long fromGroupId = 1L;
+        Long toGroupId = 2L;
+
+        Group fromGroup = GroupFixture.createGroupById(fromGroupId);
+        ReflectionTestUtils.setField(fromGroup, "gender", Gender.WOMEN);
+        Group toGroup = GroupFixture.createGroupById(toGroupId);
+        ReflectionTestUtils.setField(toGroup, "gender", Gender.WOMEN);
+
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupRepository.findById(any())).willReturn(Optional.of(fromGroup)).willReturn(Optional.of(toGroup));
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.saveGroupDateRequest(user.getId(), fromGroupId, toGroupId));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
     }
 
     @DisplayName("[팀장] : 과팅 요청 수락 기능 테스트")
@@ -465,6 +529,7 @@ class GroupServiceTest {
         assertThat(fromGroup.isMatched()).isSameAs(true);
         then(groupDateRepository).should().save(any(GroupDate.class));
         then(groupDateRequestRepository).should().delete(any(GroupDateRequest.class));
+        then(groupDateRequestRepository).should().delete(any(GroupDateRequest.class));
     }
 
     @DisplayName("[팀장] : 과팅 요청 수락 기능 테스트 - 이미 매칭된 과팅이 있는 경우")
@@ -482,6 +547,7 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(groupDateRequest));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupDateRepository.existsByMenGroupOrWomenGroup(any(), any())).willReturn(true);
 
         //When

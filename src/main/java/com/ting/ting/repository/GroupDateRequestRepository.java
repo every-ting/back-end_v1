@@ -10,6 +10,10 @@ import java.util.List;
 
 public interface GroupDateRequestRepository extends JpaRepository<GroupDateRequest, Long> {
 
+    boolean existsByFromGroupAndToGroup(Group fromGroup, Group toGroup);
+
+    void deleteByFromGroupAndToGroup(Group fromGroup, Group toGroup);
+
     @Query(value = "select entity from GroupDateRequest entity join fetch entity.fromGroup where entity.toGroup = :toGroup")
     List<GroupDateRequest> findByToGroup(@Param("toGroup") Group toGroup);
 }
