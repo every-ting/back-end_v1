@@ -9,6 +9,6 @@ import java.util.Set;
 @Getter
 public class GroupDateRequestWithFromAndToResponse {
 
-    private Set<GroupResponse> fromGroup;
-    private Set<GroupResponse> toGroup;
+    private Set<GroupResponse> receivedGroupDateRequests;
+    private Set<GroupResponse> sentGroupDateRequests;
 }
