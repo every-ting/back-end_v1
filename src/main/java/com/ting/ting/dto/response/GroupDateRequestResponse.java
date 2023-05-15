@@ -10,11 +10,13 @@ public class GroupDateRequestResponse {
 
     private Long id;
     private GroupResponse fromGroup;
+    private GroupResponse toGroup;
 
     public static GroupDateRequestResponse from(GroupDateRequest entity) {
         return new GroupDateRequestResponse(
                 entity.getId(),
-                GroupResponse.from(entity.getFromGroup())
+                GroupResponse.from(entity.getFromGroup()),
+                GroupResponse.from(entity.getToGroup())
         );
     }
 }
