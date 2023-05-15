@@ -1,5 +1,6 @@
 package com.ting.ting.service;
 
+import com.ting.ting.domain.BlindDate;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
@@ -9,6 +10,7 @@ import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
+import com.ting.ting.repository.BlindDateRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -23,11 +25,13 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
+    private final BlindDateRepository blindDateRepository;
 
-    public BlindRequestServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository) {
+    public BlindRequestServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
+        this.blindDateRepository = blindDateRepository;
     }
 
     //Todo :: 조회 두번째 방법 -> join문 사용 X 반복문을 통한 조회
@@ -120,7 +124,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void deleteRequest(long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
+        BlindRequest request = getBlindRequestById(blindRequestId);
 
         blindRequestRepository.delete(request);
     }
@@ -163,16 +167,26 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void acceptRequest(long userId, long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, request);
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+        validateRequestToMe(userId, blindRequest);
 
-        request.setStatus(RequestStatus.ACCEPTED);
-        blindRequestRepository.save(request);
+        User user = blindRequest.getToUser();
+        User blindRequestUser = blindRequest.getFromUser();
+
+        if (user.getGender() == blindRequestUser.getGender()) {
+            blindRequestRepository.delete(blindRequest);
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
+
+        blindRequest.setStatus(RequestStatus.ACCEPTED);
+        blindRequestRepository.save(blindRequest);
+
+        blindDateRepository.save(BlindDate.from(blindRequest));
     }
 
     @Override
     public void rejectRequest(long userId, long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
+        BlindRequest request = getBlindRequestById(blindRequestId);
         validateRequestToMe(userId, request);
 
         request.setStatus(RequestStatus.REJECTED);
@@ -185,7 +199,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         }
     }
 
-    private BlindRequest geBlindRequestById(long blindRequestId) {
+    private BlindRequest getBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
