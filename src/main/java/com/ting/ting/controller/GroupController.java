@@ -85,6 +85,12 @@ public interface GroupController {
     Response<Set<GroupDateRequestResponse>> getGroupDateRequest(@PathVariable Long groupId);
 
     /**
+     * 과팅 요청
+     */
+    @PostMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
      * 과팅 요청 수락
      */
     @PostMapping("/dates/requests/{groupDateRequestId}")
