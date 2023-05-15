@@ -2,6 +2,7 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.SendBlindRequest;
 import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ public interface BlindDateController {
      * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
      */
     @GetMapping("/users")
-    Response<Page<BlindDateResponse>> blindUsersInfo(@ParameterObject Pageable pageable);
+    Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(@ParameterObject Pageable pageable);
 
     /**
      * 소개팅 상대에게 요청
