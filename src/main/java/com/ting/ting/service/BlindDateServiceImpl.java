@@ -9,7 +9,6 @@ import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
-import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.repository.BlindDateRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
@@ -37,9 +36,7 @@ public class BlindDateServiceImpl extends AbstractService implements BlindDateSe
     //Todo :: 조회 두번째 방법 -> join문 사용 X 반복문을 통한 조회
     @Override
     public Set<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
-
+        User user = getUserById(userId);
         Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
 
         if (user.getGender() == Gender.MEN) {
