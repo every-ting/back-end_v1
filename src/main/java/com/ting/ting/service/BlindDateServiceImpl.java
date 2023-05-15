@@ -21,13 +21,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class BlindRequestServiceImpl extends AbstractService implements BlindRequestService {
+public class BlindDateServiceImpl extends AbstractService implements BlindDateService {
 
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
 
-    public BlindRequestServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
+    public BlindDateServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
