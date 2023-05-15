@@ -450,8 +450,8 @@ class GroupServiceTest {
         GroupDateRequestWithFromAndToResponse created = groupService.findAllGroupDateRequest(groupId, user.getId());
 
         //Then
-        assertThat(created.getFromGroup()).hasSize(3);
-        assertThat(created.getToGroup()).hasSize(2);
+        assertThat(created.getSentGroupDateRequests()).hasSize(3);
+        assertThat(created.getReceivedGroupDateRequests()).hasSize(2);
     }
 
     @DisplayName("[팀장] : 과팅 요청 기능 테스트")
