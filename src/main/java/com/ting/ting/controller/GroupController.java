@@ -91,6 +91,12 @@ public interface GroupController {
     Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
 
     /**
+     * 과팅 요청 취소
+     */
+    @DeleteMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<Void> deleteGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
      * 과팅 요청 수락
      */
     @PostMapping("/dates/requests/{groupDateRequestId}")
