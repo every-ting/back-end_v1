@@ -15,9 +15,13 @@ public enum ErrorCode {
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid"),
     REACHED_MEMBERS_SIZE_LIMIT(HttpStatus.CONFLICT, "Maximum group capacity of the number of members reached"),
     LIMIT_NUMBER_OF_REQUEST(HttpStatus.CONFLICT, "The maximum number of requests(5) has been exceeded."),
+    NO_AVAILABLE_MEMBER_AS_LEADER(HttpStatus.NOT_FOUND, "There is no available member as a leader"),
+    ALREADY_JOINED(HttpStatus.CONFLICT, "User is already in the group"),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Request doesn't meet the requirements"),
     REQUEST_NOT_MINE(HttpStatus.BAD_REQUEST,"This is not the request information that came to me"),
-    
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")
+    ;
 
     private final HttpStatus httpStatus;
     private final String message;

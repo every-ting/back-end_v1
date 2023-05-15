@@ -45,6 +45,11 @@ public interface GroupService {
     void deleteJoinRequest(long groupId, long userId);
 
     /**
+     * 팀 멤버에서 삭제
+     */
+    void deleteGroupMember(long groupId, long userId);
+
+    /**
      * 팀장 넘기기
      */
     Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader);

@@ -7,15 +7,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 public class GroupFixture {
 
-    public static Group entityById(Long groupId) {
+    public static Group createGroupById(Long id) {
         Group entity = request().toEntity();
-        ReflectionTestUtils.setField(entity, "id", groupId);
-        return entity;
-    }
-
-    public static Group entityByGender(Gender gender) {
-        Group entity = request().toEntity();
-        ReflectionTestUtils.setField(entity, "gender", gender);
+        ReflectionTestUtils.setField(entity, "id", id);
         return entity;
     }
 
