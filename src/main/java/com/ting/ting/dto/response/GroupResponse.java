@@ -9,13 +9,13 @@ import lombok.Getter;
 @Getter
 public class GroupResponse {
 
-    Long id;
-    String groupName;
-    Gender gender;
-    int numOfMember;
-    String school;
-    boolean isMatched;
-    String memo;
+    private Long id;
+    private String groupName;
+    private Gender gender;
+    private int numOfMember;
+    private String school;
+    private boolean isMatched;
+    private String memo;
 
     public static GroupResponse from(Group entity) {
         return new GroupResponse(

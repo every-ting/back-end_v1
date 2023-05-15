@@ -1,7 +1,6 @@
 package com.ting.ting.dto.request;
 
 import com.ting.ting.domain.Group;
-import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,7 +46,7 @@ public class GroupRequest {
      */
     String memo;
 
-    public Group toEntity(User leader) {
-        return Group.of(leader, groupName, gender, school,  numOfMember, memo);
+    public Group toEntity() {
+        return Group.of(groupName, gender, school,  numOfMember, memo);
     }
 }

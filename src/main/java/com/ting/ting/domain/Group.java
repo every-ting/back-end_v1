@@ -10,7 +10,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Setter
 @Getter
 @Table(name = "\"group\"")
 @Entity
@@ -20,11 +19,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "leader_id")
-    private User leader;
-
+    @Setter
     @NotNull @Size(min = 2, max = 20)
     @Column(name = "group_name", unique = true, nullable = false, length = 20)
     private String groupName;
@@ -38,10 +33,12 @@ public class Group {
     @Column(length = 70, nullable = false)
     private String school;
 
+    @Setter
     @NotNull @Min(2) @Max(6)
     @Column(name = "num_of_member", nullable = false)
     private int numOfMember;
 
+    @Setter
     @NotNull
     @Column(name = "is_matched", nullable = false)
     private boolean isMatched = false;
@@ -50,8 +47,7 @@ public class Group {
 
     protected Group() {}
 
-    private Group(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
-        this.leader = leader;
+    private Group(String groupName, Gender gender, String school, int numOfMember, String memo) {
         this.groupName = groupName;
         this.gender = gender;
         this.school = school;
@@ -59,7 +55,7 @@ public class Group {
         this.memo = memo;
     }
 
-    public static Group of(User leader, String groupName, Gender gender, String school, int numOfMember, String memo) {
-        return new Group(leader, groupName, gender, school, numOfMember, memo);
+    public static Group of(String groupName, Gender gender, String school, int numOfMember, String memo) {
+        return new Group(groupName, gender, school, numOfMember, memo);
     }
 }

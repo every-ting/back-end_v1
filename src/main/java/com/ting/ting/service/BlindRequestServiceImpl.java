@@ -14,7 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,39 +37,24 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
-        if (user.getGender().equals(Gender.MEN)) {
-            return womenBlindUsersInfo(user, pageable);
+        return getBlindUsersInfo(user, pageable);
+    }
+
+    private Page<BlindDateResponse> getBlindUsersInfo(User user, Pageable pageable) {
+        Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
+
+        if (user.getGender() == Gender.MEN) {
+            return userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
         }
-
-        return menBlindUsersInfo(user, pageable);
+        return userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
     }
 
-    private Page<BlindDateResponse> womenBlindUsersInfo(User user, Pageable pageable) {
-        List<BlindRequest> usersRelatedToMeInfo = blindRequestRepository.findAllByFromUserOrToUser(user, user);
-
-        Set<Long> idOfUsersRelatedToMe = getIdOfUsersRelatedToMe(user, usersRelatedToMeInfo);
-
-        return userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idOfUsersRelatedToMe, pageable).map(BlindDateResponse::from);
-    }
-
-    private Page<BlindDateResponse> menBlindUsersInfo(User user, Pageable pageable) {
-        List<BlindRequest> usersRelatedToMeInfo = blindRequestRepository.findAllByFromUserOrToUser(user, user);
-
-        Set<Long> idOfUsersRelatedToMe = getIdOfUsersRelatedToMe(user, usersRelatedToMeInfo);
-
-        return userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idOfUsersRelatedToMe, pageable).map(BlindDateResponse::from);
-    }
-
-    private Set<Long> getIdOfUsersRelatedToMe(User user, List<BlindRequest> allByFromUserOrToUser) {
-        Set<Long> idOfPeopleRelatedToMe = new HashSet<>();
-
-        for (BlindRequest request : allByFromUserOrToUser) {
-            idOfPeopleRelatedToMe.add(request.getToUser().getId());
-            idOfPeopleRelatedToMe.add(request.getFromUser().getId());
+    private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
+        Set<Long> userIdOfRequestToMe = new HashSet<>();
+        for (BlindRequest user1 : allByToUser) {
+            userIdOfRequestToMe.add(user1.getFromUser().getId());
         }
-        idOfPeopleRelatedToMe.remove(user.getId());
-
-        return idOfPeopleRelatedToMe;
+        return userIdOfRequestToMe;
     }
 
     @Override
@@ -77,12 +65,21 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", fromUserId)));
+
+        if (blindRequestRepository.countByFromUserAndStatus(fromUser, RequestStatus.PENDING) >= 5) {
+            throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
+        }
+
         User toUser = userRepository.findById(toUserId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
 
         blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST);
         });
+
+        if (fromUser.getGender() == toUser.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
 
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
