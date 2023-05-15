@@ -89,6 +89,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
         }
 
+        if (group.isJoinable() == false) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getNumOfMember()));
+        }
+
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id:%d) already requested to join the Group(id:%d)", userId, groupId));
         });
@@ -174,7 +178,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", groupMemberRequest.getUser().getId(), groupMemberRequest.getGroup().getId()));
         }
 
-        if (groupMemberRepository.countByGroup(groupMemberRequest.getGroup()) >= groupMemberRequest.getGroup().getNumOfMember()) {
+        Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
+
+        if (actualNumOfMembers >= groupMemberRequest.getGroup().getNumOfMember()) {
             throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getNumOfMember()));
         }
 
@@ -182,6 +188,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
+
+        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getNumOfMember()) {
+            groupMemberRequest.getGroup().setJoinable(false);
+        }
+
         return GroupMemberResponse.from(created);
     }
 

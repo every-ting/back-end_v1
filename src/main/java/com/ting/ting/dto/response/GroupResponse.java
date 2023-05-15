@@ -15,6 +15,7 @@ public class GroupResponse {
     private int numOfMember;
     private String school;
     private boolean isMatched;
+    private boolean isJoinable;
     private String memo;
 
     public static GroupResponse from(Group entity) {
@@ -25,6 +26,7 @@ public class GroupResponse {
                 entity.getNumOfMember(),
                 entity.getSchool(),
                 entity.isMatched(),
+                entity.isJoinable(),
                 entity.getMemo()
         );
     }
