@@ -6,11 +6,8 @@ import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.BlindRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,20 +25,20 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Page<BlindDateResponse>> blindUsersInfo(@ParameterObject Pageable pageable) {
+    public Response<Page<BlindDateResponse>> blindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindRequestService.blindUsersInfo(userId, pageable));
     }
 
     @Override
-    public Response<Void> sendJoinRequest(@RequestBody SendBlindRequest request) {
+    public Response<Void> sendJoinRequest(SendBlindRequest request) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         blindRequestService.createJoinRequest(fromUserId, request.getToUserId());
         return success();
     }
 
     @Override
-    public Response<Void> deleteJoinRequest(@PathVariable long blindRequestId) {
+    public Response<Void> deleteJoinRequest(long blindRequestId) {
         blindRequestService.deleteRequest(blindRequestId);
         return success();
     }
@@ -59,14 +56,14 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Void> acceptedRequest(@PathVariable long blindRequestId) {
+    public Response<Void> acceptedRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         blindRequestService.acceptRequest(userId, blindRequestId);
         return success();
     }
 
     @Override
-    public Response<Void> rejectRequest(@PathVariable long blindRequestId) {
+    public Response<Void> rejectRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         blindRequestService.rejectRequest(userId, blindRequestId);
         return success();
