@@ -51,7 +51,7 @@ public interface BlindDateController {
     Response<Void> acceptedRequest(@PathVariable long blindRequestId);
 
     /**
-     * 자신에게 온 요청 거절 -> 추가 구현 필요
+     * 자신에게 온 요청 거절
      */
     @PutMapping("/request/reject/{blindRequestId}")
     Response<Void> rejectRequest(@PathVariable long blindRequestId);
