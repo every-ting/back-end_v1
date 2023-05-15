@@ -11,12 +11,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Override
     Optional<User> findById(Long id);
+
+    Page<User> findAllByGenderAndIdNotIn(Gender gender, Set<Long> usersId, Pageable pageable);
 
     @Query(value = "select new com.ting.ting.domain.custom.BlindUserWithRequestStatus(entity.id, entity.username, entity.major, entity.mbti, entity.weight, entity.height, entity.idealPhoto, requests.status) " +
             "from User entity left outer join BlindRequest requests on requests.fromUser = :user and requests.toUser = entity" +

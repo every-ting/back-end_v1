@@ -15,9 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,15 +31,56 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
     }
 
     @Override
-    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Set<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
 
+        Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
+
         if (user.getGender() == Gender.MEN) {
-            return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.WOMEN, pageable).map(BlindUserWithRequestStatusResponse::from);
+            return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, userIdOfRequestToMe, pageable));
         }
-        return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.MEN, pageable).map(BlindUserWithRequestStatusResponse::from);
+        return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable));
     }
+
+    private Set<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Page<User> otherUsers) {
+        Set<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponse = new LinkedHashSet<>();
+
+        for (User otherUser : otherUsers) {
+            Optional<BlindRequest> blindRequestUserInfo = blindRequestRepository.findByFromUserAndToUser(user, otherUser);
+            if (blindRequestUserInfo.isEmpty()) {
+                blindUserWithRequestStatusResponse.add(BlindUserWithRequestStatusResponse.of(
+                        otherUser,
+                        null
+                ));
+            } else {
+                blindUserWithRequestStatusResponse.add(BlindUserWithRequestStatusResponse.of(
+                        otherUser,
+                        blindRequestUserInfo.get().getStatus()
+                ));
+            }
+        }
+        return blindUserWithRequestStatusResponse;
+    }
+
+    private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
+        Set<Long> userIdOfRequestToMe = new HashSet<>();
+        for (BlindRequest user1 : allByToUser) {
+            userIdOfRequestToMe.add(user1.getFromUser().getId());
+        }
+        return userIdOfRequestToMe;
+    }
+
+//    @Override
+//    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+//        User user = userRepository.findById(userId).orElseThrow(() ->
+//                new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
+//
+//        if (user.getGender() == Gender.MEN) {
+//            return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.WOMEN, pageable).map(BlindUserWithRequestStatusResponse::from);
+//        }
+//        return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.MEN, pageable).map(BlindUserWithRequestStatusResponse::from);
+//    }
 
     @Override
     public void createJoinRequest(long fromUserId, long toUserId) {
