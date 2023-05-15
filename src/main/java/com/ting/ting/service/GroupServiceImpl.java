@@ -255,6 +255,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
+    public void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId) {
+        User leader = loadUserByUserId(userIdOfLeader);
+        Group fromGroup = loadGroupByGroupId(fromGroupId);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, fromGroup);
+
+        groupDateRequestRepository.deleteByFromGroup_IdAndToGroup_Id(fromGroupId, toGroupId);
+    }
+
+    @Override
     public GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId) {
         User leader = loadUserByUserId(userIdOfLeader);
         Group menGroup, womenGroup;
