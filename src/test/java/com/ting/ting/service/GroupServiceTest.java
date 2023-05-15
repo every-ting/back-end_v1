@@ -55,13 +55,26 @@ class GroupServiceTest {
 
     @DisplayName("모든 팀 조회 성공")
     @Test
-    void Given_Nothing_When_findAllGroups_thenReturnsGroupResponsePage() {
+    void Given_Nothing_When_FindAllGroups_thenReturnsGroupResponsePage() {
         //Given
         Pageable pageable = Pageable.ofSize(20);
         given(groupRepository.findAll(pageable)).willReturn(Page.empty());
 
-        // When & Then
+        //When & Then
         assertThat(groupService.findAllGroups(pageable)).isEmpty();
+    }
+
+    @DisplayName("같은 성별 팀 가입을 위한 조회 기능 테스트")
+    @Test
+    void Given_Nothing_When_FindSuggestedSameGenderGroupList_ThenReturnsGroupWithRequestStatusResponsePage() {
+        //Given
+        Pageable pageable = Pageable.ofSize(20);
+
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupRepository.findAllSuggestedGroupWithRequestStatusByUserAndGender(any(), any(), any())).willReturn(Page.empty());
+
+        //When
+        assertThat(groupService.findSuggestedSameGenderGroupList(user.getId(), pageable)).isEmpty();
     }
 
     @DisplayName("내가 속한 팀 조회 기능 테스트")
@@ -71,7 +84,7 @@ class GroupServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRepository.findAllGroupByMemberAndStatus(any(), any())).willReturn(List.of(mock(Group.class), mock(Group.class)));
 
-        // When & Then
+        //When & Then
         assertThat(groupService.findMyGroupList(user.getId())).hasSize(2);
     }
 
@@ -88,7 +101,7 @@ class GroupServiceTest {
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(groupMemberRepository.findAllByGroup(any())).willReturn(List.of(member1, member2));
 
-        // When & Then
+        //When & Then
         assertThat(groupService.findGroupMemberList(group.getId())).hasSize(2);
     }
 
@@ -102,10 +115,10 @@ class GroupServiceTest {
         given(groupRepository.findByGroupName(request.getGroupName())).willReturn(Optional.empty());
         given(groupRepository.save(any())).willReturn(request.toEntity());
 
-        // When
+        //When
         GroupResponse actual = groupService.saveGroup(user.getId(), request);
 
-        // Then
+        //Then
         assertThat(actual.getGroupName()).isSameAs(request.getGroupName());
         then(groupMemberRepository).should().save(any(GroupMember.class));
     }
@@ -122,7 +135,7 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
         given(groupMemberRequestRepository.save(any())).willReturn(any(GroupMemberRequest.class));
 
-        // When & Then
+        //When & Then
         assertDoesNotThrow(() -> groupService.saveJoinRequest(groupId, user.getId()));
     }
 
@@ -139,10 +152,10 @@ class GroupServiceTest {
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.saveJoinRequest(groupId, user.getId()));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.GENDER_NOT_MATCH);
@@ -159,10 +172,10 @@ class GroupServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
         given(groupMemberRequestRepository.findByGroupAndUser(any(), any())).willReturn(Optional.of(mock(GroupMemberRequest.class)));
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.saveJoinRequest(groupId, user.getId()));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);
@@ -180,10 +193,10 @@ class GroupServiceTest {
         given(groupMemberRequestRepository.findByGroupAndUser(any(), any())).willReturn(Optional.empty());
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(true);
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.saveJoinRequest(groupId, user.getId()));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_JOINED);
@@ -198,7 +211,7 @@ class GroupServiceTest {
 
         willDoNothing().given(groupMemberRequestRepository).deleteByGroup_IdAndUser_Id(any(), any());
 
-        // When & Then
+        //When & Then
         assertDoesNotThrow(() -> groupService.deleteJoinRequest(groupId, user.getId()));
     }
 
@@ -215,10 +228,10 @@ class GroupServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfMember));
 
-        // When
+        //When
         groupService.deleteGroupMember(groupId, user.getId());
 
-        // Then
+        //Then
         assertDoesNotThrow(() -> groupMemberRepository.delete(memberRecordOfMember));
     }
 
@@ -238,10 +251,10 @@ class GroupServiceTest {
         given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.findAvailableMemberAsALeaderInGroup(any(), any())).willReturn(List.of(memberRecordOfMember));
 
-        // When
+        //When
         groupService.deleteGroupMember(groupId, user.getId());
 
-        // Then
+        //Then
         assertThat(memberRecordOfMember.getRole()).isSameAs(MemberRole.LEADER);
         then(groupMemberRepository).should().delete(any());
         then(groupMemberRepository).shouldHaveNoMoreInteractions();
@@ -260,10 +273,10 @@ class GroupServiceTest {
         given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.findAvailableMemberAsALeaderInGroup(any(), any())).willReturn(List.of());
 
-        // When
+        //When
         Throwable t = catchThrowable(() ->  groupService.deleteGroupMember(groupId, user.getId()));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NO_AVAILABLE_MEMBER_AS_LEADER);
@@ -287,10 +300,10 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByMemberAndStatusAndRole(any(), any(), any())).willReturn(false);
         given(groupMemberRepository.findByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader)).willReturn(Optional.of(memberRecordOfMember));
 
-        // When
+        //When
         Set<GroupMemberResponse> actual = groupService.changeGroupLeader(groupId, user.getId(), newLeader.getId());
 
-        // Then
+        //Then
         assertThat(memberRecordOfLeader.getRole()).isSameAs(MemberRole.MEMBER);
         assertThat(memberRecordOfMember.getRole()).isSameAs(MemberRole.LEADER);
     }
@@ -310,7 +323,7 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupMemberRequestRepository.findByGroup(any())).willReturn(List.of(request1, request2));
 
-        // When & Then
+        //When & Then
         assertThat(groupService.findMemberJoinRequest(groupId, user.getId())).hasSize(2);
     }
 
@@ -331,10 +344,10 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupMemberRepository.save(any())).willReturn(GroupMember.of(group, request.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
 
-        // When
+        //When
         GroupMemberResponse actual = groupService.acceptMemberJoinRequest(user.getId(), groupMemberRequestId);
 
-        // Then
+        //Then
         assertThat(actual.getMember().getUsername()).isSameAs(request.getUser().getUsername());
         then(groupMemberRepository).should().save(any(GroupMember.class));
         then(groupMemberRequestRepository).should().delete(any());
@@ -352,10 +365,10 @@ class GroupServiceTest {
         given(groupMemberRequestRepository.findById(any())).willReturn(Optional.of(request));
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(true);
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.acceptMemberJoinRequest(user.getId(), groupMemberRequestId));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);
@@ -378,10 +391,10 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
         given(groupMemberRepository.countByGroup(group)).willReturn(3L);
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.acceptMemberJoinRequest(user.getId(), groupMemberRequestId));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REACHED_MEMBERS_SIZE_LIMIT);
@@ -399,10 +412,10 @@ class GroupServiceTest {
         given(groupMemberRequestRepository.findById(any())).willReturn(Optional.of(mock(GroupMemberRequest.class)));
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
 
-        // When
+        //When
         groupService.rejectMemberJoinRequest(user.getId(), groupMemberRequestId);
 
-        // Then
+        //Then
         then(groupMemberRequestRepository).should().delete(any(GroupMemberRequest.class));
     }
 
@@ -421,7 +434,7 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupDateRequestRepository.findByToGroup(any())).willReturn(List.of(request1, request2));
 
-        // When & Then
+        //When & Then
         assertThat(groupService.findAllGroupDateRequest(groupId, user.getId())).hasSize(2);
     }
 
@@ -444,10 +457,10 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupDateRepository.save(any())).willReturn(GroupDate.of(toGroup, fromGroup));
 
-        // When
+        //When
         groupService.acceptGroupDateRequest(user.getId(), groupDateRequestId);
 
-        // Then
+        //Then
         assertThat(toGroup.isMatched()).isSameAs(true);
         assertThat(fromGroup.isMatched()).isSameAs(true);
         then(groupDateRepository).should().save(any(GroupDate.class));
@@ -471,10 +484,10 @@ class GroupServiceTest {
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(groupDateRequest));
         given(groupDateRepository.existsByMenGroupOrWomenGroup(any(), any())).willReturn(true);
 
-        // When
+        //When
         Throwable t = catchThrowable(() -> groupService.acceptGroupDateRequest(user.getId(), groupDateRequestId));
 
-        // Then
+        //Then
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATED_REQUEST);
@@ -491,7 +504,7 @@ class GroupServiceTest {
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(mock(GroupDateRequest.class)));
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
 
-        // When & Then
+        //When & Then
         assertDoesNotThrow(() -> groupService.rejectGroupDateRequest(user.getId(), groupDateRequestId));
     }
 }

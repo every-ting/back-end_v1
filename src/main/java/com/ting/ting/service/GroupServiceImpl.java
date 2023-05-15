@@ -47,9 +47,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<GroupResponse> findSuggestedGroupList(Pageable pageable) {
-        // TODO : 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회 구현
-        return null;
+    public Page<GroupWithRequestStatusResponse> findSuggestedSameGenderGroupList(Long userId, Pageable pageable) {
+        User user = loadUserByUserId(userId);
+
+        return groupRepository.findAllSuggestedGroupWithRequestStatusByUserAndGender(user, user.getGender(), pageable).map(GroupWithRequestStatusResponse::from);
     }
 
     @Override
