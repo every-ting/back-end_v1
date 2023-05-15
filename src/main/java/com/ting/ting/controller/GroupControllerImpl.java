@@ -98,7 +98,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Set<GroupDateRequestResponse>> getGroupDateRequest(Long groupId) {
+    public Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(Long groupId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findAllGroupDateRequest(groupId, userIdOfLeader));

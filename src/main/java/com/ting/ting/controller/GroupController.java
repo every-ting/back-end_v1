@@ -79,10 +79,10 @@ public interface GroupController {
     Response<Void> rejectJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
 
     /**
-     * 과팅 요청 조회
+     * 과팅 요청 조회(받은 요청, 한 요청 모두)
      */
     @GetMapping("/{groupId}/dates/requests")
-    Response<Set<GroupDateRequestResponse>> getGroupDateRequest(@PathVariable Long groupId);
+    Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(@PathVariable Long groupId);
 
     /**
      * 과팅 요청
