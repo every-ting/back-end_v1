@@ -30,6 +30,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         this.blindRequestRepository = blindRequestRepository;
     }
 
+    //Todo :: 조회 두번째 방법 -> join문 사용 X 반복문을 통한 조회
     @Override
     public Set<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -71,6 +72,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         return userIdOfRequestToMe;
     }
 
+    // Todo :: 조회 첫번째 방법 -> join문 사용
 //    @Override
 //    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
 //        User user = userRepository.findById(userId).orElseThrow(() ->
@@ -99,6 +101,10 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
 
         blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
+
+        blindRequestRepository.findByFromUserAndToUser(toUser, fromUser).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST);
         });
 
