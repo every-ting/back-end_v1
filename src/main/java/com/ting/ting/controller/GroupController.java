@@ -13,10 +13,10 @@ import java.util.Set;
 public interface GroupController {
 
     /**
-     * 모든 팀 조회
+     * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
     @GetMapping
-    Response<Page<GroupResponse>> suggestedGroupList(@ParameterObject Pageable pageable);
+    Response<Page<GroupWithRequestStatusResponse>> getSuggestedSameGenderGroupList(@ParameterObject Pageable pageable);
 
     /**
      * 내가 속한 팀 조회
