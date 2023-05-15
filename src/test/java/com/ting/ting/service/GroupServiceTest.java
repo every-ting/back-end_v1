@@ -6,6 +6,7 @@ import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupDateRequestResponse;
+import com.ting.ting.dto.response.GroupDateRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.exception.ErrorCode;
@@ -438,16 +439,19 @@ class GroupServiceTest {
         Long groupId = 1L;
 
         Group group = GroupFixture.createGroupById(groupId);
-        GroupDateRequest request1 = GroupDateRequest.of(GroupFixture.createGroupById(2L), group);
-        GroupDateRequest request2 = GroupDateRequest.of(GroupFixture.createGroupById(3L), group);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupDateRequestRepository.findByToGroup(any())).willReturn(List.of(request1, request2));
+        given(groupDateRequestRepository.findToGroupByFromGroup(any())).willReturn(List.of(GroupFixture.createGroupById(4L), GroupFixture.createGroupById(5L), GroupFixture.createGroupById(6L)));
+        given(groupDateRequestRepository.findFromGroupByToGroup(any())).willReturn(List.of(GroupFixture.createGroupById(2L), GroupFixture.createGroupById(3L)));
 
-        //When & Then
-        assertThat(groupService.findAllGroupDateRequest(groupId, user.getId())).hasSize(2);
+        //When
+        GroupDateRequestWithFromAndToResponse created = groupService.findAllGroupDateRequest(groupId, user.getId());
+
+        //Then
+        assertThat(created.getFromGroup()).hasSize(3);
+        assertThat(created.getToGroup()).hasSize(2);
     }
 
     @DisplayName("[팀장] : 과팅 요청 기능 테스트")

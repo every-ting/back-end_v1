@@ -210,13 +210,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader) {
+    public GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader) {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(userIdOfLeader);
 
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
-        return groupDateRequestRepository.findByToGroup(group).stream().map(GroupDateRequestResponse::from).collect(Collectors.toUnmodifiableSet());
+        Set<GroupResponse> requestsFromThisGroup = groupDateRequestRepository.findToGroupByFromGroup(group).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        Set<GroupResponse> requestsToThisGroup = groupDateRequestRepository.findFromGroupByToGroup(group).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+
+        return new GroupDateRequestWithFromAndToResponse(requestsFromThisGroup, requestsToThisGroup);
     }
 
     @Override
