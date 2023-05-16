@@ -1,8 +1,8 @@
 package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
-import com.ting.ting.service.BlindDateService;
-import com.ting.ting.service.BlindDateServiceImpl;
+import com.ting.ting.service.BlindService;
+import com.ting.ting.service.BlindServiceImpl;
 import com.ting.ting.service.GroupService;
 import com.ting.ting.service.GroupServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class AppConfig {
     }
 
     @Bean
-    public BlindDateService blindRequestService() {
-        return new BlindDateServiceImpl(userRepository, blindRequestRepository, blindDateRepository);
+    public BlindService blindService() {
+        return new BlindServiceImpl(userRepository, blindRequestRepository, blindDateRepository);
     }
 }

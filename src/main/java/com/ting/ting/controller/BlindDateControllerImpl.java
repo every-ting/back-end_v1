@@ -5,7 +5,7 @@ import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
-import com.ting.ting.service.BlindDateService;
+import com.ting.ting.service.BlindService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,55 +18,55 @@ import java.util.stream.Collectors;
 @RestController
 public class BlindDateControllerImpl extends AbstractController implements BlindDateController {
 
-    private final BlindDateService blindDateService;
+    private final BlindService blindService;
 
-    public BlindDateControllerImpl(BlindDateService blindDateService) {
+    public BlindDateControllerImpl(BlindService blindService) {
         super(ServiceType.BLIND);
-        this.blindDateService = blindDateService;
+        this.blindService = blindService;
     }
 
     @Override
     public Response<Set<BlindUserWithRequestStatusResponse>> blindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindDateService.blindUsersInfo(userId, pageable));
+        return success(blindService.blindUsersInfo(userId, pageable));
     }
 
     @Override
     public Response<Void> sendJoinRequest(SendBlindRequest request) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindDateService.createJoinRequest(fromUserId, request.getToUserId());
+        blindService.createJoinRequest(fromUserId, request.getToUserId());
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinRequest(long blindRequestId) {
-        blindDateService.deleteRequest(blindRequestId);
+        blindService.deleteRequest(blindRequestId);
         return success();
     }
 
     @Override
     public Response<List<BlindDateResponse>> confirmOfMyRequest() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindDateService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
+        return success(blindService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
     }
 
     @Override
     public Response<List<BlindDateResponse>> confirmOfRequestToMe() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindDateService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
+        return success(blindService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
     }
 
     @Override
     public Response<Void> acceptedRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindDateService.acceptRequest(userId, blindRequestId);
+        blindService.acceptRequest(userId, blindRequestId);
         return success();
     }
 
     @Override
     public Response<Void> rejectRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindDateService.rejectRequest(userId, blindRequestId);
+        blindService.rejectRequest(userId, blindRequestId);
         return success();
     }
 }
