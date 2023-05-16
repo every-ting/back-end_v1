@@ -43,6 +43,11 @@ public class Group {
     @Column(name = "is_matched", nullable = false)
     private boolean isMatched = false;
 
+    @Setter
+    @NotNull
+    @Column(name = "is_joinable", nullable = false)
+    private boolean isJoinable = true;
+
     private String memo;
 
     protected Group() {}

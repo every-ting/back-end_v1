@@ -17,7 +17,7 @@ public interface GroupService {
     /**
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
-    Page<GroupResponse> findSuggestedGroupList(Pageable pageable);
+    Page<GroupWithRequestStatusResponse> findSuggestedSameGenderGroupList(Long userId, Pageable pageable);
 
     /**
      * 내가 속한 팀 조회 - request status : ACCEPTED

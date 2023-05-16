@@ -22,8 +22,9 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Page<GroupResponse>> suggestedGroupList(Pageable pageable) {
-        return success(groupService.findAllGroups(pageable));
+    public Response<Page<GroupWithRequestStatusResponse>> getSuggestedSameGenderGroupList(Pageable pageable) {
+        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        return success(groupService.findSuggestedSameGenderGroupList(userId, pageable));
     }
 
     @Override

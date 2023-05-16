@@ -47,9 +47,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<GroupResponse> findSuggestedGroupList(Pageable pageable) {
-        // TODO : 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회 구현
-        return null;
+    public Page<GroupWithRequestStatusResponse> findSuggestedSameGenderGroupList(Long userId, Pageable pageable) {
+        User user = loadUserByUserId(userId);
+
+        return groupRepository.findAllSuggestedGroupWithRequestStatusByUserAndGender(user, user.getGender(), pageable).map(GroupWithRequestStatusResponse::from);
     }
 
     @Override
@@ -87,6 +88,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         if (group.getGender() != user.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
+        }
+
+        if (group.isJoinable() == false) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getNumOfMember()));
         }
 
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
@@ -174,7 +179,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", groupMemberRequest.getUser().getId(), groupMemberRequest.getGroup().getId()));
         }
 
-        if (groupMemberRepository.countByGroup(groupMemberRequest.getGroup()) >= groupMemberRequest.getGroup().getNumOfMember()) {
+        Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
+
+        if (actualNumOfMembers >= groupMemberRequest.getGroup().getNumOfMember()) {
             throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getNumOfMember()));
         }
 
@@ -182,6 +189,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
+
+        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getNumOfMember()) {
+            groupMemberRequest.getGroup().setJoinable(false);
+        }
+
         return GroupMemberResponse.from(created);
     }
 
