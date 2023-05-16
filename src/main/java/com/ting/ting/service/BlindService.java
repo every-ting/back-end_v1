@@ -40,7 +40,7 @@ public interface BlindService {
     void acceptRequest(long userId, long blindRequestId);
 
     /**
-     * 자신에게 온 요청 거절 -> 추가 구현 필요
+     * 자신에게 온 요청 거절
      */
     void rejectRequest(long userId, long blindRequestId);
 }

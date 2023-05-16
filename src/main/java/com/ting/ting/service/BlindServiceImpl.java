@@ -52,10 +52,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
 
         for (User otherUser : otherUsers) {
-            if(myRequestPendingUsers.contains(otherUser)) {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser,RequestStatus.PENDING));
+            if (myRequestPendingUsers.contains(otherUser)) {
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, RequestStatus.PENDING));
             } else {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser,null));
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, null));
             }
         }
 
