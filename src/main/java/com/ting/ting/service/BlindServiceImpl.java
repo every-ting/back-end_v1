@@ -35,33 +35,27 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         this.blindDateRepository = blindDateRepository;
     }
 
-    //Todo :: 조회 두번째 방법 -> join문 사용 X 반복문을 통한 조회
     @Override
     public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
-        Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
+        Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
 
         if (user.getGender() == Gender.MEN) {
-            return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, userIdOfRequestToMe, pageable));
+            return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
         }
-        return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable));
+        return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
     private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Page<User> otherUsers) {
         List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
 
+        Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
+
         for (User otherUser : otherUsers) {
-            Optional<BlindRequest> blindRequestUserInfo = blindRequestRepository.findByFromUserAndToUser(user, otherUser);
-            if (blindRequestUserInfo.isEmpty()) {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(
-                        otherUser,
-                        null
-                ));
+            if(myRequestPendingUsers.contains(otherUser)) {
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser,RequestStatus.PENDING));
             } else {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(
-                        otherUser,
-                        blindRequestUserInfo.get().getStatus()
-                ));
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser,null));
             }
         }
 
@@ -72,25 +66,33 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return new PageImpl<>(blindUserWithRequestStatusResponses, PageRequest.of(pageNumber, pageSize), totalElements);
     }
 
-    private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
-        Set<Long> userIdOfRequestToMe = new HashSet<>();
-        for (BlindRequest user1 : allByToUser) {
-            userIdOfRequestToMe.add(user1.getFromUser().getId());
+    private Set<User> getMyRequestPendingUsers(User user) {
+        Set<User> myRequestPendingUsers = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsers.add(blindRequest.getToUser());
         }
-        return userIdOfRequestToMe;
+
+        return myRequestPendingUsers;
     }
 
-    // Todo :: 조회 첫번째 방법 -> join문 사용
-//    @Override
-//    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
-//        User user = userRepository.findById(userId).orElseThrow(() ->
-//                new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
-//
-//        if (user.getGender() == Gender.MEN) {
-//            return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.WOMEN, pageable).map(BlindUserWithRequestStatusResponse::from);
-//        }
-//        return userRepository.findAllBlindUserWithRequestStatusByUserAndGender(user, Gender.MEN, pageable).map(BlindUserWithRequestStatusResponse::from);
-//    }
+    private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
+        Set<Long> idToBeRemoved = new HashSet<>();
+
+        Set<BlindRequest> requestToMeUserInfo = blindRequestRepository.findAllByToUser(user);
+        for (BlindRequest userInfo : requestToMeUserInfo) {
+            idToBeRemoved.add(userInfo.getFromUser().getId());
+        }
+
+        Set<BlindRequest> myRequestUserNotPending = blindRequestRepository.findAllByFromUserAndStatusIsNot(user, RequestStatus.PENDING);
+        for (BlindRequest userInfo : myRequestUserNotPending) {
+            idToBeRemoved.add(userInfo.getToUser().getId());
+        }
+
+        return idToBeRemoved;
+    }
 
     @Override
     public void createJoinRequest(long fromUserId, long toUserId) {

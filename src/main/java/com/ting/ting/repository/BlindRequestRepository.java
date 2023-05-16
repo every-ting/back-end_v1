@@ -19,6 +19,9 @@ public interface BlindRequestRepository extends JpaRepository<BlindRequest, Long
 
     Set<BlindRequest> findAllByFromUserAndStatus(User FromUser, RequestStatus status);
 
+    Set<BlindRequest> findAllByFromUserAndStatusIsNot(User FromUser, RequestStatus status);
+
+
     Set<BlindRequest> findAllByToUserAndStatus(User toUser, RequestStatus status);
 
     Long countByFromUserAndStatus(User FromUser, RequestStatus status);
