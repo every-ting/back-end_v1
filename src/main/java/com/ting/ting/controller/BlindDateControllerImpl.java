@@ -7,11 +7,11 @@ import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.BlindService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,7 +26,7 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Set<BlindUserWithRequestStatusResponse>> blindUsersInfo(Pageable pageable) {
+    public Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindService.blindUsersInfo(userId, pageable));
     }

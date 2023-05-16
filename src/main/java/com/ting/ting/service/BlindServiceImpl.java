@@ -13,6 +13,8 @@ import com.ting.ting.repository.BlindDateRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +37,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     //Todo :: 조회 두번째 방법 -> join문 사용 X 반복문을 통한 조회
     @Override
-    public Set<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
         Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
 
@@ -45,24 +47,29 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable));
     }
 
-    private Set<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Page<User> otherUsers) {
-        Set<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponse = new LinkedHashSet<>();
+    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Page<User> otherUsers) {
+        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
 
         for (User otherUser : otherUsers) {
             Optional<BlindRequest> blindRequestUserInfo = blindRequestRepository.findByFromUserAndToUser(user, otherUser);
             if (blindRequestUserInfo.isEmpty()) {
-                blindUserWithRequestStatusResponse.add(BlindUserWithRequestStatusResponse.of(
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(
                         otherUser,
                         null
                 ));
             } else {
-                blindUserWithRequestStatusResponse.add(BlindUserWithRequestStatusResponse.of(
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(
                         otherUser,
                         blindRequestUserInfo.get().getStatus()
                 ));
             }
         }
-        return blindUserWithRequestStatusResponse;
+
+        int pageSize = otherUsers.getSize();
+        int pageNumber = otherUsers.getNumber();
+        long totalElements = otherUsers.getTotalElements();
+
+        return new PageImpl<>(blindUserWithRequestStatusResponses, PageRequest.of(pageNumber, pageSize), totalElements);
     }
 
     private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
