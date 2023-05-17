@@ -1,6 +1,5 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.BlindDate;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
@@ -14,7 +13,6 @@ import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -41,12 +39,12 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
 
         if (user.getGender() == Gender.MEN) {
-            return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
+            return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
         }
-        return getBlindUserWithRequestStatusResponses(user, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
+        return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
-    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Page<User> otherUsers) {
+    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
         List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
 
         Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
@@ -59,11 +57,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             }
         }
 
-        int pageSize = otherUsers.getSize();
-        int pageNumber = otherUsers.getNumber();
-        long totalElements = otherUsers.getTotalElements();
-
-        return new PageImpl<>(blindUserWithRequestStatusResponses, PageRequest.of(pageNumber, pageSize), totalElements);
+        return new PageImpl<>(blindUserWithRequestStatusResponses, pageable, otherUsers.getTotalElements());
     }
 
     private Set<User> getMyRequestPendingUsers(User user) {
@@ -111,10 +105,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
 
         blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
-        });
-
-        blindRequestRepository.findByFromUserAndToUser(toUser, fromUser).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST);
         });
 
@@ -184,11 +174,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
 
-        blindRequest.setStatus(RequestStatus.ACCEPTED);
-        blindRequestRepository.save(blindRequest);
-
-        blindDateRepository.save(BlindDate.from(blindRequest));
+        if (blindRequest.getStatus() == RequestStatus.ACCEPTED) {
+            throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
     }
+
 
     @Override
     public void rejectRequest(long userId, long blindRequestId) {
