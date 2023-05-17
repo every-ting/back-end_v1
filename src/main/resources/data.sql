@@ -44,6 +44,8 @@ insert into group_date_request(id, from_id, to_id) values (1, 2, 1);
 insert into group_date_request(id, from_id, to_id) values (2, 6, 1);
 insert into group_date_request(id, from_id, to_id) values (3, 7, 1);
 insert into group_date_request(id, from_id, to_id) values (4, 8, 1);
+insert into group_date_request(id, from_id, to_id) values (5, 1, 16);
+insert into group_date_request(id, from_id, to_id) values (6, 1, 19);
 
 insert into group_member (group_id, member_id, status, role) values (1, 1, 'ACTIVE', 'LEADER');
 insert into group_member (group_id, member_id, status, role) values (2, 2, 'ACTIVE', 'LEADER');

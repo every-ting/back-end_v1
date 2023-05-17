@@ -70,9 +70,19 @@ public interface GroupService {
     void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
-     * 내가 팀장인 팀에 온 과팅 요청 조회
+     * 내가 팀장인 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
      */
-    Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader);
+    GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader);
+
+    /**
+     * 다른 팀에 과팅 요청
+     */
+    GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
+
+    /**
+     * 다른 팀에 했던 과팅 요청을 취소
+     */
+    void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
 
     /**
      * 내가 팀장인 팀에 온 과팅 요청 수락

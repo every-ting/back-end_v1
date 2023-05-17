@@ -210,13 +210,58 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupDateRequestResponse> findAllGroupDateRequest(long groupId, long userIdOfLeader) {
+    public GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader) {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(userIdOfLeader);
 
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
-        return groupDateRequestRepository.findByToGroup(group).stream().map(GroupDateRequestResponse::from).collect(Collectors.toUnmodifiableSet());
+        Set<GroupResponse> receivedGroupDateRequests = groupDateRequestRepository.findFromGroupByToGroup(group).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        Set<GroupResponse> sentGroupDateRequests = groupDateRequestRepository.findToGroupByFromGroup(group).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+
+        return new GroupDateRequestWithFromAndToResponse(receivedGroupDateRequests, sentGroupDateRequests);
+    }
+
+    @Override
+    public GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId) {
+        User leader = loadUserByUserId(userIdOfLeader);
+        Group fromGroup = loadGroupByGroupId(fromGroupId);
+        Group toGroup = loadGroupByGroupId(toGroupId);
+        Group menGroup, womenGroup;
+
+        if (fromGroup.getGender() == toGroup.getGender()) {
+            throwException(ErrorCode.INVALID_REQUEST, String.format("The genders of fromGroup(id: %d) and toGroup(id: %d) are the same", fromGroupId, toGroupId));
+        }
+
+        if (groupDateRequestRepository.existsByFromGroupAndToGroup(fromGroup, toGroup)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("fromGroup(id:%d) has already requested a date match with toGroup(id:%d)", fromGroup, toGroup));
+        }
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, fromGroup);
+
+        if (leader.getGender().equals(Gender.MEN)) {
+            menGroup = fromGroup;
+            womenGroup = toGroup;
+        } else {
+            menGroup = toGroup;
+            womenGroup = fromGroup;
+        }
+
+        if (groupDateRepository.existsByMenGroupOrWomenGroup(menGroup, womenGroup)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("GroupDate of fromGroup(id: %d) or toGroup(id: %d) already exists", fromGroupId, toGroupId));
+        }
+
+        return GroupDateRequestResponse.from(groupDateRequestRepository.save(GroupDateRequest.of(fromGroup, toGroup)));
+    }
+
+    @Override
+    public void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId) {
+        User leader = loadUserByUserId(userIdOfLeader);
+        Group fromGroup = loadGroupByGroupId(fromGroupId);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, fromGroup);
+
+        groupDateRequestRepository.deleteByFromGroup_IdAndToGroup_Id(fromGroupId, toGroupId);
     }
 
     @Override
@@ -229,8 +274,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         if (groupDateRequest.getFromGroup().getGender().equals(groupDateRequest.getToGroup().getGender())) {
             groupDateRequestRepository.delete(groupDateRequest);
-            throwException(ErrorCode.INVALID_REQUEST, String.format("The gender values of fromGroup(id: %d) and toGroup(id: %d) is the same", groupDateRequest.getFromGroup().getId(), groupDateRequest.getToGroup().getId()));
+            throwException(ErrorCode.INVALID_REQUEST, String.format("The genders of fromGroup(id: %d) and toGroup(id: %d) are the same", groupDateRequest.getFromGroup().getId(), groupDateRequest.getToGroup().getId()));
         }
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
 
         if (leader.getGender().equals(Gender.MEN)) {
             menGroup = groupDateRequest.getToGroup();
@@ -244,13 +291,12 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("GroupDate of fromGroup(id: %d) or toGroup(id: %d) already exists", groupDateRequest.getFromGroup().getId(), groupDateRequest.getToGroup().getId()));
         }
 
-        throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
-
         menGroup.setMatched(true);
         womenGroup.setMatched(true);
 
         GroupDate created = groupDateRepository.save(GroupDate.of(menGroup, womenGroup));
         groupDateRequestRepository.delete(groupDateRequest);
+        groupDateRequestRepository.deleteByFromGroupAndToGroup(groupDateRequest.getToGroup(), groupDateRequest.getFromGroup()); // toGroup이 fromGroup에 요청한 적이 있다면, 그 기록도 삭제한다.
 
         return GroupDateResponse.from(created);
     }
