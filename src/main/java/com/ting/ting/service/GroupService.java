@@ -70,6 +70,11 @@ public interface GroupService {
     void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
+     * 팀 멤버로 초대하는 QR 코드 생성
+     */
+    GroupInvitationResponse createGroupMemberInvitation(long groupId, long userIdOfLeader);
+
+    /**
      * 내가 팀장인 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
      */
     GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader);

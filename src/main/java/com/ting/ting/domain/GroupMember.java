@@ -9,9 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Getter
-@Table(name = "\"group_member\"", uniqueConstraints = {
-        @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "member_id"}),
-})
+@Table(name = "\"group_member\"")
 @Entity
 public class GroupMember {
 
@@ -24,9 +22,8 @@ public class GroupMember {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Group group;
 
-    @NotNull
     @JoinColumn(name = "member_id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User member;
 
     @Setter

@@ -14,6 +14,7 @@ import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
+import com.ting.ting.util.S3StorageManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,9 @@ class GroupServiceTest {
 
     @InjectMocks private GroupServiceImpl groupService;
 
+    @Mock private S3StorageManager s3StorageManager;
     @Mock private GroupRepository groupRepository;
+    @Mock private GroupInvitationRepository groupInvitationRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
     @Mock private GroupDateRepository groupDateRepository;
@@ -430,6 +433,56 @@ class GroupServiceTest {
 
         //Then
         then(groupMemberRequestRepository).should().delete(any(GroupMemberRequest.class));
+    }
+
+    @DisplayName("[팀장] : 과팅 멤버 초대 기능 테스트")
+    @Test
+    void Given_Group_When_CreateGroupMemberInvitation_Then_ReturnsGroupInvitationResponse() {
+        //Given
+        Long groupId = 1L;
+
+        Group group = GroupFixture.createGroupById(groupId);
+        group.setNumOfMember(2);
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.countByGroup(group)).willReturn(1L);
+        given(s3StorageManager.uploadByteArrayToS3WithKey(any(), any())).willReturn("qrImagePath");
+        given(groupInvitationRepository.save(any())).willReturn(GroupInvitation.of(group, "invitationCode", "qrImageURl"));
+
+        //When
+        groupService.createGroupMemberInvitation(groupId, user.getId());
+
+        //Then
+        then(s3StorageManager).should().uploadByteArrayToS3WithKey(any(), any());
+        then(groupMemberRepository).should().save(any(GroupMember.class));
+        then(groupInvitationRepository).should().save(any(GroupInvitation.class));
+    }
+
+    @DisplayName("[팀장] : 과팅 멤버 초대 기능 테스트 - 멤버 수가 꽉 찼을 때")
+    @Test
+    void Given_GroupWhoseMemberCapacityLimitReached_When_CreateGroupMemberInvitation_Then_ThrowsException() {
+        //Given
+        Long groupId = 1L;
+
+        Group group = GroupFixture.createGroupById(groupId);
+        group.setNumOfMember(2);
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.countByGroup(group)).willReturn(2L);
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.createGroupMemberInvitation(groupId, user.getId()));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REACHED_MEMBERS_SIZE_LIMIT);
+        then(groupMemberRepository).shouldHaveNoMoreInteractions();
+        then(groupInvitationRepository).shouldHaveNoInteractions();
     }
 
     @DisplayName("[팀장] : 과팅 요청 조회 기능 테스트")
