@@ -12,9 +12,13 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
 
----
+server.url: ${SERVER_URL}
 
-spring:
-  config.activate.on-profile: test
-  datasource.url: jdbc:h2:mem:testdb;NON_KEYWORDS=USER;DATABASE_TO_UPPER=false
-  sql.init.mode: never
+cloud:
+  aws:
+    s3.bucket: ${S3_BUCKET_NAME}
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: ${S3_BUCKET_ACCESS_KEY}
+      secretKey: ${S3_BUCKET_SECRET_KEY}
