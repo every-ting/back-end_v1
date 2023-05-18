@@ -64,8 +64,8 @@ public interface GroupController {
      * 과팅 팀 초대 수락
      */
     // TODO : 일단 GetMapping으로 -> 프론트 url 정해지면 PutMapping으로 바꿀 예정.
-    @GetMapping("{groupId}/members/invitations/{invitationKey}")
-    Response<Void> acceptGroupMemberInvitation(@PathVariable Long groupId, @PathVariable String invitationKey);
+    @GetMapping("{groupId}/members/invitations/{invitationCode}")
+    Response<Void> acceptGroupMemberInvitation(@PathVariable Long groupId, @PathVariable String invitationCode);
 
     /**
      * 팀장 - 팀장 넘기기

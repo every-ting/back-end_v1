@@ -77,7 +77,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
 
     @Override // TODO : 구현 필요
-    public Response<Void> acceptGroupMemberInvitation(Long groupId, String invitationKey) {
+    public Response<Void> acceptGroupMemberInvitation(Long groupId, String invitationCode) {
         return null;
     }
 
