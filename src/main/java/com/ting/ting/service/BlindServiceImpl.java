@@ -1,5 +1,6 @@
 package com.ting.ting.service;
 
+import com.ting.ting.domain.BlindDate;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
@@ -101,6 +102,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
         }
 
+        if(blindDateRepository.countByBlindDate(fromUser) >= 3) {
+            throwException(ErrorCode.LIMIT_NUMBER_OF_BlIND_DATE);
+        }
+
         User toUser = userRepository.findById(toUserId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
 
@@ -174,9 +179,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
 
-        if (blindRequest.getStatus() == RequestStatus.ACCEPTED) {
-            throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
-        }
+        blindRequest.setStatus(RequestStatus.ACCEPTED);
+        blindRequestRepository.save(blindRequest);
+
+        blindDateRepository.save(BlindDate.from(blindRequest));
     }
 
 
