@@ -1,60 +1,92 @@
 package com.ting.ting.service;
 
+import com.ting.ting.domain.BlindDate;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
-import com.ting.ting.exception.TingApplicationException;
+import com.ting.ting.repository.BlindDateRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class BlindRequestServiceImpl extends AbstractService implements BlindRequestService {
+public class BlindServiceImpl extends AbstractService implements BlindService {
 
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
+    private final BlindDateRepository blindDateRepository;
 
-    public BlindRequestServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository) {
+    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
+        this.blindDateRepository = blindDateRepository;
     }
 
     @Override
-    public Page<BlindDateResponse> blindUsersInfo(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new TingApplicationException(ErrorCode.USER_NOT_FOUND, ServiceType.BLIND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
-
-        return getBlindUsersInfo(user, pageable);
-    }
-
-    private Page<BlindDateResponse> getBlindUsersInfo(User user, Pageable pageable) {
-        Set<Long> userIdOfRequestToMe = getUserIdOfRequestToMe(blindRequestRepository.findAllByToUser(user));
+    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+        User user = getUserById(userId);
+        Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
 
         if (user.getGender() == Gender.MEN) {
-            return userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
+            return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
         }
-        return userRepository.findAllByGenderAndIdNotIn(Gender.MEN, userIdOfRequestToMe, pageable).map(BlindDateResponse::from);
+        return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
-    private Set<Long> getUserIdOfRequestToMe(Set<BlindRequest> allByToUser) {
-        Set<Long> userIdOfRequestToMe = new HashSet<>();
-        for (BlindRequest user1 : allByToUser) {
-            userIdOfRequestToMe.add(user1.getFromUser().getId());
+    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
+        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
+
+        Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
+
+        for (User otherUser : otherUsers) {
+            if (myRequestPendingUsers.contains(otherUser)) {
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, RequestStatus.PENDING));
+            } else {
+                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, null));
+            }
         }
-        return userIdOfRequestToMe;
+
+        return new PageImpl<>(blindUserWithRequestStatusResponses, pageable, otherUsers.getTotalElements());
+    }
+
+    private Set<User> getMyRequestPendingUsers(User user) {
+        Set<User> myRequestPendingUsers = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsers.add(blindRequest.getToUser());
+        }
+
+        return myRequestPendingUsers;
+    }
+
+    private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
+        Set<Long> idToBeRemoved = new HashSet<>();
+
+        Set<BlindRequest> requestToMeUserInfo = blindRequestRepository.findAllByToUser(user);
+        for (BlindRequest userInfo : requestToMeUserInfo) {
+            idToBeRemoved.add(userInfo.getFromUser().getId());
+        }
+
+        Set<BlindRequest> myRequestUserNotPending = blindRequestRepository.findAllByFromUserAndStatusIsNot(user, RequestStatus.PENDING);
+        for (BlindRequest userInfo : myRequestUserNotPending) {
+            idToBeRemoved.add(userInfo.getToUser().getId());
+        }
+
+        return idToBeRemoved;
     }
 
     @Override
@@ -68,6 +100,10 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
         if (blindRequestRepository.countByFromUserAndStatus(fromUser, RequestStatus.PENDING) >= 5) {
             throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
+        }
+
+        if(blindDateRepository.countByBlindDate(fromUser) >= 3) {
+            throwException(ErrorCode.LIMIT_NUMBER_OF_BlIND_DATE);
         }
 
         User toUser = userRepository.findById(toUserId).orElseThrow(() ->
@@ -89,7 +125,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void deleteRequest(long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
+        BlindRequest request = getBlindRequestById(blindRequestId);
 
         blindRequestRepository.delete(request);
     }
@@ -132,16 +168,27 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
 
     @Override
     public void acceptRequest(long userId, long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, request);
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+        validateRequestToMe(userId, blindRequest);
 
-        request.setStatus(RequestStatus.ACCEPTED);
-        blindRequestRepository.save(request);
+        User user = blindRequest.getToUser();
+        User blindRequestUser = blindRequest.getFromUser();
+
+        if (user.getGender() == blindRequestUser.getGender()) {
+            blindRequestRepository.delete(blindRequest);
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
+
+        blindRequest.setStatus(RequestStatus.ACCEPTED);
+        blindRequestRepository.save(blindRequest);
+
+        blindDateRepository.save(BlindDate.from(blindRequest));
     }
+
 
     @Override
     public void rejectRequest(long userId, long blindRequestId) {
-        BlindRequest request = geBlindRequestById(blindRequestId);
+        BlindRequest request = getBlindRequestById(blindRequestId);
         validateRequestToMe(userId, request);
 
         request.setStatus(RequestStatus.REJECTED);
@@ -154,7 +201,7 @@ public class BlindRequestServiceImpl extends AbstractService implements BlindReq
         }
     }
 
-    private BlindRequest geBlindRequestById(long blindRequestId) {
+    private BlindRequest getBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
