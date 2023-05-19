@@ -33,7 +33,7 @@ public class GroupRequest {
      */
     @NotNull
     @Min(2) @Max(6)
-    Integer numOfMember;
+    Integer memberSizeLimit;
 
     /**
      * 과팅 팀의 학교
@@ -47,6 +47,6 @@ public class GroupRequest {
     String memo;
 
     public Group toEntity() {
-        return Group.of(groupName, gender, school,  numOfMember, memo);
+        return Group.of(groupName, gender, school, memberSizeLimit, memo);
     }
 }

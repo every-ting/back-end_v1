@@ -18,7 +18,7 @@ public class GroupWithRequestStatusResponse {
                         groupWithRequestStatus.getId(),
                         groupWithRequestStatus.getGroupName(),
                         groupWithRequestStatus.getGender(),
-                        groupWithRequestStatus.getNumOfMember(),
+                        groupWithRequestStatus.getMemberSizeLimit(),
                         groupWithRequestStatus.getSchool(),
                         groupWithRequestStatus.isMatched(),
                         groupWithRequestStatus.isJoinable(),

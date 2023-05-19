@@ -35,8 +35,8 @@ public class Group {
 
     @Setter
     @NotNull @Min(2) @Max(6)
-    @Column(name = "num_of_member", nullable = false)
-    private int numOfMember;
+    @Column(name = "member_size_limit", nullable = false)
+    private int memberSizeLimit;
 
     @Setter
     @NotNull
@@ -52,15 +52,15 @@ public class Group {
 
     protected Group() {}
 
-    private Group(String groupName, Gender gender, String school, int numOfMember, String memo) {
+    private Group(String groupName, Gender gender, String school, int memberSizeLimit, String memo) {
         this.groupName = groupName;
         this.gender = gender;
         this.school = school;
-        this.numOfMember = numOfMember;
+        this.memberSizeLimit = memberSizeLimit;
         this.memo = memo;
     }
 
-    public static Group of(String groupName, Gender gender, String school, int numOfMember, String memo) {
-        return new Group(groupName, gender, school, numOfMember, memo);
+    public static Group of(String groupName, Gender gender, String school, int memberSizeLimit, String memo) {
+        return new Group(groupName, gender, school, memberSizeLimit, memo);
     }
 }

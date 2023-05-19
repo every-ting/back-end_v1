@@ -102,7 +102,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         }
 
         if (group.isJoinable() == false) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getNumOfMember()));
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getMemberSizeLimit()));
         }
 
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
@@ -192,8 +192,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
 
-        if (actualNumOfMembers >= groupMemberRequest.getGroup().getNumOfMember()) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getNumOfMember()));
+        if (actualNumOfMembers >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getMemberSizeLimit()));
         }
 
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
@@ -201,7 +201,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
 
-        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getNumOfMember()) {
+        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
             groupMemberRequest.getGroup().setJoinable(false);
         }
 
@@ -229,8 +229,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         Long currentNumberOfMembers = groupMemberRepository.countByGroup(group);
 
-        if (currentNumberOfMembers >= group.getNumOfMember()) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getNumOfMember()));
+        if (currentNumberOfMembers >= group.getMemberSizeLimit()) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getMemberSizeLimit()));
         }
 
         // 초대 번호를 이용한 초대 qr 생성
