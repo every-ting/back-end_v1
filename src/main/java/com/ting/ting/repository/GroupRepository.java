@@ -16,7 +16,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Page<Group> findAll(Pageable pageable);
 
-    @Query(value = "select new com.ting.ting.domain.custom.SuggestedGroupWithRequestStatus(entity.id, entity.groupName, entity.gender, entity.school, entity.numOfMember, entity.isMatched, entity.isJoinable, entity.memo, requests.status) " +
+    @Query(value = "select new com.ting.ting.domain.custom.SuggestedGroupWithRequestStatus(entity.id, entity.groupName, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo, requests.status) " +
             "from Group entity left outer join GroupMemberRequest requests on requests.group = entity and requests.user = :user " +
             "where entity not in (select gm.group from GroupMember gm where gm.member = :user) and entity.gender = :gender and entity.isJoinable = true and entity.isMatched = false")
     Page<SuggestedGroupWithRequestStatus> findAllSuggestedGroupWithRequestStatusByUserAndGender(@Param("user") User user, @Param("gender") Gender gender, Pageable pageable);

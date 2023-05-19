@@ -13,7 +13,7 @@ public class SuggestedGroupWithRequestStatus {
     private String groupName;
     private Gender gender;
     private String school;
-    private int numOfMember;
+    private int memberSizeLimit;
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;

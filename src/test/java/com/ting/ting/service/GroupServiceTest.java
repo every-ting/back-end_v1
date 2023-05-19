@@ -350,7 +350,7 @@ class GroupServiceTest {
         Long groupMemberRequestId = 1L;
 
         Group group = GroupFixture.createGroupById(1L);
-        group.setNumOfMember(3);
+        group.setMemberSizeLimit(3);
         GroupMemberRequest request = GroupMemberRequest.of(group, UserFixture.createUserById(user.getId() + 1));
 
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
@@ -399,7 +399,7 @@ class GroupServiceTest {
         Long groupMemberRequestId = 1L;
 
         Group group = GroupFixture.createGroupById(1L);
-        group.setNumOfMember(3);
+        group.setMemberSizeLimit(3);
         GroupMemberRequest request = GroupMemberRequest.of(group, UserFixture.createUserById(user.getId() + 1));
 
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
@@ -442,7 +442,7 @@ class GroupServiceTest {
         Long groupId = 1L;
 
         Group group = GroupFixture.createGroupById(groupId);
-        group.setNumOfMember(2);
+        group.setMemberSizeLimit(2);
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
@@ -467,7 +467,7 @@ class GroupServiceTest {
         Long groupId = 1L;
 
         Group group = GroupFixture.createGroupById(groupId);
-        group.setNumOfMember(2);
+        group.setMemberSizeLimit(2);
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
