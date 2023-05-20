@@ -15,8 +15,6 @@ import java.util.Optional;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
 
-    Optional<GroupMember> findByGroupAndRole(Group group, MemberRole role);
-
     Optional<GroupMember> findByGroupAndMemberAndStatus(Group group, User user, MemberStatus status);
 
     Optional<GroupMember> findByGroupAndMemberAndStatusAndRole(Group group, User user, MemberStatus status, MemberRole role);

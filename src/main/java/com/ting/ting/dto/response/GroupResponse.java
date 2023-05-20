@@ -12,7 +12,7 @@ public class GroupResponse {
     private Long id;
     private String groupName;
     private Gender gender;
-    private int numOfMember;
+    private int memberSizeLimit;
     private String school;
     private boolean isMatched;
     private boolean isJoinable;
@@ -23,7 +23,7 @@ public class GroupResponse {
                 entity.getId(),
                 entity.getGroupName(),
                 entity.getGender(),
-                entity.getNumOfMember(),
+                entity.getMemberSizeLimit(),
                 entity.getSchool(),
                 entity.isMatched(),
                 entity.isJoinable(),

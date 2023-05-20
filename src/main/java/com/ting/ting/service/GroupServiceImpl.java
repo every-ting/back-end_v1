@@ -9,6 +9,9 @@ import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
+import com.ting.ting.util.QRCodeGenerator;
+import com.ting.ting.util.S3StorageManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -24,21 +28,28 @@ import java.util.stream.Collectors;
 @Component
 public class GroupServiceImpl extends AbstractService implements GroupService {
 
+    @Value("${server.url}")
+    private String serverUrl;
+
     private final GroupRepository groupRepository;
+    private final GroupInvitationRepository groupInvitationRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final UserRepository userRepository;
+    private final S3StorageManager s3StorageManager;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository) {
+    public GroupServiceImpl(GroupRepository groupRepository, GroupInvitationRepository groupInvitationRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository, S3StorageManager s3StorageManager) {
         super(ServiceType.GROUP_MEETING);
         this.groupRepository = groupRepository;
+        this.groupInvitationRepository = groupInvitationRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
         this.userRepository = userRepository;
+        this.s3StorageManager = s3StorageManager;
     }
 
     @Override
@@ -91,7 +102,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         }
 
         if (group.isJoinable() == false) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getNumOfMember()));
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getMemberSizeLimit()));
         }
 
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
@@ -181,8 +192,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
 
-        if (actualNumOfMembers >= groupMemberRequest.getGroup().getNumOfMember()) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getNumOfMember()));
+        if (actualNumOfMembers >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getMemberSizeLimit()));
         }
 
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
@@ -190,7 +201,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
 
-        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getNumOfMember()) {
+        if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
             groupMemberRequest.getGroup().setJoinable(false);
         }
 
@@ -207,6 +218,29 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
         groupMemberRequestRepository.delete(groupMemberRequest);
+    }
+
+    @Override
+    public GroupInvitationResponse createGroupMemberInvitation(long groupId, long userIdOfLeader) {
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(userIdOfLeader);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
+
+        Long currentNumberOfMembers = groupMemberRepository.countByGroup(group);
+
+        if (currentNumberOfMembers >= group.getMemberSizeLimit()) {
+            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getMemberSizeLimit()));
+        }
+
+        // 초대 번호를 이용한 초대 qr 생성
+        String invitationCode = groupId + UUID.randomUUID().toString();
+        byte[] qrImageBytes = generateGroupInvitationQRCodeBytes(groupId, invitationCode);
+        String qrImageUrl = uploadGroupInvitationQRCodeToStorage(groupId, invitationCode, qrImageBytes);
+        groupMemberRepository.save(GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER));
+        GroupInvitation created = groupInvitationRepository.save(GroupInvitation.of(group, invitationCode, qrImageUrl));
+
+        return GroupInvitationResponse.from(created);
     }
 
     @Override
@@ -311,6 +345,25 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         throwIfUserIsNotTheLeaderOfGroup(leader, groupDateRequest.getToGroup());
 
         groupDateRequestRepository.delete(groupDateRequest);
+    }
+
+    private byte[] generateGroupInvitationQRCodeBytes(long groupId, String invitationCode) {
+        // TODO : linkedUrl에 front url이 담겨야 함. 추후에 front url 확정되면 수정
+        String linkedUrl = serverUrl + "/groups/" + groupId + "/members/invitations/" + invitationCode;
+        byte[] qrImage = null;
+
+        try {
+            qrImage = QRCodeGenerator.generateQRCodeImageBytes(linkedUrl);
+        } catch (Exception e) {
+            throwException(ErrorCode.QR_GENERATOR_ERROR);
+        }
+
+        return qrImage;
+    }
+
+    private String uploadGroupInvitationQRCodeToStorage(long groupId, String imageFileName, byte[] qrImageBytes) {
+        String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
+        return s3StorageManager.uploadByteArrayToS3WithKey(qrImageBytes, qrImageKey);
     }
 
     private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {
