@@ -40,11 +40,11 @@ public interface BlindDateController {
      * 자신에게 온 요청 수락
      */
     @PutMapping("/request/accept/{blindRequestId}")
-    Response<Void> acceptedRequest(@PathVariable long blindRequestId);
+    Response<Void> acceptRequest(@PathVariable long blindRequestId);
 
     /**
      * 자신에게 온 요청 거절
      */
     @PutMapping("/request/reject/{blindRequestId}")
-    Response<Void> rejectedRequest(@PathVariable long blindRequestId);
+    Response<Void> rejectRequest(@PathVariable long blindRequestId);
 }

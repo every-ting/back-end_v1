@@ -31,5 +31,5 @@ public interface BlindService {
     /**
      * 자신에게 온 요청 수락 & 거절
      */
-    void blindRequestAcceptedOrRejected(long userId, long blindRequestId, RequestStatus requestStatus);
+    void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus);
 }
