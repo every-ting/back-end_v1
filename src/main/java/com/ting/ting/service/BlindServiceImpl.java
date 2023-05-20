@@ -6,6 +6,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -131,7 +132,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public Set<BlindDateResponse> myRequest(long fromUserId) {
+    public BlindRequestWithFromAndToResponse getBlindRequest(long userId) {
+        return new BlindRequestWithFromAndToResponse(
+                requestToMe(userId),
+                myRequest(userId)
+        );
+    }
+
+    private Set<BlindDateResponse> myRequest(long fromUserId) {
         User fromUser = getUserById(fromUserId);
 
         Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUserAndStatus(fromUser, RequestStatus.PENDING);
@@ -147,8 +155,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    @Override
-    public Set<BlindDateResponse> requestToMe(long toUserId) {
+    private Set<BlindDateResponse> requestToMe(long toUserId) {
         Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
 
         LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();

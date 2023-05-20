@@ -2,7 +2,7 @@ package com.ting.ting.controller;
 
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.request.SendBlindRequest;
-import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
@@ -11,9 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -46,15 +43,9 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<List<BlindDateResponse>> confirmOfMyRequest() {
+    public Response<BlindRequestWithFromAndToResponse> getBlindRequest() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
-    }
-
-    @Override
-    public Response<List<BlindDateResponse>> confirmOfRequestToMe() {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
+        return success(blindService.getBlindRequest(userId));
     }
 
     @Override
