@@ -1,11 +1,10 @@
 package com.ting.ting.service;
 
-import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.domain.constant.RequestStatus;
+import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Set;
 
 public interface BlindService {
 
@@ -25,22 +24,12 @@ public interface BlindService {
     void deleteRequest(long blindRequestId);
 
     /**
-     * 내가 한 요청 확인
+     * 소개팅 요청 조회(받은 요청, 한 요청 모두)
      */
-    Set<BlindDateResponse> myRequest(long fromUserId);
+    BlindRequestWithFromAndToResponse getBlindRequest(long userId);
 
     /**
-     * 나에게 온 요청 확인
+     * 자신에게 온 요청 수락 & 거절
      */
-    Set<BlindDateResponse> requestToMe(long toUserId);
-
-    /**
-     * 자신에게 온 요청 수락
-     */
-    void acceptRequest(long userId, long blindRequestId);
-
-    /**
-     * 자신에게 온 요청 거절
-     */
-    void rejectRequest(long userId, long blindRequestId);
+    void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus);
 }
