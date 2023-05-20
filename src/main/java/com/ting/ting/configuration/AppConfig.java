@@ -1,11 +1,7 @@
 package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
-import com.ting.ting.service.BlindRequestService;
-import com.ting.ting.service.BlindRequestServiceImpl;
-import com.ting.ting.service.GroupService;
-import com.ting.ting.service.GroupServiceImpl;
-import com.ting.ting.util.S3StorageManager;
+import com.ting.ting.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +19,7 @@ public class AppConfig {
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final BlindRequestRepository blindRequestRepository;
+    private final BlindDateRepository blindDateRepository;
 
     @Bean
     public GroupService groupService() {
@@ -30,7 +27,7 @@ public class AppConfig {
     }
 
     @Bean
-    public BlindRequestService blindRequestService() {
-        return new BlindRequestServiceImpl(userRepository, blindRequestRepository);
+    public BlindService blindService() {
+        return new BlindServiceImpl(userRepository, blindRequestRepository, blindDateRepository);
     }
 }

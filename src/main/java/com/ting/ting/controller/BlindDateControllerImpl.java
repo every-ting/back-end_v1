@@ -1,71 +1,64 @@
 package com.ting.ting.controller;
 
+import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.request.SendBlindRequest;
-import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
-import com.ting.ting.service.BlindRequestService;
+import com.ting.ting.service.BlindService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Slf4j
 @RestController
 public class BlindDateControllerImpl extends AbstractController implements BlindDateController {
 
-    private final BlindRequestService blindRequestService;
+    private final BlindService blindService;
 
-    public BlindDateControllerImpl(BlindRequestService blindRequestService) {
+    public BlindDateControllerImpl(BlindService blindService) {
         super(ServiceType.BLIND);
-        this.blindRequestService = blindRequestService;
+        this.blindService = blindService;
     }
 
     @Override
-    public Response<Page<BlindDateResponse>> blindUsersInfo(Pageable pageable) {
+    public Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindRequestService.blindUsersInfo(userId, pageable));
+        return success(blindService.blindUsersInfo(userId, pageable));
     }
 
     @Override
     public Response<Void> sendJoinRequest(SendBlindRequest request) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindRequestService.createJoinRequest(fromUserId, request.getToUserId());
+        blindService.createJoinRequest(fromUserId, request.getToUserId());
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinRequest(long blindRequestId) {
-        blindRequestService.deleteRequest(blindRequestId);
+        blindService.deleteRequest(blindRequestId);
         return success();
     }
 
     @Override
-    public Response<List<BlindDateResponse>> confirmOfMyRequest() {
+    public Response<BlindRequestWithFromAndToResponse> getBlindRequest() {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindRequestService.myRequest(userId).stream().collect(Collectors.toUnmodifiableList()));
+        return success(blindService.getBlindRequest(userId));
     }
 
     @Override
-    public Response<List<BlindDateResponse>> confirmOfRequestToMe() {
+    public Response<Void> acceptRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindRequestService.requestToMe(userId).stream().collect(Collectors.toUnmodifiableList()));
-    }
-
-    @Override
-    public Response<Void> acceptedRequest(long blindRequestId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindRequestService.acceptRequest(userId, blindRequestId);
+        blindService.handleRequest(userId, blindRequestId, RequestStatus.ACCEPTED);
         return success();
     }
 
     @Override
     public Response<Void> rejectRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindRequestService.rejectRequest(userId, blindRequestId);
+        blindService.handleRequest(userId, blindRequestId, RequestStatus.REJECTED);
         return success();
     }
 }
