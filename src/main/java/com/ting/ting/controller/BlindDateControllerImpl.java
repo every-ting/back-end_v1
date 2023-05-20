@@ -60,14 +60,14 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     @Override
     public Response<Void> acceptedRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.blindRequestAcceptOrReject(userId, blindRequestId, RequestStatus.ACCEPTED);
+        blindService.blindRequestAcceptedOrRejected(userId, blindRequestId, RequestStatus.ACCEPTED);
         return success();
     }
 
     @Override
-    public Response<Void> rejectRequest(long blindRequestId) {
+    public Response<Void> rejectedRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.blindRequestAcceptOrReject(userId, blindRequestId, RequestStatus.REJECTED);
+        blindService.blindRequestAcceptedOrRejected(userId, blindRequestId, RequestStatus.REJECTED);
         return success();
     }
 }

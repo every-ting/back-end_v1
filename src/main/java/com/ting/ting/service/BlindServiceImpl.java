@@ -167,7 +167,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void blindRequestAcceptOrReject(long userId, long blindRequestId, RequestStatus requestStatus) {
+    public void blindRequestAcceptedOrRejected(long userId, long blindRequestId, RequestStatus requestStatus) {
         BlindRequest blindRequest = getBlindRequest(userId, blindRequestId);
 
         User user = blindRequest.getToUser();
