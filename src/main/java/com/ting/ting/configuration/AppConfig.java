@@ -2,6 +2,7 @@ package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
+import com.ting.ting.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
