@@ -102,7 +102,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
         }
 
-        if(blindDateRepository.countByBlindDate(fromUser) >= 3) {
+        if (blindDateRepository.countByBlindDate(fromUser) >= 3) {
             throwException(ErrorCode.LIMIT_NUMBER_OF_BlIND_DATE);
         }
 
@@ -167,9 +167,8 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void acceptRequest(long userId, long blindRequestId) {
-        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, blindRequest);
+    public void blindRequestAcceptedOrRejected(long userId, long blindRequestId, RequestStatus requestStatus) {
+        BlindRequest blindRequest = getBlindRequest(userId, blindRequestId);
 
         User user = blindRequest.getToUser();
         User blindRequestUser = blindRequest.getFromUser();
@@ -179,20 +178,30 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
 
-        blindRequest.setStatus(RequestStatus.ACCEPTED);
-        blindRequestRepository.save(blindRequest);
+        if (blindRequest.getStatus() != RequestStatus.PENDING) {
+            throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
 
-        blindDateRepository.save(BlindDate.from(blindRequest));
+        blindRequest.setStatus(requestStatus);
+
+        Optional<BlindRequest> oppositeCase = blindRequestRepository.findByFromUserAndToUser(user, blindRequestUser);
+
+        oppositeCase.ifPresent(otherBlindRequest -> {
+            otherBlindRequest.setStatus(requestStatus);
+            blindRequestRepository.save(otherBlindRequest);
+        });
+
+        if (requestStatus == RequestStatus.ACCEPTED) {
+            blindDateRepository.save(BlindDate.from(blindRequest));
+        }
+
+        blindRequestRepository.save(blindRequest);
     }
 
-
-    @Override
-    public void rejectRequest(long userId, long blindRequestId) {
-        BlindRequest request = getBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, request);
-
-        request.setStatus(RequestStatus.REJECTED);
-        blindRequestRepository.save(request);
+    private BlindRequest getBlindRequest(long userId, long blindRequestId) {
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+        validateRequestToMe(userId, blindRequest);
+        return blindRequest;
     }
 
     private void validateRequestToMe(long userId, BlindRequest request) {
