@@ -235,8 +235,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         // 초대 번호를 이용한 초대 qr 생성
         String invitationCode = groupId + UUID.randomUUID().toString();
-        byte[] qrImageBytes = generateGroupInvitationQRCodeBytes(group, invitationCode);
-        String qrImageUrl = uploadGroupInvitationQRCodeToStorage(group, invitationCode, qrImageBytes);
+        byte[] qrImageBytes = generateGroupInvitationQRCodeBytes(groupId, invitationCode);
+        String qrImageUrl = uploadGroupInvitationQRCodeToStorage(groupId, invitationCode, qrImageBytes);
         groupMemberRepository.save(GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER));
         GroupInvitation created = groupInvitationRepository.save(GroupInvitation.of(group, invitationCode, qrImageUrl));
 
@@ -347,9 +347,9 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         groupDateRequestRepository.delete(groupDateRequest);
     }
 
-    private byte[] generateGroupInvitationQRCodeBytes(Group group, String invitationCode) {
+    private byte[] generateGroupInvitationQRCodeBytes(long groupId, String invitationCode) {
         // TODO : linkedUrl에 front url이 담겨야 함. 추후에 front url 확정되면 수정
-        String linkedUrl = serverUrl + "/groups/" + group.getId() + "/members/invitations/" + invitationCode;
+        String linkedUrl = serverUrl + "/groups/" + groupId + "/members/invitations/" + invitationCode;
         byte[] qrImage = null;
 
         try {
@@ -361,8 +361,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         return qrImage;
     }
 
-    private String uploadGroupInvitationQRCodeToStorage(Group group, String imageFileName, byte[] qrImageBytes) {
-        String qrImageKey = "qr/" + group.getId() + "/" + imageFileName + ".png";
+    private String uploadGroupInvitationQRCodeToStorage(long groupId, String imageFileName, byte[] qrImageBytes) {
+        String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
         return s3StorageManager.uploadByteArrayToS3WithKey(qrImageBytes, qrImageKey);
     }
 
