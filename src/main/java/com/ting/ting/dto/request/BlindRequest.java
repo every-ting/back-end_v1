@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SendBlindRequest {
+public class BlindRequest {
 
     /**
      * 소개팅 상대 정보
