@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.BlindDate;
+import com.ting.ting.domain.BlindLike;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
@@ -96,7 +97,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     @Override
     public void createJoinRequest(long fromUserId, long toUserId) {
         if (fromUserId == toUserId) {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
+            throwException(ErrorCode.DUPLICATED_USER_REQUEST);
         }
 
         User fromUser = getUserById(fromUserId);
@@ -216,12 +217,30 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     @Override
     public void createJoinLiked(long fromUserId, long toUserId) {
+        if (fromUserId == toUserId) {
+            throwException(ErrorCode.DUPLICATED_USER_REQUEST);
+        }
 
+        User fromUser = getUserById(fromUserId);
+
+        User toUser = getUserById(toUserId);
+
+        blindLikeRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
+
+        if (fromUser.getGender() == toUser.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
+
+        BlindLike request = new BlindLike();
+        request.setFromUser(fromUser);
+        request.setToUser(toUser);
+        blindLikeRepository.save(request);
     }
 
     @Override
     public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
-
     }
 
     @Override
