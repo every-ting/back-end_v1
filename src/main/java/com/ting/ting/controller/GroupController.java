@@ -55,10 +55,22 @@ public interface GroupController {
     Response<Void> deleteGroupMember(@PathVariable Long groupId);
 
     /**
+     * 팀장 - 했던 초대 모두 조회
+     */
+    @GetMapping("{groupId}/members/invitations")
+    Response<Set<GroupInvitationResponse>> getGroupMemberInvitationList(@PathVariable Long groupId);
+
+    /**
      * 팀장 - 과팅 팀 초대
      */
     @PostMapping("{groupId}/members/invitations")
     Response<GroupInvitationResponse> createGroupMemberInvitation(@PathVariable Long groupId);
+
+    /**
+     * 팀장 - 과팅 팀 초대 취소
+     */
+    @DeleteMapping("{groupId}/members/invitations/{groupInvitationId}")
+    Response<Void> cancelGroupMemberInvitation(@PathVariable Long groupId, @PathVariable Long groupInvitationId);
 
     /**
      * 과팅 팀 초대 수락
