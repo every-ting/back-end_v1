@@ -18,6 +18,8 @@ public interface BlindDateController {
     @GetMapping("/users")
     Response<Page<BlindUserWithRequestStatusResponse>> getBlindUsersInfo(@ParameterObject Pageable pageable);
 
+    //Todo :: 소개팅 요청 로직
+
     /**
      * 소개팅 상대에게 요청
      */
@@ -53,4 +55,30 @@ public interface BlindDateController {
      */
     @PutMapping("/request/reject/{blindRequestId}")
     Response<Void> rejectRequest(@PathVariable long blindRequestId);
+
+    //Todo :: 찜 로직
+
+    /**
+     * 소개팅 상대방 찜하기
+     */
+    @PostMapping("/request")
+    Response<Void> sendJoinLiked(@RequestBody BlindRequest request);
+
+    /**
+     * 소개팅 상대에게 한 찜하기 취소 -> 상대편 조회 페이지에서
+     */
+    @PostMapping("/request/cancel")
+    Response<Void> deleteJoinLiked(@RequestBody BlindRequest blindRequest);
+
+    /**
+     * 소개팅 상대에게 한 찜하기 취소 -> 요청 페이지에서
+     */
+    @DeleteMapping("/request/{blindRequestId}")
+    Response<Void> deleteJoinLiked(@PathVariable long blindRequestId);
+
+    /**
+     * 소개팅 찜하기 조회(받은 요청, 한 요청 모두)
+     */
+    @GetMapping("/requests")
+    Response<BlindRequestWithFromAndToResponse> getBlindLiked();
 }

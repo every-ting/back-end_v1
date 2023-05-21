@@ -7,9 +7,9 @@ import javax.persistence.*;
 
 @Setter
 @Getter
-@Table(name = "blind_likes")
+@Table(name = "blind_liked")
 @Entity
-public class BlindLikes {
+public class BlindLiked {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

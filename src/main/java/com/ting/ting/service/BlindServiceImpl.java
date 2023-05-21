@@ -11,6 +11,7 @@ import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
+import com.ting.ting.repository.BlindLikedRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -27,12 +28,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
+    private final BlindLikedRepository blindLikedRepository;
 
-    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
+    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository, BlindLikedRepository blindLikedRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
         this.blindDateRepository = blindDateRepository;
+        this.blindLikedRepository = blindLikedRepository;
     }
 
     @Override
@@ -92,12 +95,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     @Override
     public void createJoinRequest(long fromUserId, long toUserId) {
-        if (Objects.equals(fromUserId, toUserId)) {
-            throwException(ErrorCode.DUPLICATED_USER_REQUEST);
+        if (fromUserId == toUserId) {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
         }
 
-        User fromUser = userRepository.findById(fromUserId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", fromUserId)));
+        User fromUser = getUserById(fromUserId);
 
         if (blindRequestRepository.countByFromUserAndStatus(fromUser, RequestStatus.PENDING) >= 5) {
             throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
@@ -107,8 +109,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.LIMIT_NUMBER_OF_BlIND_DATE);
         }
 
-        User toUser = userRepository.findById(toUserId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
+        User toUser = getUserById(toUserId);
 
         blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST);
@@ -213,6 +214,26 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         blindRequestRepository.save(blindRequest);
     }
 
+    @Override
+    public void createJoinLiked(long fromUserId, long toUserId) {
+
+    }
+
+    @Override
+    public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
+
+    }
+
+    @Override
+    public void deleteLikedByBlindRequestId(long userId, long blindRequestId) {
+
+    }
+
+    @Override
+    public BlindRequestWithFromAndToResponse getBlindLiked(long userId) {
+        return null;
+    }
+
     private void validateRequestToMe(long userId, BlindRequest request) {
         if (request.getToUser().getId() != userId) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
@@ -220,7 +241,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     private void validateMyRequest(long userId, BlindRequest request) {
-        if(request.getFromUser().getId() != userId) {
+        if (request.getFromUser().getId() != userId) {
             throwException(ErrorCode.NOT_MY_REQUEST);
         }
     }
