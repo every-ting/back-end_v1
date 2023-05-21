@@ -68,3 +68,7 @@ insert into group_member_request (group_id, user_id) values (4, 1);
 
 insert into blind_request(from_user_id, to_user_id, request_status) values(13, 9, 'PENDING');
 insert into blind_request(from_user_id, to_user_id, request_status) values(16, 9, 'PENDING');
+
+insert into blind_like(from_user_id, to_user_id) values(13, 9);
+insert into blind_like(from_user_id, to_user_id) values(16, 9);
+insert into blind_like(from_user_id, to_user_id) values(9, 2);
