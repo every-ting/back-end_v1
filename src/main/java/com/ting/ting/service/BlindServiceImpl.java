@@ -5,6 +5,7 @@ import com.ting.ting.domain.BlindLike;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
@@ -45,25 +46,34 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
 
         if (user.getGender() == Gender.MEN) {
-            return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
+            return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
         }
-        return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
+        return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
-    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
-        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
+    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusAndLikeStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
+        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusAndLikeStatusResponses = new ArrayList<>();
 
         Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
 
+        Set<User> myLikedUsers = getMyLikedUser(user);
+
         for (User otherUser : otherUsers) {
             if (myRequestPendingUsers.contains(otherUser)) {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, RequestStatus.PENDING));
+                checkLikedUserAndUpdateBlindUserList(blindUserWithRequestStatusAndLikeStatusResponses, myLikedUsers, otherUser, RequestStatus.PENDING);
             } else {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, null));
+                checkLikedUserAndUpdateBlindUserList(blindUserWithRequestStatusAndLikeStatusResponses, myLikedUsers, otherUser, null);
             }
         }
+        return new PageImpl<>(blindUserWithRequestStatusAndLikeStatusResponses, pageable, otherUsers.getTotalElements());
+    }
 
-        return new PageImpl<>(blindUserWithRequestStatusResponses, pageable, otherUsers.getTotalElements());
+    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
+        if (myLikedUsers.contains(otherUser)) {
+            blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, requestStatus, LikeStatus.DOING));
+        } else {
+            blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, requestStatus, LikeStatus.NOTING));
+        }
     }
 
     private Set<User> getMyRequestPendingUsers(User user) {
@@ -76,6 +86,18 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
 
         return myRequestPendingUsers;
+    }
+
+    private Set<User> getMyLikedUser(User user) {
+        Set<User> myLikedUser = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUser.add(blindLike.getToUser());
+        }
+
+        return myLikedUser;
     }
 
     private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
