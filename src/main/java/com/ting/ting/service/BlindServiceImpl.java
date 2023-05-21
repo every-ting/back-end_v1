@@ -125,9 +125,15 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequest(long blindRequestId) {
-        BlindRequest request = getBlindRequestById(blindRequestId);
+    public void deleteRequestByUserInfo(long userId, long toUserId) {
+        BlindRequest request = getBlindRequest(userId, toUserId);
+        blindRequestRepository.delete(request);
+    }
 
+    @Override
+    public void deleteRequestByBlindRequestInfo(long userId, long blindRequestId) {
+        BlindRequest request = getBlindRequestById(blindRequestId);
+        validateMyRequest(userId, request);
         blindRequestRepository.delete(request);
     }
 
@@ -214,6 +220,12 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     private void validateRequestToMe(long userId, BlindRequest request) {
         if (request.getToUser().getId() != userId) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
+        }
+    }
+
+    private void validateMyRequest(long userId, BlindRequest request) {
+        if(request.getFromUser().getId() != userId) {
+            throwException(ErrorCode.NOT_MY_REQUEST);
         }
     }
 

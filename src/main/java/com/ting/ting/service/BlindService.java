@@ -19,9 +19,14 @@ public interface BlindService {
     void createJoinRequest(long fromUserId, long toUserId);
 
     /**
-     * 소개팅 상대에게 한 요청 취소
+     * 소개팅 상대에게 한 요청 취소 -> 조회 페이지에서
      */
-    void deleteRequest(long blindRequestId);
+    void deleteRequestByUserInfo(long userId, long toUserId);
+
+    /**
+     * 소개팅 상대에게 한 요청 취소 -> 요청 페이지에서
+     */
+    void deleteRequestByBlindRequestInfo(long userId, long blindRequestId);
 
     /**
      * 소개팅 요청 조회(받은 요청, 한 요청 모두)

@@ -1,7 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.request.SendBlindRequest;
+import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
@@ -30,15 +30,23 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Void> sendJoinRequest(SendBlindRequest request) {
+    public Response<Void> sendJoinRequest(BlindRequest request) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
         blindService.createJoinRequest(fromUserId, request.getToUserId());
         return success();
     }
 
     @Override
+    public Response<Void> deleteJoinRequest(BlindRequest blindRequest) {
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindService.deleteRequestByUserInfo(userId, blindRequest.getToUserId());
+        return success();
+    }
+
+    @Override
     public Response<Void> deleteJoinRequest(long blindRequestId) {
-        blindService.deleteRequest(blindRequestId);
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindService.deleteRequestByBlindRequestInfo(userId, blindRequestId);
         return success();
     }
 

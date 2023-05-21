@@ -1,6 +1,6 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.dto.request.SendBlindRequest;
+import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.dto.response.Response;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public interface BlindDateController {
 
     /**
-     * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
+     * 소개팅 상대편 조회
      */
     @GetMapping("/users")
     Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(@ParameterObject Pageable pageable);
@@ -22,10 +22,16 @@ public interface BlindDateController {
      * 소개팅 상대에게 요청
      */
     @PostMapping("/request")
-    Response<Void> sendJoinRequest(@RequestBody SendBlindRequest request);
+    Response<Void> sendJoinRequest(@RequestBody BlindRequest request);
 
     /**
-     * 소개팅 상대에게 한 요청 취소
+     * 소개팅 상대에게 한 요청 취소 -> 상대편 조회 페이지에서
+     */
+    @PostMapping("/request/cancel")
+    Response<Void> deleteJoinRequest(@RequestBody BlindRequest blindRequest);
+
+    /**
+     * 소개팅 상대에게 한 요청 취소 -> 요청 페이지에서
      */
     @DeleteMapping("/request/{blindRequestId}")
     Response<Void> deleteJoinRequest(@PathVariable long blindRequestId);

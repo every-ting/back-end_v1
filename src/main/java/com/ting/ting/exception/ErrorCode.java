@@ -21,6 +21,7 @@ public enum ErrorCode {
     ALREADY_JOINED(HttpStatus.CONFLICT, "User is already in the group"),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Request doesn't meet the requirements"),
     REQUEST_NOT_MINE(HttpStatus.BAD_REQUEST,"This is not the request information that came to me"),
+    NOT_MY_REQUEST(HttpStatus.BAD_REQUEST,"This is not a request I sent."),
     QR_GENERATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred in the QR generator"),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")
