@@ -125,13 +125,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequestByUserInfo(long userId, long toUserId) {
-        BlindRequest request = getBlindRequest(userId, toUserId);
+    public void deleteRequestByFromUserIdAndToUserId(long userId, long toUserId) {
+        BlindRequest request = blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+                .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
         blindRequestRepository.delete(request);
     }
 
     @Override
-    public void deleteRequestByBlindRequestInfo(long userId, long blindRequestId) {
+    public void deleteRequestByBlindRequestId(long userId, long blindRequestId) {
         BlindRequest request = getBlindRequestById(blindRequestId);
         validateMyRequest(userId, request);
         blindRequestRepository.delete(request);
@@ -181,7 +182,8 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     @Override
     public void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus) {
-        BlindRequest blindRequest = getBlindRequest(userId, blindRequestId);
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+        validateRequestToMe(userId, blindRequest);
 
         User user = blindRequest.getToUser();
         User blindRequestUser = blindRequest.getFromUser();
@@ -209,12 +211,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
 
         blindRequestRepository.save(blindRequest);
-    }
-
-    private BlindRequest getBlindRequest(long userId, long blindRequestId) {
-        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, blindRequest);
-        return blindRequest;
     }
 
     private void validateRequestToMe(long userId, BlindRequest request) {

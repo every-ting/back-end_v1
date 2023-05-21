@@ -39,14 +39,14 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     @Override
     public Response<Void> deleteJoinRequest(BlindRequest blindRequest) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteRequestByUserInfo(userId, blindRequest.getToUserId());
+        blindService.deleteRequestByFromUserIdAndToUserId(userId, blindRequest.getToUserId());
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteRequestByBlindRequestInfo(userId, blindRequestId);
+        blindService.deleteRequestByBlindRequestId(userId, blindRequestId);
         return success();
     }
 
