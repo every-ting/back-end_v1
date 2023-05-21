@@ -16,7 +16,7 @@ public interface BlindDateController {
      * 소개팅 상대편 조회
      */
     @GetMapping("/users")
-    Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(@ParameterObject Pageable pageable);
+    Response<Page<BlindUserWithRequestStatusResponse>> getBlindUsersInfo(@ParameterObject Pageable pageable);
 
     /**
      * 소개팅 상대에게 요청

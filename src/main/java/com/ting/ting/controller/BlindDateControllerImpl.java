@@ -24,7 +24,7 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Page<BlindUserWithRequestStatusResponse>> blindUsersInfo(Pageable pageable) {
+    public Response<Page<BlindUserWithRequestStatusResponse>> getBlindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindService.blindUsersInfo(userId, pageable));
     }
