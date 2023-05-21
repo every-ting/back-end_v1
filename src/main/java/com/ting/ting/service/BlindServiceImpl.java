@@ -11,7 +11,7 @@ import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
-import com.ting.ting.repository.BlindLikedRepository;
+import com.ting.ting.repository.BlindLikeRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -28,14 +28,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
-    private final BlindLikedRepository blindLikedRepository;
+    private final BlindLikeRepository blindLikeRepository;
 
-    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository, BlindLikedRepository blindLikedRepository) {
+    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository, BlindLikeRepository blindLikeRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
         this.blindDateRepository = blindDateRepository;
-        this.blindLikedRepository = blindLikedRepository;
+        this.blindLikeRepository = blindLikeRepository;
     }
 
     @Override
