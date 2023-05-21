@@ -79,12 +79,16 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
 
     @Override
     public Response<Void> deleteJoinLiked(BlindRequest blindRequest) {
-        return null;
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindService.deleteLikedByFromUserIdAndToUserId(userId, blindRequest.getToUserId());
+        return success();
     }
 
     @Override
     public Response<Void> deleteJoinLiked(long blindRequestId) {
-        return null;
+        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
+        blindService.deleteLikedByBlindRequestId(userId, blindRequestId);
+        return success();
     }
 
     @Override

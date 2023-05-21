@@ -55,7 +55,7 @@ public interface BlindService {
     /**
      * 소개팅 상대에게 한 찜하기 취소 -> 요청 페이지에서
      */
-    void deleteLikedByBlindRequestId(long userId, long blindRequestId);
+    void deleteLikedByBlindRequestId(long userId, long blindLikeId);
 
     /**
      * 소개팅 찜 조회(받은 요청, 한 요청 모두)

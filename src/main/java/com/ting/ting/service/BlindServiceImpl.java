@@ -136,7 +136,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     @Override
     public void deleteRequestByBlindRequestId(long userId, long blindRequestId) {
         BlindRequest request = getBlindRequestById(blindRequestId);
-        validateMyRequest(userId, request);
+
+        if (request.getFromUser().getId() != userId) {
+            throwException(ErrorCode.NOT_MY_REQUEST);
+        }
+
         blindRequestRepository.delete(request);
     }
 
@@ -177,15 +181,13 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private User getUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
-    }
-
     @Override
     public void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, blindRequest);
+
+        if (blindRequest.getToUser().getId() != userId) {
+            throwException(ErrorCode.REQUEST_NOT_MINE);
+        }
 
         User user = blindRequest.getToUser();
         User blindRequestUser = blindRequest.getFromUser();
@@ -241,11 +243,20 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     @Override
     public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
+        BlindLike request = blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+                .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
+        blindLikeRepository.delete(request);
     }
 
     @Override
-    public void deleteLikedByBlindRequestId(long userId, long blindRequestId) {
+    public void deleteLikedByBlindRequestId(long userId, long blindLikeId) {
+        BlindLike request = getBlindLikeById(blindLikeId);
 
+        if (request.getFromUser().getId() != userId) {
+            throwException(ErrorCode.NOT_MY_REQUEST);
+        }
+
+        blindLikeRepository.delete(request);
     }
 
     @Override
@@ -253,20 +264,18 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return null;
     }
 
-    private void validateRequestToMe(long userId, BlindRequest request) {
-        if (request.getToUser().getId() != userId) {
-            throwException(ErrorCode.REQUEST_NOT_MINE);
-        }
-    }
-
-    private void validateMyRequest(long userId, BlindRequest request) {
-        if (request.getFromUser().getId() != userId) {
-            throwException(ErrorCode.NOT_MY_REQUEST);
-        }
+    private User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 
     private BlindRequest getBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND));
+    }
+
+    private BlindLike getBlindLikeById(long blindLikeId) {
+        return blindLikeRepository.findById(blindLikeId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
 }

@@ -8,5 +8,9 @@ import java.util.Optional;
 
 public interface BlindLikeRepository extends JpaRepository<BlindLike, Long> {
 
+    Optional<BlindLike> findById(Long blindLikeId);
+
     Optional<BlindLike> findByFromUserAndToUser(User fromUser, User toUser);
+
+    Optional<BlindLike> findByFromUser_IdAndToUser_Id(long userId, long toUserId);
 }
