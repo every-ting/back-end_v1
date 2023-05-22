@@ -1,10 +1,13 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.constant.RequestStatus;
+import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Set;
 
 public interface BlindService {
 
@@ -60,5 +63,5 @@ public interface BlindService {
     /**
      * 소개팅 찜 조회(받은 요청, 한 요청 모두)
      */
-    BlindRequestWithFromAndToResponse getBlindLike(long userId);
+    Set<BlindLikeResponse> getBlindLike(long userId);
 }

@@ -296,8 +296,29 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public BlindRequestWithFromAndToResponse getBlindLike(long userId) {
-        return null;
+    public Set<BlindLikeResponse> getBlindLike(long userId) {
+        User user = getUserById(userId);
+        Set<BlindLike> allLikedUserInfos = blindLikeRepository.findAllByFromUser(user);
+        Set<BlindDateResponse> blindDateResponses = new LinkedHashSet<>();
+
+        for (BlindLike blindLikeInfo : allLikedUserInfos) {
+            User toUser = blindLikeInfo.getToUser();
+            blindDateResponses.add(BlindDateResponse.from(toUser));
+        }
+
+        Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
+
+        for (BlindDateResponse blindDateResponse : blindDateResponses) {
+            Long toUserId = blindDateResponse.getId();
+
+            if (blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
+            } else {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
+            }
+        }
+
+        return blindLikeResponses;
     }
 
     private User getUserById(long userId) {

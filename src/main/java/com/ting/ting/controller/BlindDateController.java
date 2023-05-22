@@ -1,6 +1,7 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.BlindRequest;
+import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import com.ting.ting.dto.response.Response;
@@ -8,6 +9,8 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RequestMapping("/blind")
 public interface BlindDateController {
@@ -80,5 +83,5 @@ public interface BlindDateController {
      * 소개팅 찜하기 조회(받은 요청, 한 요청 모두)
      */
     @GetMapping("/likes")
-    Response<BlindRequestWithFromAndToResponse> getBlindLiked();
+    Response<Set<BlindLikeResponse>> getBlindLiked();
 }
