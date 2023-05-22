@@ -11,7 +11,7 @@ public class BlindRequestResponse {
     private BlindDateResponse blindDateResponse;
     private LikeStatus likeStatus;
 
-    public static BlindRequestResponse from(BlindDateResponse blindDateResponse, LikeStatus likeStatus) {
+    public static BlindRequestResponse of(BlindDateResponse blindDateResponse, LikeStatus likeStatus) {
         return new BlindRequestResponse(
                 blindDateResponse,
                 likeStatus
