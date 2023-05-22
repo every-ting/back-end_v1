@@ -269,8 +269,39 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
             throwException(ErrorCode.INVALID_REQUEST, String.format("GroupInvitation(id: %d) does not belong to Group(id: %d)", groupInvitationId, groupId));
         }
 
+        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
+
+        groupInvitationRepository.delete(groupInvitation);
+        groupMemberRepository.delete(reservedGroupMemberRecord);
+        deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
+    }
+
+    @Override
+    public GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode) {
+        Group group = loadGroupByGroupId(groupId);
+        User user = loadUserByUserId(userId);
+
+        if (group.getGender() != user.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
+        }
+
+        if (groupMemberRepository.existsByGroupAndMember(group, user)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", userId, groupId));
+        }
+
+        GroupInvitation groupInvitation = groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(group, invitationCode).orElseThrow(() ->
+                throwException(ErrorCode.INVALID_REQUEST, String.format("InvitationCode(%s) is invalid", invitationCode))
+        );
+
+        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
+        reservedGroupMemberRecord.setMember(user);
+        reservedGroupMemberRecord.setStatus(MemberStatus.ACTIVE);
+        GroupMember updated = groupMemberRepository.saveAndFlush(reservedGroupMemberRecord);
+
         groupInvitationRepository.delete(groupInvitation);
         deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
+
+        return GroupMemberResponse.from(updated);
     }
 
     @Override
