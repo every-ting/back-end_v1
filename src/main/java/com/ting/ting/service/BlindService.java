@@ -26,7 +26,7 @@ public interface BlindService {
     /**
      * 소개팅 상대에게 한 요청 취소 -> 조회 페이지에서
      */
-    void deleteRequestByFromUserIdAndToUserId(long userId, long toUserId);
+    void deleteRequestById(long userId, long toUserId);
 
     /**
      * 소개팅 상대에게 한 요청 취소 -> 요청 페이지에서

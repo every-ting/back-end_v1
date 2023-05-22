@@ -1,7 +1,6 @@
 package com.ting.ting.controller;
 
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
@@ -33,23 +32,16 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Void> sendJoinRequest(BlindRequest request) {
+    public Response<Void> sendJoinRequest(long toUserId) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.createJoinRequest(fromUserId, request.getToUserId());
+        blindService.createJoinRequest(fromUserId, toUserId);
         return success();
     }
 
     @Override
-    public Response<Void> deleteJoinRequest(BlindRequest blindRequest) {
+    public Response<Void> deleteJoinRequest(long toUserId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteRequestByFromUserIdAndToUserId(userId, blindRequest.getToUserId());
-        return success();
-    }
-
-    @Override
-    public Response<Void> deleteJoinRequest(long blindRequestId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteRequestByBlindRequestId(userId, blindRequestId);
+        blindService.deleteRequestById(userId, toUserId);
         return success();
     }
 
@@ -74,23 +66,16 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Void> sendJoinLiked(BlindRequest request) {
+    public Response<Void> sendJoinLiked(long toUserId) {
         Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.createJoinLiked(fromUserId, request.getToUserId());
+        blindService.createJoinLiked(fromUserId, toUserId);
         return success();
     }
 
     @Override
-    public Response<Void> deleteJoinLiked(BlindRequest blindRequest) {
+    public Response<Void> deleteJoinLiked(long toUserId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteLikedByFromUserIdAndToUserId(userId, blindRequest.getToUserId());
-        return success();
-    }
-
-    @Override
-    public Response<Void> deleteJoinLiked(long blindRequestId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteLikedByBlindRequestId(userId, blindRequestId);
+        blindService.deleteLikedByFromUserIdAndToUserId(userId, toUserId);
         return success();
     }
 

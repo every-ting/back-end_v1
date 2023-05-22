@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-
 @Getter
 public enum LikeStatus {
-    DOING("찜 O"),
-    NOTING("찜 X");
+    LIKED("찜 O"),
+    NOT_LIKED("찜 X");
 
     private final String status;
 }

@@ -1,6 +1,5 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
@@ -26,20 +25,14 @@ public interface BlindDateController {
     /**
      * 소개팅 상대에게 요청
      */
-    @PostMapping("/request")
-    Response<Void> sendJoinRequest(@RequestBody BlindRequest request);
+    @PostMapping("/request/{toUserId}")
+    Response<Void> sendJoinRequest(@PathVariable long toUserId);
 
     /**
-     * 소개팅 상대에게 한 요청 취소 -> 상대편 조회 페이지에서
+     * 소개팅 상대에게 한 요청 취소
      */
-    @PostMapping("/request/cancel")
-    Response<Void> deleteJoinRequest(@RequestBody BlindRequest blindRequest);
-
-    /**
-     * 소개팅 상대에게 한 요청 취소 -> 요청 페이지에서
-     */
-    @DeleteMapping("/request/{blindRequestId}")
-    Response<Void> deleteJoinRequest(@PathVariable long blindRequestId);
+    @DeleteMapping("/request/{toUserId}")
+    Response<Void> deleteJoinRequest(@PathVariable long toUserId);
 
     /**
      * 소개팅 요청 조회(받은 요청, 한 요청 모두)
@@ -64,20 +57,14 @@ public interface BlindDateController {
     /**
      * 소개팅 상대방 찜하기
      */
-    @PostMapping("/like")
-    Response<Void> sendJoinLiked(@RequestBody BlindRequest request);
+    @PostMapping("/like/{toUserId}")
+    Response<Void> sendJoinLiked(@PathVariable long toUserId);
 
     /**
-     * 소개팅 상대에게 한 찜하기 취소 -> 상대편 조회 페이지에서
+     * 소개팅 상대에게 한 찜하기 취소
      */
-    @PostMapping("/like/cancel")
-    Response<Void> deleteJoinLiked(@RequestBody BlindRequest blindRequest);
-
-    /**
-     * 소개팅 상대에게 한 찜하기 취소 -> 요청 페이지에서
-     */
-    @DeleteMapping("/like/{blindRequestId}")
-    Response<Void> deleteJoinLiked(@PathVariable long blindRequestId);
+    @DeleteMapping("/like/{toUserId}")
+    Response<Void> deleteJoinLiked(@PathVariable long toUserId);
 
     /**
      * 소개팅 찜하기 조회(받은 요청, 한 요청 모두)

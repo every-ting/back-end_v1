@@ -68,9 +68,9 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusRespons, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
         if (myLikedUsers.contains(otherUser)) {
-            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.DOING));
+            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.LIKED));
         } else {
-            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOTING));
+            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOT_LIKED));
         }
     }
 
@@ -132,13 +132,13 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
         User toUser = getUserById(toUserId);
 
-        blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
-        });
-
         if (fromUser.getGender() == toUser.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
+
+        blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
 
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
@@ -147,7 +147,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequestByFromUserIdAndToUserId(long userId, long toUserId) {
+    public void deleteRequestById(long userId, long toUserId) {
         BlindRequest request = blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
                 .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
         blindRequestRepository.delete(request);
@@ -179,9 +179,9 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             long toUserId = blindDateResponse.getId();
 
             if (blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
-                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.DOING));
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.LIKED));
             } else {
-                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOTING));
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOT_LIKED));
             }
         }
 
@@ -263,13 +263,13 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
         User toUser = getUserById(toUserId);
 
-        blindLikeRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
-        });
-
         if (fromUser.getGender() == toUser.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
+
+        blindLikeRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
 
         BlindLike request = new BlindLike();
         request.setFromUser(fromUser);
