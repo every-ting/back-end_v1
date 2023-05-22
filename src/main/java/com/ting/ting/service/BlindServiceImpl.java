@@ -7,9 +7,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.BlindDateResponse;
-import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
@@ -169,9 +167,25 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     @Override
     public BlindRequestWithFromAndToResponse getBlindRequest(long userId) {
         return new BlindRequestWithFromAndToResponse(
-                requestToMe(userId),
-                myRequest(userId)
+                getBlindRequestResponseByBlindDateResponse(userId, requestToMe(userId)),
+                getBlindRequestResponseByBlindDateResponse(userId, myRequest(userId))
         );
+    }
+
+    private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> blindDateResponses) {
+        Set<BlindRequestResponse> blindRequestResponses = new LinkedHashSet<>();
+
+        for (BlindDateResponse blindDateResponse : blindDateResponses) {
+            long toUserId = blindDateResponse.getId();
+
+            if (blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
+                blindRequestResponses.add(BlindRequestResponse.from(blindDateResponse, LikeStatus.DOING));
+            } else {
+                blindRequestResponses.add(BlindRequestResponse.from(blindDateResponse, LikeStatus.NOTING));
+            }
+        }
+
+        return blindRequestResponses;
     }
 
     private Set<BlindDateResponse> myRequest(long fromUserId) {

@@ -2,7 +2,7 @@ package com.ting.ting.controller;
 
 import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import com.ting.ting.dto.response.Response;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -15,8 +15,8 @@ public interface BlindDateController {
     /**
      * 소개팅 상대편 조회
      */
-    @GetMapping("/users")
-    Response<Page<BlindUserWithRequestStatusResponse>> getBlindUsersInfo(@ParameterObject Pageable pageable);
+    @GetMapping
+    Response<Page<BlindUserWithRequestStatusAndLikeStatusResponse>> getBlindUsersInfo(@ParameterObject Pageable pageable);
 
     //Todo :: 소개팅 요청 로직
 

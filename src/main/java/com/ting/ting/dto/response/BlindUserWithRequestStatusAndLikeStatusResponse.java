@@ -8,14 +8,14 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class BlindUserWithRequestStatusResponse {
+public class BlindUserWithRequestStatusAndLikeStatusResponse {
 
     private BlindDateResponse blindDateResponse;
     private RequestStatus requestStatus;
     private LikeStatus likeStatus;
 
-    public static BlindUserWithRequestStatusResponse of(User entity, RequestStatus requestStatus, LikeStatus likeStatus) {
-        return new BlindUserWithRequestStatusResponse(
+    public static BlindUserWithRequestStatusAndLikeStatusResponse of(User entity, RequestStatus requestStatus, LikeStatus likeStatus) {
+        return new BlindUserWithRequestStatusAndLikeStatusResponse(
                 new BlindDateResponse(
                         entity.getId(),
                         entity.getUsername(),
