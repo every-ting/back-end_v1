@@ -3,7 +3,7 @@ package com.ting.ting.controller;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.request.BlindRequest;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.BlindService;
@@ -24,7 +24,7 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     }
 
     @Override
-    public Response<Page<BlindUserWithRequestStatusResponse>> getBlindUsersInfo(Pageable pageable) {
+    public Response<Page<BlindUserWithRequestStatusAndLikeStatusResponse>> getBlindUsersInfo(Pageable pageable) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
         return success(blindService.blindUsersInfo(userId, pageable));
     }

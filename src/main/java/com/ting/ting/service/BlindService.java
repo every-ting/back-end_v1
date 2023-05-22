@@ -2,7 +2,7 @@ package com.ting.ting.service;
 
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,7 +11,7 @@ public interface BlindService {
     /**
      * 소개팅 상대편 조회(자신의 성별에 따라 조회 결과가 다름)
      */
-    Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable);
+    Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable);
 
     //Todo :: 요청하기
 
@@ -60,5 +60,5 @@ public interface BlindService {
     /**
      * 소개팅 찜 조회(받은 요청, 한 요청 모두)
      */
-    BlindRequestWithFromAndToResponse getBlindLiked(long userId);
+    BlindRequestWithFromAndToResponse getBlindLike(long userId);
 }

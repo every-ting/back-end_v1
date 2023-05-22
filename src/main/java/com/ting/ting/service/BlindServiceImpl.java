@@ -39,7 +39,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
         Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
 
@@ -49,8 +49,8 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
-    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusAndLikeStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
-        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusAndLikeStatusResponses = new ArrayList<>();
+    private Page<BlindUserWithRequestStatusAndLikeStatusResponse> getBlindUserWithRequestStatusAndLikeStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
+        List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusResponses = new ArrayList<>();
 
         Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
 
@@ -66,11 +66,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return new PageImpl<>(blindUserWithRequestStatusAndLikeStatusResponses, pageable, otherUsers.getTotalElements());
     }
 
-    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
+    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusRespons, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
         if (myLikedUsers.contains(otherUser)) {
-            blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, requestStatus, LikeStatus.DOING));
+            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.DOING));
         } else {
-            blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, requestStatus, LikeStatus.NOTING));
+            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOTING));
         }
     }
 
@@ -179,9 +179,9 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             long toUserId = blindDateResponse.getId();
 
             if (blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
-                blindRequestResponses.add(BlindRequestResponse.from(blindDateResponse, LikeStatus.DOING));
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.DOING));
             } else {
-                blindRequestResponses.add(BlindRequestResponse.from(blindDateResponse, LikeStatus.NOTING));
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOTING));
             }
         }
 
@@ -296,7 +296,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public BlindRequestWithFromAndToResponse getBlindLiked(long userId) {
+    public BlindRequestWithFromAndToResponse getBlindLike(long userId) {
         return null;
     }
 
