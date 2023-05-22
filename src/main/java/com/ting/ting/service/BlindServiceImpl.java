@@ -173,12 +173,16 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> blindDateResponses) {
+        User user = getUserById(userId);
+
         Set<BlindRequestResponse> blindRequestResponses = new LinkedHashSet<>();
+
+        Set<Long> blindLikedUserId = getMyLikedUserId(user);
 
         for (BlindDateResponse blindDateResponse : blindDateResponses) {
             long toUserId = blindDateResponse.getId();
 
-            if (blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
+            if (blindLikedUserId.contains(toUserId)) {
                 blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.LIKED));
             } else {
                 blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOT_LIKED));
@@ -215,6 +219,18 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
 
         return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private Set<Long> getMyLikedUserId(User user) {
+        Set<Long> myLikedUserId = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUserId.add(blindLike.getToUser().getId());
+        }
+
+        return myLikedUserId;
     }
 
     @Override
