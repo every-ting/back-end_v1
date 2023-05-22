@@ -66,36 +66,12 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return new PageImpl<>(blindUserWithRequestStatusAndLikeStatusResponses, pageable, otherUsers.getTotalElements());
     }
 
-    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusRespons, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
+    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusResponse, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
         if (myLikedUsers.contains(otherUser)) {
-            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.LIKED));
+            blindUserWithRequestStatusAndLikeStatusResponse.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.LIKED));
         } else {
-            blindUserWithRequestStatusAndLikeStatusRespons.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOT_LIKED));
+            blindUserWithRequestStatusAndLikeStatusResponse.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOT_LIKED));
         }
-    }
-
-    private Set<User> getMyRequestPendingUsers(User user) {
-        Set<User> myRequestPendingUsers = new HashSet<>();
-
-        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
-
-        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
-            myRequestPendingUsers.add(blindRequest.getToUser());
-        }
-
-        return myRequestPendingUsers;
-    }
-
-    private Set<User> getMyLikedUser(User user) {
-        Set<User> myLikedUser = new HashSet<>();
-
-        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
-
-        for (BlindLike blindLike : myLikedUserInfo) {
-            myLikedUser.add(blindLike.getToUser());
-        }
-
-        return myLikedUser;
     }
 
     private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
@@ -221,18 +197,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private Set<Long> getMyLikedUserId(User user) {
-        Set<Long> myLikedUserId = new HashSet<>();
-
-        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
-
-        for (BlindLike blindLike : myLikedUserInfo) {
-            myLikedUserId.add(blindLike.getToUser().getId());
-        }
-
-        return myLikedUserId;
-    }
-
     @Override
     public void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
@@ -324,11 +288,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
         Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
 
+        Set<Long> myRequestPendingUsersId = getMyRequestPendingUsersId(user);
+
         for (BlindDateResponse blindDateResponse : blindDateResponses) {
             Long toUserId = blindDateResponse.getId();
 
-            if (blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId).isPresent()) {
+            if (myRequestPendingUsersId.contains(toUserId)) {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
+
             } else {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
             }
@@ -350,5 +317,53 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     private BlindLike getBlindLikeById(long blindLikeId) {
         return blindLikeRepository.findById(blindLikeId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
+    }
+
+    private Set<User> getMyRequestPendingUsers(User user) {
+        Set<User> myRequestPendingUsers = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsers.add(blindRequest.getToUser());
+        }
+
+        return myRequestPendingUsers;
+    }
+
+    private Set<Long> getMyRequestPendingUsersId(User user) {
+        Set<Long> myRequestPendingUsersId = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsersId.add(blindRequest.getToUser().getId());
+        }
+
+        return myRequestPendingUsersId;
+    }
+
+    private Set<User> getMyLikedUser(User user) {
+        Set<User> myLikedUser = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUser.add(blindLike.getToUser());
+        }
+
+        return myLikedUser;
+    }
+
+    private Set<Long> getMyLikedUserId(User user) {
+        Set<Long> myLikedUserId = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUserId.add(blindLike.getToUser().getId());
+        }
+
+        return myLikedUserId;
     }
 }
