@@ -94,7 +94,6 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<GroupMemberResponse> acceptGroupMemberInvitation(Long groupId, String invitationCode) {
         Long userId = 19L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-
         return success(groupService.acceptGroupMemberInvitation(groupId, userId, invitationCode));
     }
 
