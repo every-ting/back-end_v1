@@ -210,6 +210,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         Optional<BlindRequest> oppositeCase = blindRequestRepository.findByFromUserAndToUser(user, blindRequestUser);
 
         oppositeCase.ifPresent(otherBlindRequest -> {
+            if (otherBlindRequest.getStatus() == RequestStatus.ACCEPTED) {
+                throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+            }
+
             otherBlindRequest.setStatus(RequestStatus.ACCEPTED);
             blindRequestRepository.save(otherBlindRequest);
         });
