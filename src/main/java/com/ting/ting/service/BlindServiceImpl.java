@@ -41,7 +41,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     @Override
     public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
-        Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
+        Set<Long> idToBeRemoved = getUserIdOfMeAndMyDateMatchedUsers(user);
 
         if (user.getGender() == Gender.MEN) {
             return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
@@ -74,18 +74,17 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
     }
 
-    private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
+    private Set<Long> getUserIdOfMeAndMyDateMatchedUsers(User user) {
         Set<Long> idToBeRemoved = new HashSet<>();
 
-        Set<BlindRequest> requestToMeUserInfo = blindRequestRepository.findAllByToUser(user);
-        for (BlindRequest userInfo : requestToMeUserInfo) {
-            idToBeRemoved.add(userInfo.getFromUser().getId());
+        Set<BlindDate> matchedUsers = blindDateRepository.getByMyMatchedUsers(user);
+
+        for (BlindDate blindDate : matchedUsers) {
+            idToBeRemoved.add(blindDate.getMenUser().getId());
+            idToBeRemoved.add(blindDate.getWomenUser().getId());
         }
 
-        Set<BlindRequest> myRequestUserNotPending = blindRequestRepository.findAllByFromUserAndStatusIsNot(user, RequestStatus.PENDING);
-        for (BlindRequest userInfo : myRequestUserNotPending) {
-            idToBeRemoved.add(userInfo.getToUser().getId());
-        }
+        idToBeRemoved.add(user.getId());
 
         return idToBeRemoved;
     }
