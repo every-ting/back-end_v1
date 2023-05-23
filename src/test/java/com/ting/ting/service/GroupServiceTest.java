@@ -644,6 +644,7 @@ class GroupServiceTest {
 
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
         given(groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(any(), any())).willReturn(Optional.empty());
 
         //When
@@ -653,7 +654,7 @@ class GroupServiceTest {
         assertThat(t)
                 .isInstanceOf(TingApplicationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
-        then(groupMemberRepository).shouldHaveNoInteractions();
+        then(groupMemberRepository).shouldHaveNoMoreInteractions();
         then(groupInvitationRepository).shouldHaveNoMoreInteractions();
         then(s3StorageManager).shouldHaveNoInteractions();
     }
