@@ -1,6 +1,5 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
@@ -24,14 +23,9 @@ public interface BlindService {
     void createJoinRequest(long fromUserId, long toUserId);
 
     /**
-     * 소개팅 상대에게 한 요청 취소 -> 조회 페이지에서
+     * 소개팅 상대에게 한 요청 취소
      */
     void deleteRequestById(long userId, long toUserId);
-
-    /**
-     * 소개팅 상대에게 한 요청 취소 -> 요청 페이지에서
-     */
-    void deleteRequestByBlindRequestId(long userId, long blindRequestId);
 
     /**
      * 소개팅 요청 조회(받은 요청, 한 요청 모두)
@@ -39,9 +33,14 @@ public interface BlindService {
     BlindRequestWithFromAndToResponse getBlindRequest(long userId);
 
     /**
-     * 자신에게 온 요청 수락 & 거절
+     * 자신에게 온 요청 수락
      */
-    void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus);
+    void acceptRequest(long userId, long blindRequestId);
+
+    /**
+     * 자신에게 온 요청 거절
+     */
+    void rejectRequest(long userId, long blindRequestId);
 
     // Todo :: 찜하기
 

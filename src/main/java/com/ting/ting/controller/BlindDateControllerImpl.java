@@ -1,6 +1,5 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindLikeResponse;
 import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
 import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
@@ -54,14 +53,14 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
     @Override
     public Response<Void> acceptRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.handleRequest(userId, blindRequestId, RequestStatus.ACCEPTED);
+        blindService.acceptRequest(userId, blindRequestId);
         return success();
     }
 
     @Override
     public Response<Void> rejectRequest(long blindRequestId) {
         Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.handleRequest(userId, blindRequestId, RequestStatus.REJECTED);
+        blindService.rejectRequest(userId, blindRequestId);
         return success();
     }
 

@@ -130,17 +130,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequestByBlindRequestId(long userId, long blindRequestId) {
-        BlindRequest request = getBlindRequestById(blindRequestId);
-
-        if (request.getFromUser().getId() != userId) {
-            throwException(ErrorCode.NOT_MY_REQUEST);
-        }
-
-        blindRequestRepository.delete(request);
-    }
-
-    @Override
     public BlindRequestWithFromAndToResponse getBlindRequest(long userId) {
         return new BlindRequestWithFromAndToResponse(
                 getBlindRequestResponseByBlindDateResponse(userId, requestToMe(userId)),
@@ -198,7 +187,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus) {
+    public void acceptRequest(long userId, long blindRequestId) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
 
         if (blindRequest.getToUser().getId() != userId) {
@@ -217,20 +206,28 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
         }
 
-        blindRequest.setStatus(requestStatus);
+        blindRequest.setStatus(RequestStatus.ACCEPTED);
 
         Optional<BlindRequest> oppositeCase = blindRequestRepository.findByFromUserAndToUser(user, blindRequestUser);
 
         oppositeCase.ifPresent(otherBlindRequest -> {
-            otherBlindRequest.setStatus(requestStatus);
+            otherBlindRequest.setStatus(RequestStatus.ACCEPTED);
             blindRequestRepository.save(otherBlindRequest);
         });
 
-        if (requestStatus == RequestStatus.ACCEPTED) {
-            blindDateRepository.save(BlindDate.from(blindRequest));
+        blindDateRepository.save(BlindDate.from(blindRequest));
+        blindRequestRepository.save(blindRequest);
+    }
+
+    @Override
+    public void rejectRequest(long userId, long blindRequestId) {
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+
+        if (blindRequest.getToUser().getId() != userId) {
+            throwException(ErrorCode.REQUEST_NOT_MINE);
         }
 
-        blindRequestRepository.save(blindRequest);
+        blindRequestRepository.delete(blindRequest);
     }
 
     @Override
