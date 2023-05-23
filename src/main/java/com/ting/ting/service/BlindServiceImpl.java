@@ -41,7 +41,9 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     @Override
     public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
-        Set<Long> idToBeRemoved = getUserIdOfMeAndMyDateMatchedUsers(user);
+        Set<Long> idToBeRemoved = getUserIdOfMyDateMatchedUsers(user);
+
+        idToBeRemoved.add(userId);
 
         if (user.getGender() == Gender.MEN) {
             return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
@@ -74,7 +76,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
     }
 
-    private Set<Long> getUserIdOfMeAndMyDateMatchedUsers(User user) {
+    private Set<Long> getUserIdOfMyDateMatchedUsers(User user) {
         Set<Long> idToBeRemoved = new HashSet<>();
 
         Set<BlindDate> matchedUsers = blindDateRepository.getByMyMatchedUsers(user);
@@ -83,8 +85,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             idToBeRemoved.add(blindDate.getMenUser().getId());
             idToBeRemoved.add(blindDate.getWomenUser().getId());
         }
-
-        idToBeRemoved.add(user.getId());
 
         return idToBeRemoved;
     }
@@ -288,16 +288,19 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
         Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
 
-        Set<Long> myRequestPendingUsersId = getMyRequestPendingUsersId(user);
+        Set<Long> myRequestPendingUsersId = getMyRequestUsersIdByRequestStatus(user, RequestStatus.PENDING);
+
+        Set<Long> userIdOfMeAndMyDateMatchedUsers = getUserIdOfMyDateMatchedUsers(user);
 
         for (BlindDateResponse blindDateResponse : blindDateResponses) {
             Long toUserId = blindDateResponse.getId();
 
             if (myRequestPendingUsersId.contains(toUserId)) {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
-
-            } else {
+            } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
+            } else {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
             }
         }
 
@@ -331,7 +334,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return myRequestPendingUsers;
     }
 
-    private Set<Long> getMyRequestPendingUsersId(User user) {
+    private Set<Long> getMyRequestUsersIdByRequestStatus(User user, RequestStatus requestStatus) {
         Set<Long> myRequestPendingUsersId = new HashSet<>();
 
         Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
