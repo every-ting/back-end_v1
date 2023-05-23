@@ -279,13 +279,13 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     @Override
     public GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode) {
         Group group = loadGroupByGroupId(groupId);
-        User user = loadUserByUserId(userId);
+        User invitedUser = loadUserByUserId(userId);
 
-        if (group.getGender() != user.getGender()) {
+        if (group.getGender() != invitedUser.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
         }
 
-        if (groupMemberRepository.existsByGroupAndMember(group, user)) {
+        if (groupMemberRepository.existsByGroupAndMember(group, invitedUser)) {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", userId, groupId));
         }
 
@@ -294,7 +294,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         );
 
         GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
-        reservedGroupMemberRecord.setMember(user);
+        reservedGroupMemberRecord.setMember(invitedUser);
         reservedGroupMemberRecord.setStatus(MemberStatus.ACTIVE);
         GroupMember updated = groupMemberRepository.saveAndFlush(reservedGroupMemberRecord);
 
