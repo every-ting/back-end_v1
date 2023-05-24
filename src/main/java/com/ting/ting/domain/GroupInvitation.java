@@ -16,7 +16,7 @@ public class GroupInvitation {
 
     @NotNull
     @JoinColumn(name = "group_member_id")
-    @OneToOne(optional = false, cascade = CascadeType.REMOVE)
+    @OneToOne(optional = false)
     private GroupMember groupMember;
 
     @NotNull

@@ -85,6 +85,11 @@ public interface GroupService {
     void deleteGroupMemberInvitation(long groupId, long userIdOfLeader, long groupInvitationId);
 
     /**
+     * 팀 초대 수락
+     */
+    GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode);
+
+    /**
      * 팀장 - 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
      */
     GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader);
