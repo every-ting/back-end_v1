@@ -19,12 +19,13 @@ public class AppConfig {
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
+    private final GroupLikeToDateRepository groupLikeToDateRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(groupRepository, groupInvitationRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, userRepository, s3StorageManager);
+        return new GroupServiceImpl(groupRepository, groupInvitationRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository, userRepository, s3StorageManager);
     }
 
     @Bean

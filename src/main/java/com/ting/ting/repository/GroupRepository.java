@@ -3,7 +3,7 @@ package com.ting.ting.repository;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
-import com.ting.ting.domain.custom.SuggestedGroupWithRequestStatus;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,12 +14,22 @@ import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
-    Page<Group> findAll(Pageable pageable);
+    Optional<Group> findByGroupName(String name);
 
-    @Query(value = "select new com.ting.ting.domain.custom.SuggestedGroupWithRequestStatus(entity.id, entity.groupName, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo, requests.status) " +
-            "from Group entity left outer join GroupMemberRequest requests on requests.group = entity and requests.user = :user " +
-            "where entity not in (select gm.group from GroupMember gm where gm.member = :user) and entity.gender = :gender and entity.isJoinable = true and entity.isMatched = false")
-    Page<SuggestedGroupWithRequestStatus> findAllSuggestedGroupWithRequestStatusByUserAndGender(@Param("user") User user, @Param("gender") Gender gender, Pageable pageable);
+    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo) " +
+            "from Group entity left join GroupMember gm on gm.group = entity " +
+            "group by entity.id, entity.groupName, entity.gender, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo")
+    Page<GroupWithMemberCount> findAllWithMemberCount(Pageable pageable);
 
-    Optional<Group>findByGroupName(String name);
+    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo) " +
+            "from Group entity left join GroupMember gm on gm.group = entity " +
+            "where entity.gender = :gender and entity.isMatched = :isMatched " +
+            "group by entity.id, entity.groupName, entity.gender, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo")
+    Page<GroupWithMemberCount> findAllWithMemberCountByGenderAndIsMatched(@Param("gender") Gender gender, @Param("isMatched") boolean isMatched, Pageable pageable);
+
+    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo) " +
+            "from Group entity left join GroupMember gm on gm.group = entity " +
+            "where entity.gender = :gender and entity.isJoinable = :isJoinable and entity not in (select gm2.group from GroupMember gm2 where gm2.member = :user) " +
+            "group by entity.id, entity.groupName, entity.gender, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo")
+    Page<GroupWithMemberCount> findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(@Param("gender") Gender gender, @Param("isJoinable") boolean isJoinable, @Param("user") User user, Pageable pageable);
 }
