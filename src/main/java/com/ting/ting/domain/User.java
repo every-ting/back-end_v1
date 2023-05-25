@@ -4,20 +4,25 @@ import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MBTI;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @Table(name = "\"user\"", indexes = {
         @Index(columnList = "username")
 })
+@SQLDelete(sql = "UPDATE \"user\" SET deleted_at = NOW() where id=?")
+@Where(clause = "deleted_at is NULL")
 @Entity
-public class User {
+public class User extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +63,9 @@ public class User {
 
     @Column(name="ideal_photo")
     private String idealPhoto;
+
+    @Column(name = "deleted_at")  // soft-delete
+    private LocalDateTime deletedAt;
 
     protected User() {}
 

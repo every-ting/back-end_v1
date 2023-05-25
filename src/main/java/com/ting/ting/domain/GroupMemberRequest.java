@@ -14,7 +14,7 @@ import java.util.Objects;
         @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "user_id"}),
 })
 @Entity
-public class GroupMemberRequest {
+public class GroupMemberRequest extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

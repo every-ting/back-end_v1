@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 @Getter
 @Table(name = "\"group\"")
 @Entity
-public class Group {
+public class Group extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Table(name = "\"group_invitation\"")
 @Entity
-public class GroupInvitation {
+public class GroupInvitation extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

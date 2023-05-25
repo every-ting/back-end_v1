@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "blind_date")
 @Entity
-public class BlindDate {
+public class BlindDate extends AuditingFields {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
