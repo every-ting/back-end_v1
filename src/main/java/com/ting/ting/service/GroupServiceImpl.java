@@ -1,5 +1,6 @@
 package com.ting.ting.service;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
@@ -182,7 +183,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     public GroupMemberResponse acceptMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId) {
         User leader = loadUserByUserId(userIdOfLeader);
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
-            throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
 
         if (groupMemberRepository.existsByGroupAndMember(groupMemberRequest.getGroup(), groupMemberRequest.getUser())) {
@@ -221,6 +222,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
+    public Set<GroupInvitationResponse> findAllGroupMemberInvitation(long groupId, long userIdOfLeader) {
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(userIdOfLeader);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
+
+        return groupInvitationRepository.findByGroupMember_Group(group).stream().map(GroupInvitationResponse::from).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Override
     public GroupInvitationResponse createGroupMemberInvitation(long groupId, long userIdOfLeader) {
         Group group = loadGroupByGroupId(groupId);
         User leader = loadUserByUserId(userIdOfLeader);
@@ -237,10 +248,60 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         String invitationCode = groupId + UUID.randomUUID().toString();
         byte[] qrImageBytes = generateGroupInvitationQRCodeBytes(groupId, invitationCode);
         String qrImageUrl = uploadGroupInvitationQRCodeToStorage(groupId, invitationCode, qrImageBytes);
-        groupMemberRepository.save(GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER));
-        GroupInvitation created = groupInvitationRepository.save(GroupInvitation.of(group, invitationCode, qrImageUrl));
+        GroupMember pendingReservedMember = groupMemberRepository.save(GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER));
+        GroupInvitation created = groupInvitationRepository.save(GroupInvitation.of(pendingReservedMember, invitationCode, qrImageUrl));
 
         return GroupInvitationResponse.from(created);
+    }
+
+    @Override
+    public void deleteGroupMemberInvitation(long groupId, long userIdOfLeader, long groupInvitationId) {
+        Group group = loadGroupByGroupId(groupId);
+        User leader = loadUserByUserId(userIdOfLeader);
+
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
+
+        GroupInvitation groupInvitation = groupInvitationRepository.findById(groupInvitationId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupInvitation(id: %d) not found", groupInvitationId))
+        );
+
+        if (!groupInvitation.getGroupMember().getGroup().equals(group)) {
+            throwException(ErrorCode.INVALID_REQUEST, String.format("GroupInvitation(id: %d) does not belong to Group(id: %d)", groupInvitationId, groupId));
+        }
+
+        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
+
+        groupInvitationRepository.delete(groupInvitation);
+        groupMemberRepository.delete(reservedGroupMemberRecord);
+        deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
+    }
+
+    @Override
+    public GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode) {
+        Group group = loadGroupByGroupId(groupId);
+        User invitedUser = loadUserByUserId(userId);
+
+        if (group.getGender() != invitedUser.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
+        }
+
+        if (groupMemberRepository.existsByGroupAndMember(group, invitedUser)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", userId, groupId));
+        }
+
+        GroupInvitation groupInvitation = groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(group, invitationCode).orElseThrow(() ->
+                throwException(ErrorCode.INVALID_REQUEST, String.format("InvitationCode(%s) is invalid", invitationCode))
+        );
+
+        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
+        reservedGroupMemberRecord.setMember(invitedUser);
+        reservedGroupMemberRecord.setStatus(MemberStatus.ACTIVE);
+        GroupMember updated = groupMemberRepository.saveAndFlush(reservedGroupMemberRecord);
+
+        groupInvitationRepository.delete(groupInvitation);
+        deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
+
+        return GroupMemberResponse.from(updated);
     }
 
     @Override
@@ -364,6 +425,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     private String uploadGroupInvitationQRCodeToStorage(long groupId, String imageFileName, byte[] qrImageBytes) {
         String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
         return s3StorageManager.uploadByteArrayToS3WithKey(qrImageBytes, qrImageKey);
+    }
+
+    private void deleteGroupInvitationQRCodeFromStorage(long groupId, String imageFileName) {
+        String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
+
+        try {
+            s3StorageManager.deleteImageByKey(qrImageKey);
+        } catch (AmazonS3Exception e) {
+            throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("QR Image with the key : %s does not exist in the bucket", qrImageKey));
+        }
     }
 
     private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {

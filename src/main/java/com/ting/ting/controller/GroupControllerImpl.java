@@ -69,16 +69,32 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
+    public Response<Set<GroupInvitationResponse>> getGroupMemberInvitationList(Long groupId) {
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        return success(groupService.findAllGroupMemberInvitation(groupId, userIdOfLeader));
+    }
+
+    @Override
     public Response<GroupInvitationResponse> createGroupMemberInvitation(Long groupId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.createGroupMemberInvitation(groupId, userIdOfLeader));
     }
 
+    @Override
+    public Response<Void> cancelGroupMemberInvitation(Long groupId, Long groupInvitationId) {
+        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-    @Override // TODO : 구현 필요
-    public Response<Void> acceptGroupMemberInvitation(Long groupId, String invitationCode) {
-        return null;
+        groupService.deleteGroupMemberInvitation(groupId, userIdOfLeader, groupInvitationId);
+        return success();
+    }
+
+    @Override
+    public Response<GroupMemberResponse> acceptGroupMemberInvitation(Long groupId, String invitationCode) {
+        Long userId = 19L; // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        return success(groupService.acceptGroupMemberInvitation(groupId, userId, invitationCode));
     }
 
     @Override

@@ -8,16 +8,16 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Table(name = "\"group_invitation\"")
 @Entity
-public class GroupInvitation {
+public class GroupInvitation extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
-    @JoinColumn(name = "group_id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Group group;
+    @JoinColumn(name = "group_member_id")
+    @OneToOne(optional = false)
+    private GroupMember groupMember;
 
     @NotNull
     @Column(name = "invitation_code")
@@ -29,13 +29,13 @@ public class GroupInvitation {
 
     protected GroupInvitation() {}
 
-    private GroupInvitation(Group group, String invitationCode, String qrImageUrl) {
-        this.group = group;
+    private GroupInvitation(GroupMember groupMember, String invitationCode, String qrImageUrl) {
+        this.groupMember = groupMember;
         this.invitationCode = invitationCode;
         this.qrImageUrl = qrImageUrl;
     }
 
-    public static GroupInvitation of(Group group, String invitationCode, String qrImageUrl) {
-        return new GroupInvitation(group, invitationCode, qrImageUrl);
+    public static GroupInvitation of(GroupMember groupMember, String invitationCode, String qrImageUrl) {
+        return new GroupInvitation(groupMember, invitationCode, qrImageUrl);
     }
 }

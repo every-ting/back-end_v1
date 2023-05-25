@@ -435,6 +435,21 @@ class GroupServiceTest {
         then(groupMemberRequestRepository).should().delete(any(GroupMemberRequest.class));
     }
 
+    @DisplayName("[팀장] : 했던 팀 초대들 조회 기능 테스트")
+    @Test
+    void Given_Group_When_GetGroupMemberInvitationList_Then_ReturnsGroupInvitationResponseSet() {
+        //Given
+        Long groupId = 1L;
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupInvitationRepository.findByGroupMember_Group(any())).willReturn(List.of(mock(GroupInvitation.class), mock(GroupInvitation.class)));
+
+        //When & Then
+        assertThat(groupService.findAllGroupMemberInvitation(groupId, user.getId())).hasSize(2);
+    }
+
     @DisplayName("[팀장] : 과팅 멤버 초대 기능 테스트")
     @Test
     void Given_Group_When_CreateGroupMemberInvitation_Then_ReturnsGroupInvitationResponse() {
@@ -449,7 +464,8 @@ class GroupServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
         given(groupMemberRepository.countByGroup(group)).willReturn(1L);
         given(s3StorageManager.uploadByteArrayToS3WithKey(any(), any())).willReturn("qrImagePath");
-        given(groupInvitationRepository.save(any())).willReturn(GroupInvitation.of(group, "invitationCode", "qrImageURl"));
+        given(groupMemberRepository.save(any())).willReturn(mock(GroupMember.class));
+        given(groupInvitationRepository.save(any())).willReturn(GroupInvitation.of(mock(GroupMember.class), "invitationCode", "qrImageURl"));
 
         //When
         groupService.createGroupMemberInvitation(groupId, user.getId());
@@ -485,13 +501,169 @@ class GroupServiceTest {
         then(groupInvitationRepository).shouldHaveNoInteractions();
     }
 
+    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 초대 레코드가 DB에 있는 경우")
+    @Test
+    void Given_GroupAndGroupInvitation_When_DeleteGroupMemberInvitation_Then_DeletesGroupInvitationRecordAndQrImage() {
+        //Given
+        Long groupId = 1L;
+        Long groupInvitationId = 1L;
+
+        Group group = GroupFixture.createGroupById(groupId);
+        GroupMember groupMember = GroupMember.of(group, UserFixture.createUserById(2L), MemberStatus.PENDING, MemberRole.MEMBER);
+        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, "invitationCode",  "invitationQrImageUrl");
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.of(groupInvitation));
+
+        //When
+        groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId);
+
+        //Then
+        then(groupInvitationRepository).should().delete(any(GroupInvitation.class));
+        then(s3StorageManager).should().deleteImageByKey(any());
+    }
+
+    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 초대 레코드가 DB에 없는 경우")
+    @Test
+    void Given_GroupAndGroupInvitationWhichDoesNotExist_When_DeleteGroupMemberInvitation_Then_ThrowsException() {
+        //Given
+        Long groupId = 1L;
+        Long groupInvitationId = 1L;
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.empty());
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REQUEST_NOT_FOUND);
+        then(groupMemberRepository).shouldHaveNoMoreInteractions();
+        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
+        then(s3StorageManager).shouldHaveNoInteractions();
+    }
+
+    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 그룹의 것이 아닌 초대에 대한 삭제 요청을 보냈을 때")
+    @Test
+    void Given_GroupAndGroupInvitationWhichDoesNotBelongToTheGroup_When_DeleteGroupMemberInvitation_Then_ThrowsException() {
+        //Given
+        Long groupId = 1L;
+        Long groupInvitationId = 1L;
+
+        Group group = GroupFixture.createGroupById(groupId);
+        GroupMember groupMember = GroupMember.of(GroupFixture.createGroupById(2L), UserFixture.createUserById(2L), MemberStatus.PENDING, MemberRole.MEMBER);
+        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, "invitationCode",  "invitationQrImageUrl");
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.of(groupInvitation));
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
+        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
+        then(s3StorageManager).shouldHaveNoInteractions();
+    }
+
+    @DisplayName("과팅 초대 수락 기능 테스트")
+    @Test
+    void Given_GroupAndInvitationCode_When_AcceptGroupMemberInvitation_Then_ReturnsCreatedGroupMemberResponse() {
+        //Given
+        Long groupId = 1L;
+        String invitationCode = "invitationCode";
+
+        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
+        GroupMember groupMember = GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER);
+        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, invitationCode,  "invitationQrImageUrl");
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(any(), any())).willReturn(Optional.of(groupInvitation));
+        given(groupMemberRepository.saveAndFlush(any())).willReturn(groupInvitation.getGroupMember());
+
+        //When
+        GroupMemberResponse updatedResponse = groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode);
+
+        //Then
+        assertThat(updatedResponse.getMember().getId()).isSameAs(user.getId());
+        assertThat(updatedResponse.getStatus()).isSameAs(MemberStatus.ACTIVE);
+        then(groupInvitationRepository).should().delete(any(GroupInvitation.class));
+        then(s3StorageManager).should().deleteImageByKey(any());
+    }
+
+    @DisplayName("과팅 초대 수락 기능 테스트 - 팀과 성별이 다른 user 가 초대 요청 수락을 했을 때")
+    @Test
+    void Given_GroupWhoseGenderDoesNotMatchTheUserAndInvitationCode_When_AcceptGroupMemberInvitation_Then_ThrowsException() {
+        //Given
+        Long groupId = 1L;
+        String invitationCode = "invitationCode";
+
+        ReflectionTestUtils.setField(user, "gender", Gender.MEN);
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.GENDER_NOT_MATCH);
+        then(groupMemberRepository).shouldHaveNoInteractions();
+        then(groupInvitationRepository).shouldHaveNoInteractions();
+        then(s3StorageManager).shouldHaveNoInteractions();
+    }
+
+    @DisplayName("과팅 초대 수락 기능 테스트 - invalid 한 invitationCode 로 접근했을 때")
+    @Test
+    void Given_GroupAndInvitationCodeWhichIsInvalid_When_AcceptGroupMemberInvitation_Then_ThrowsException() {
+        //Given
+        Long groupId = 1L;
+        String invitationCode = "invitationCode";
+
+        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
+        Group group = GroupFixture.createGroupById(groupId);
+        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
+        GroupMember groupMember = GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
+        given(groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(any(), any())).willReturn(Optional.empty());
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
+        then(groupMemberRepository).shouldHaveNoMoreInteractions();
+        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
+        then(s3StorageManager).shouldHaveNoInteractions();
+    }
+
     @DisplayName("[팀장] : 과팅 요청 조회 기능 테스트")
     @Test
     void Given_Group_When_FindAllGroupDateRequest_Then_ReturnsGroupDateRequestResponseSet() {
         //Given
         Long groupId = 1L;
-
-        Group group = GroupFixture.createGroupById(groupId);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));

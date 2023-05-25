@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "blind_request")
 @Entity
-public class BlindRequest {
+public class BlindRequest extends AuditingFields {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
