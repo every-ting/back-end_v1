@@ -1,16 +1,17 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.BlindDate;
+import com.ting.ting.domain.BlindLike;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.BlindDateResponse;
-import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
+import com.ting.ting.repository.BlindLikeRepository;
 import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -27,64 +28,62 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     private final UserRepository userRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
+    private final BlindLikeRepository blindLikeRepository;
 
-    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository) {
+    public BlindServiceImpl(UserRepository userRepository, BlindRequestRepository blindRequestRepository, BlindDateRepository blindDateRepository, BlindLikeRepository blindLikeRepository) {
         super(ServiceType.BLIND);
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
         this.blindDateRepository = blindDateRepository;
+        this.blindLikeRepository = blindLikeRepository;
     }
 
     @Override
-    public Page<BlindUserWithRequestStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
+    public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
         User user = getUserById(userId);
-        Set<Long> idToBeRemoved = getUserIdOfRequestToMeOrMyRequestNotPending(user);
+        Set<Long> idToBeRemoved = getUserIdOfMyDateMatchedUsers(user);
+
+        idToBeRemoved.add(userId);
 
         if (user.getGender() == Gender.MEN) {
-            return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
+            return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
         }
-        return getBlindUserWithRequestStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
+        return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
     }
 
-    private Page<BlindUserWithRequestStatusResponse> getBlindUserWithRequestStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
-        List<BlindUserWithRequestStatusResponse> blindUserWithRequestStatusResponses = new ArrayList<>();
+    private Page<BlindUserWithRequestStatusAndLikeStatusResponse> getBlindUserWithRequestStatusAndLikeStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
+        List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusResponses = new ArrayList<>();
 
         Set<User> myRequestPendingUsers = getMyRequestPendingUsers(user);
 
+        Set<User> myLikedUsers = getMyLikedUser(user);
+
         for (User otherUser : otherUsers) {
             if (myRequestPendingUsers.contains(otherUser)) {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, RequestStatus.PENDING));
+                checkLikedUserAndUpdateBlindUserList(blindUserWithRequestStatusAndLikeStatusResponses, myLikedUsers, otherUser, RequestStatus.PENDING);
             } else {
-                blindUserWithRequestStatusResponses.add(BlindUserWithRequestStatusResponse.of(otherUser, null));
+                checkLikedUserAndUpdateBlindUserList(blindUserWithRequestStatusAndLikeStatusResponses, myLikedUsers, otherUser, RequestStatus.EMPTY);
             }
         }
-
-        return new PageImpl<>(blindUserWithRequestStatusResponses, pageable, otherUsers.getTotalElements());
+        return new PageImpl<>(blindUserWithRequestStatusAndLikeStatusResponses, pageable, otherUsers.getTotalElements());
     }
 
-    private Set<User> getMyRequestPendingUsers(User user) {
-        Set<User> myRequestPendingUsers = new HashSet<>();
-
-        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
-
-        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
-            myRequestPendingUsers.add(blindRequest.getToUser());
+    private void checkLikedUserAndUpdateBlindUserList(List<BlindUserWithRequestStatusAndLikeStatusResponse> blindUserWithRequestStatusAndLikeStatusResponse, Set<User> myLikedUsers, User otherUser, RequestStatus requestStatus) {
+        if (myLikedUsers.contains(otherUser)) {
+            blindUserWithRequestStatusAndLikeStatusResponse.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.LIKED));
+        } else {
+            blindUserWithRequestStatusAndLikeStatusResponse.add(BlindUserWithRequestStatusAndLikeStatusResponse.of(otherUser, requestStatus, LikeStatus.NOT_LIKED));
         }
-
-        return myRequestPendingUsers;
     }
 
-    private Set<Long> getUserIdOfRequestToMeOrMyRequestNotPending(User user) {
+    private Set<Long> getUserIdOfMyDateMatchedUsers(User user) {
         Set<Long> idToBeRemoved = new HashSet<>();
 
-        Set<BlindRequest> requestToMeUserInfo = blindRequestRepository.findAllByToUser(user);
-        for (BlindRequest userInfo : requestToMeUserInfo) {
-            idToBeRemoved.add(userInfo.getFromUser().getId());
-        }
+        Set<BlindDate> matchedUsers = blindDateRepository.getByMyMatchedUsers(user);
 
-        Set<BlindRequest> myRequestUserNotPending = blindRequestRepository.findAllByFromUserAndStatusIsNot(user, RequestStatus.PENDING);
-        for (BlindRequest userInfo : myRequestUserNotPending) {
-            idToBeRemoved.add(userInfo.getToUser().getId());
+        for (BlindDate blindDate : matchedUsers) {
+            idToBeRemoved.add(blindDate.getMenUser().getId());
+            idToBeRemoved.add(blindDate.getWomenUser().getId());
         }
 
         return idToBeRemoved;
@@ -92,12 +91,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     @Override
     public void createJoinRequest(long fromUserId, long toUserId) {
-        if (Objects.equals(fromUserId, toUserId)) {
+        if (fromUserId == toUserId) {
             throwException(ErrorCode.DUPLICATED_USER_REQUEST);
         }
 
-        User fromUser = userRepository.findById(fromUserId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", fromUserId)));
+        User fromUser = getUserById(fromUserId);
 
         if (blindRequestRepository.countByFromUserAndStatus(fromUser, RequestStatus.PENDING) >= 5) {
             throwException(ErrorCode.LIMIT_NUMBER_OF_REQUEST);
@@ -107,16 +105,15 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.LIMIT_NUMBER_OF_BlIND_DATE);
         }
 
-        User toUser = userRepository.findById(toUserId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", toUserId)));
-
-        blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
-        });
+        User toUser = getUserById(toUserId);
 
         if (fromUser.getGender() == toUser.getGender()) {
             throwException(ErrorCode.GENDER_NOT_MATCH);
         }
+
+        blindRequestRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
 
         BlindRequest request = new BlindRequest();
         request.setFromUser(fromUser);
@@ -125,18 +122,38 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequest(long blindRequestId) {
-        BlindRequest request = getBlindRequestById(blindRequestId);
-
+    public void deleteRequestById(long userId, long toUserId) {
+        BlindRequest request = blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+                .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
         blindRequestRepository.delete(request);
     }
 
     @Override
     public BlindRequestWithFromAndToResponse getBlindRequest(long userId) {
         return new BlindRequestWithFromAndToResponse(
-                requestToMe(userId),
-                myRequest(userId)
+                getBlindRequestResponseByBlindDateResponse(userId, requestToMe(userId)),
+                getBlindRequestResponseByBlindDateResponse(userId, myRequest(userId))
         );
+    }
+
+    private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> blindDateResponses) {
+        User user = getUserById(userId);
+
+        Set<BlindRequestResponse> blindRequestResponses = new LinkedHashSet<>();
+
+        Set<Long> blindLikedUserId = getMyLikedUserId(user);
+
+        for (BlindDateResponse blindDateResponse : blindDateResponses) {
+            long toUserId = blindDateResponse.getId();
+
+            if (blindLikedUserId.contains(toUserId)) {
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.LIKED));
+            } else {
+                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOT_LIKED));
+            }
+        }
+
+        return blindRequestResponses;
     }
 
     private Set<BlindDateResponse> myRequest(long fromUserId) {
@@ -168,14 +185,13 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private User getUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
-    }
-
     @Override
-    public void handleRequest(long userId, long blindRequestId, RequestStatus requestStatus) {
-        BlindRequest blindRequest = getBlindRequest(userId, blindRequestId);
+    public void acceptRequest(long userId, long blindRequestId) {
+        BlindRequest blindRequest = getBlindRequestById(blindRequestId);
+
+        if (blindRequest.getToUser().getId() != userId) {
+            throwException(ErrorCode.REQUEST_NOT_MINE);
+        }
 
         User user = blindRequest.getToUser();
         User blindRequestUser = blindRequest.getFromUser();
@@ -189,36 +205,168 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
             throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
         }
 
-        blindRequest.setStatus(requestStatus);
+        blindRequest.setStatus(RequestStatus.ACCEPTED);
 
         Optional<BlindRequest> oppositeCase = blindRequestRepository.findByFromUserAndToUser(user, blindRequestUser);
 
         oppositeCase.ifPresent(otherBlindRequest -> {
-            otherBlindRequest.setStatus(requestStatus);
+            if (otherBlindRequest.getStatus() == RequestStatus.ACCEPTED) {
+                throwException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+            }
+
+            otherBlindRequest.setStatus(RequestStatus.ACCEPTED);
             blindRequestRepository.save(otherBlindRequest);
         });
 
-        if (requestStatus == RequestStatus.ACCEPTED) {
-            blindDateRepository.save(BlindDate.from(blindRequest));
-        }
-
+        blindDateRepository.save(BlindDate.from(blindRequest));
         blindRequestRepository.save(blindRequest);
     }
 
-    private BlindRequest getBlindRequest(long userId, long blindRequestId) {
+    @Override
+    public void rejectRequest(long userId, long blindRequestId) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
-        validateRequestToMe(userId, blindRequest);
-        return blindRequest;
-    }
 
-    private void validateRequestToMe(long userId, BlindRequest request) {
-        if (request.getToUser().getId() != userId) {
+        if (blindRequest.getToUser().getId() != userId) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
         }
+
+        blindRequestRepository.delete(blindRequest);
+    }
+
+    @Override
+    public void createJoinLiked(long fromUserId, long toUserId) {
+        if (fromUserId == toUserId) {
+            throwException(ErrorCode.DUPLICATED_USER_REQUEST);
+        }
+
+        User fromUser = getUserById(fromUserId);
+
+        User toUser = getUserById(toUserId);
+
+        if (fromUser.getGender() == toUser.getGender()) {
+            throwException(ErrorCode.GENDER_NOT_MATCH);
+        }
+
+        blindLikeRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
+            throwException(ErrorCode.DUPLICATED_REQUEST);
+        });
+
+        BlindLike request = new BlindLike();
+        request.setFromUser(fromUser);
+        request.setToUser(toUser);
+        blindLikeRepository.save(request);
+    }
+
+    @Override
+    public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
+        BlindLike request = blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+                .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
+        blindLikeRepository.delete(request);
+    }
+
+    @Override
+    public void deleteLikedByBlindRequestId(long userId, long blindLikeId) {
+        BlindLike request = getBlindLikeById(blindLikeId);
+
+        if (request.getFromUser().getId() != userId) {
+            throwException(ErrorCode.NOT_MY_REQUEST);
+        }
+
+        blindLikeRepository.delete(request);
+    }
+
+    @Override
+    public Set<BlindLikeResponse> getBlindLike(long userId) {
+        User user = getUserById(userId);
+        Set<BlindLike> allLikedUserInfos = blindLikeRepository.findAllByFromUser(user);
+        Set<BlindDateResponse> blindDateResponses = new LinkedHashSet<>();
+
+        for (BlindLike blindLikeInfo : allLikedUserInfos) {
+            User toUser = blindLikeInfo.getToUser();
+            blindDateResponses.add(BlindDateResponse.from(toUser));
+        }
+
+        Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
+
+        Set<Long> myRequestPendingUsersId = getMyRequestUsersIdByRequestStatus(user, RequestStatus.PENDING);
+
+        Set<Long> userIdOfMeAndMyDateMatchedUsers = getUserIdOfMyDateMatchedUsers(user);
+
+        for (BlindDateResponse blindDateResponse : blindDateResponses) {
+            Long toUserId = blindDateResponse.getId();
+
+            if (myRequestPendingUsersId.contains(toUserId)) {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
+            } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
+            } else {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
+            }
+        }
+
+        return blindLikeResponses;
+    }
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 
     private BlindRequest getBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
+    }
+
+    private BlindLike getBlindLikeById(long blindLikeId) {
+        return blindLikeRepository.findById(blindLikeId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND));
+    }
+
+    private Set<User> getMyRequestPendingUsers(User user) {
+        Set<User> myRequestPendingUsers = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsers.add(blindRequest.getToUser());
+        }
+
+        return myRequestPendingUsers;
+    }
+
+    private Set<Long> getMyRequestUsersIdByRequestStatus(User user, RequestStatus requestStatus) {
+        Set<Long> myRequestPendingUsersId = new HashSet<>();
+
+        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
+
+        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
+            myRequestPendingUsersId.add(blindRequest.getToUser().getId());
+        }
+
+        return myRequestPendingUsersId;
+    }
+
+    private Set<User> getMyLikedUser(User user) {
+        Set<User> myLikedUser = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUser.add(blindLike.getToUser());
+        }
+
+        return myLikedUser;
+    }
+
+    private Set<Long> getMyLikedUserId(User user) {
+        Set<Long> myLikedUserId = new HashSet<>();
+
+        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
+
+        for (BlindLike blindLike : myLikedUserInfo) {
+            myLikedUserId.add(blindLike.getToUser().getId());
+        }
+
+        return myLikedUserId;
     }
 }

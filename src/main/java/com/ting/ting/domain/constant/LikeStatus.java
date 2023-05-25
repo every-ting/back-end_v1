@@ -5,10 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum RequestStatus {
-    EMPTY("요청 X"),
-    PENDING("요청중"),
-    ACCEPTED("성공");
+public enum LikeStatus {
+    LIKED("찜 O"),
+    NOT_LIKED("찜 X");
 
     private final String status;
 }

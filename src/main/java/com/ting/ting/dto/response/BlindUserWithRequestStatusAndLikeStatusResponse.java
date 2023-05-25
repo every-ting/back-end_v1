@@ -1,19 +1,21 @@
 package com.ting.ting.dto.response;
 
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class BlindUserWithRequestStatusResponse {
+public class BlindUserWithRequestStatusAndLikeStatusResponse {
 
-    BlindDateResponse blindDateResponse;
+    private BlindDateResponse blindDateResponse;
     private RequestStatus requestStatus;
+    private LikeStatus likeStatus;
 
-    public static BlindUserWithRequestStatusResponse of(User entity, RequestStatus requestStatus) {
-        return new BlindUserWithRequestStatusResponse(
+    public static BlindUserWithRequestStatusAndLikeStatusResponse of(User entity, RequestStatus requestStatus, LikeStatus likeStatus) {
+        return new BlindUserWithRequestStatusAndLikeStatusResponse(
                 new BlindDateResponse(
                         entity.getId(),
                         entity.getUsername(),
@@ -23,7 +25,8 @@ public class BlindUserWithRequestStatusResponse {
                         entity.getHeight(),
                         entity.getIdealPhoto()
                 ),
-                requestStatus
+                requestStatus,
+                likeStatus
         );
     }
 }
