@@ -2,7 +2,7 @@ package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
-import com.ting.ting.util.*;
+import com.ting.ting.util.S3StorageManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,12 @@ public class AppConfig {
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(groupRepository, groupInvitationRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, userRepository, s3StorageManager);
+        return new GroupServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository);
+    }
+
+    @Bean
+    public GroupInvitationService groupInvitationService() {
+        return new GroupInvitationServiceImpl(userRepository, groupRepository, groupMemberRepository, groupInvitationRepository, s3StorageManager);
     }
 
     @Bean

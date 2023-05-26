@@ -2,12 +2,14 @@ package com.ting.ting.util;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,7 +36,16 @@ public class S3StorageManager {
         amazonS3.deleteObject(bucketName, key);
     }
 
-    public String getImageUrlForKey(String key) {
+    public void deleteImagesByKeys(List<String> keys) throws AmazonS3Exception {
+        if (!keys.isEmpty()) {
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName)
+                    .withKeys(keys.toArray(new String[0]));
+
+            amazonS3.deleteObjects(deleteObjectsRequest);
+        }
+    }
+
+    public String getImageUrlForKey(String key){
         return amazonS3.getUrl(bucketName, key).toString();
     }
 }

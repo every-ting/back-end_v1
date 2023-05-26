@@ -23,7 +23,7 @@ public class GroupInvitation extends AuditingFields {
 
     @NotNull
     @JoinColumn(name = "group_member_id")
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.PERSIST)
     private GroupMember groupMember;
 
     @NotNull
@@ -35,17 +35,19 @@ public class GroupInvitation extends AuditingFields {
     private String qrImageUrl;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
     protected GroupInvitation() {}
 
-    private GroupInvitation(GroupMember groupMember, String invitationCode, String qrImageUrl) {
+    private GroupInvitation(GroupMember groupMember, String invitationCode, String qrImageUrl, LocalDateTime expiredAt) {
         this.groupMember = groupMember;
         this.invitationCode = invitationCode;
         this.qrImageUrl = qrImageUrl;
+        this.expiredAt = expiredAt;
     }
 
-    public static GroupInvitation of(GroupMember groupMember, String invitationCode, String qrImageUrl) {
-        return new GroupInvitation(groupMember, invitationCode, qrImageUrl);
+    public static GroupInvitation of(GroupMember groupMember, String invitationCode, String qrImageUrl, LocalDateTime expiredAt) {
+        return new GroupInvitation(groupMember, invitationCode, qrImageUrl, expiredAt);
     }
 }

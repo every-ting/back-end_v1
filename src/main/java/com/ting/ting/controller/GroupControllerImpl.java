@@ -3,6 +3,7 @@ package com.ting.ting.controller;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
+import com.ting.ting.service.GroupInvitationService;
 import com.ting.ting.service.GroupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,10 +16,12 @@ import java.util.Set;
 public class GroupControllerImpl extends AbstractController implements GroupController {
 
     private final GroupService groupService;
+    private final GroupInvitationService groupInvitationService;
 
-    public GroupControllerImpl(GroupService groupService) {
+    public GroupControllerImpl(GroupService groupService, GroupInvitationService groupInvitationService) {
         super(ServiceType.GROUP_MEETING);
         this.groupService = groupService;
+        this.groupInvitationService = groupInvitationService;
     }
 
     @Override
@@ -72,21 +75,21 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<Set<GroupInvitationResponse>> getGroupMemberInvitationList(Long groupId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findAllGroupMemberInvitation(groupId, userIdOfLeader));
+        return success(groupInvitationService.findAllGroupMemberInvitation(groupId, userIdOfLeader));
     }
 
     @Override
     public Response<GroupInvitationResponse> createGroupMemberInvitation(Long groupId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.createGroupMemberInvitation(groupId, userIdOfLeader));
+        return success(groupInvitationService.createGroupMemberInvitation(groupId, userIdOfLeader));
     }
 
     @Override
     public Response<Void> cancelGroupMemberInvitation(Long groupId, Long groupInvitationId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        groupService.deleteGroupMemberInvitation(groupId, userIdOfLeader, groupInvitationId);
+        groupInvitationService.deleteGroupMemberInvitation(groupId, userIdOfLeader, groupInvitationId);
         return success();
     }
 
@@ -94,7 +97,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<GroupMemberResponse> acceptGroupMemberInvitation(Long groupId, String invitationCode) {
         Long userId = 19L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.acceptGroupMemberInvitation(groupId, userId, invitationCode));
+        return success(groupInvitationService.acceptGroupMemberInvitation(groupId, userId, invitationCode));
     }
 
     @Override
