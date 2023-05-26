@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum RequestStatus {
     EMPTY("요청 X"),
     PENDING("요청중"),
-    REJECTED("거절"),
     ACCEPTED("성공");
 
     private final String status;

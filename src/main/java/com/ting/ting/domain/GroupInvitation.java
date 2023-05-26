@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Table(name = "\"group_invitation\"")
 @Entity
-public class GroupInvitation {
+public class GroupInvitation extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +16,7 @@ public class GroupInvitation {
 
     @NotNull
     @JoinColumn(name = "group_member_id")
-    @OneToOne(optional = false, cascade = CascadeType.REMOVE)
+    @OneToOne(optional = false)
     private GroupMember groupMember;
 
     @NotNull

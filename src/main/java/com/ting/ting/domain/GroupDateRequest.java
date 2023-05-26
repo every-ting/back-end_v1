@@ -9,7 +9,7 @@ import javax.persistence.*;
         @UniqueConstraint(name = "unique_from_group_to_group", columnNames = {"from_id", "to_id"}),
 })
 @Entity
-public class GroupDateRequest {
+public class GroupDateRequest extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

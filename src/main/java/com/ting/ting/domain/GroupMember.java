@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 @Table(name = "\"group_member\"")
 @Entity
-public class GroupMember {
+public class GroupMember extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,7 @@ public class GroupMember {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Group group;
 
+    @Setter
     @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User member;
@@ -46,8 +47,8 @@ public class GroupMember {
     protected GroupMember() {}
 
     private GroupMember(Group group, User user, MemberStatus status, MemberRole role) {
-        this.member = user;
         this.group = group;
+        this.member = user;
         this.status = status;
         this.role = role;
     }

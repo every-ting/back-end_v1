@@ -22,6 +22,7 @@ public class AppConfig {
     private final GroupLikeToDateRepository groupLikeToDateRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
+    private final BlindLikeRepository blindLikeRepository;
 
     @Bean
     public GroupService groupService() {
@@ -30,6 +31,6 @@ public class AppConfig {
 
     @Bean
     public BlindService blindService() {
-        return new BlindServiceImpl(userRepository, blindRequestRepository, blindDateRepository);
+        return new BlindServiceImpl(userRepository, blindRequestRepository, blindDateRepository, blindLikeRepository);
     }
 }
