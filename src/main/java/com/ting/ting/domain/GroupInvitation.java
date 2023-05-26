@@ -1,6 +1,9 @@
 package com.ting.ting.domain;
 
 import lombok.Getter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -9,6 +12,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Table(name = "\"group_invitation\"")
+@FilterDef(name = "validGroupInvitationFilter", parameters = @ParamDef(name = "now", type = "java.time.LocalDateTime"))
+@Filter(name = "validGroupInvitationFilter", condition = "expired_at > :now")
 @Entity
 public class GroupInvitation extends AuditingFields {
 

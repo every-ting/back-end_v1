@@ -4,6 +4,9 @@ import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -12,6 +15,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Table(name = "\"group_member\"")
+@FilterDef(name = "validGroupMemberFilter", parameters = @ParamDef(name = "now", type = "java.time.LocalDateTime"))
+@Filter(name = "validGroupMemberFilter", condition = "expired_at > :now or expired_at is null")
 @Entity
 public class GroupMember extends AuditingFields {
 
