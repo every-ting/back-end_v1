@@ -7,5 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Gender {
     MEN,
-    WOMEN
+    WOMEN;
+
+    public Gender getOpposite() {
+        return this == MEN ? WOMEN : MEN;
+    }
 }

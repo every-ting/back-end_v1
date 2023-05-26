@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -49,6 +50,7 @@ class GroupServiceTest {
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
     @Mock private GroupDateRepository groupDateRepository;
     @Mock private GroupDateRequestRepository groupDateRequestRepository;
+    @Mock private GroupLikeToDateRepository groupLikeToDateRepository;
     @Mock private UserRepository userRepository;
 
     private User user;
@@ -60,10 +62,10 @@ class GroupServiceTest {
 
     @DisplayName("모든 팀 조회 성공")
     @Test
-    void Given_Nothing_When_FindAllGroups_thenReturnsGroupResponsePage() {
+    void Given_Nothing_When_FindAllGroups_Then_ReturnsGroupResponsePage() {
         //Given
         Pageable pageable = Pageable.ofSize(20);
-        given(groupRepository.findAll(pageable)).willReturn(Page.empty());
+        given(groupRepository.findAllWithMemberCount(pageable)).willReturn(Page.empty());
 
         //When & Then
         assertThat(groupService.findAllGroups(pageable)).isEmpty();
@@ -71,20 +73,40 @@ class GroupServiceTest {
 
     @DisplayName("같은 성별 팀 가입을 위한 조회 기능 테스트")
     @Test
-    void Given_Nothing_When_FindSuggestedSameGenderGroupList_ThenReturnsGroupWithRequestStatusResponsePage() {
+    void Given_Nothing_When_FindSuggestedSameGenderGroupList_Then_ReturnsGroupWithRequestStatusResponsePage() {
         //Given
         Pageable pageable = Pageable.ofSize(20);
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupRepository.findAllSuggestedGroupWithRequestStatusByUserAndGender(any(), any(), any())).willReturn(Page.empty());
+        given(groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(any(), anyBoolean(), any(), any())).willReturn(Page.empty());
 
         //When
-        assertThat(groupService.findSuggestedSameGenderGroupList(user.getId(), pageable)).isEmpty();
+        assertThat(groupService.findJoinableSameGenderGroupList(user.getId(), pageable)).isEmpty();
+    }
+
+    @DisplayName("다른 성별 팀 과팅 요청을 위한 조회 기능 테스트")
+    @Test
+    void Given_Group_When_FindDateableOppositeGenderGroupList_Then_ReturnsGroupWithLikeStatusResponse() {
+        //Given
+        Long groupId = 1L;
+        Pageable pageable = Pageable.ofSize(20);
+
+        Group group = GroupFixture.createGroupById(groupId);
+        List<Long> likedGroupIds = Arrays.asList(1L, 2L, 3L);
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+        given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
+        given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(true);
+        given(groupRepository.findAllWithMemberCountByGenderAndIsMatched(any(), anyBoolean(), any())).willReturn(Page.empty());
+        given(groupLikeToDateRepository.findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(any(), any())).willReturn(likedGroupIds);
+
+        //When & Then
+        assertThat(groupService.findDateableOppositeGenderGroupList(groupId, user.getId(), pageable)).isEmpty();
     }
 
     @DisplayName("내가 속한 팀 조회 기능 테스트")
     @Test
-    void Given_Nothing_When_FindMyGroupList_ThenReturnsGroupSet() {
+    void Given_Nothing_When_FindMyGroupList_Then_ReturnsGroupSet() {
         //Given
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRepository.findAllGroupByMemberAndStatus(any(), any())).willReturn(List.of(mock(Group.class), mock(Group.class)));

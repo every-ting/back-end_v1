@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Table(name = "\"group_member\"")
@@ -38,6 +40,9 @@ public class GroupMember extends AuditingFields {
     @Column(name = "role", length = 6)
     @Enumerated(EnumType.STRING)
     private MemberRole role;
+
+    @OneToMany(mappedBy = "fromGroupMember", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private final Set<GroupLikeToDate> groupLikeToDates = new LinkedHashSet<>();
 
     protected GroupMember() {}
 

@@ -2,9 +2,8 @@ package com.ting.ting.service;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.ting.ting.domain.*;
-import com.ting.ting.domain.constant.Gender;
-import com.ting.ting.domain.constant.MemberRole;
-import com.ting.ting.domain.constant.MemberStatus;
+import com.ting.ting.domain.constant.*;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
@@ -14,11 +13,13 @@ import com.ting.ting.util.QRCodeGenerator;
 import com.ting.ting.util.S3StorageManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -38,10 +39,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
+    private final GroupLikeToDateRepository groupLikeToDateRepository;
     private final UserRepository userRepository;
     private final S3StorageManager s3StorageManager;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupInvitationRepository groupInvitationRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, UserRepository userRepository, S3StorageManager s3StorageManager) {
+    public GroupServiceImpl(GroupRepository groupRepository, GroupInvitationRepository groupInvitationRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository, UserRepository userRepository, S3StorageManager s3StorageManager) {
         super(ServiceType.GROUP_MEETING);
         this.groupRepository = groupRepository;
         this.groupInvitationRepository = groupInvitationRepository;
@@ -49,20 +51,60 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
+        this.groupLikeToDateRepository = groupLikeToDateRepository;
         this.userRepository = userRepository;
         this.s3StorageManager = s3StorageManager;
     }
 
     @Override
     public Page<GroupResponse> findAllGroups(Pageable pageable) {
-        return groupRepository.findAll(pageable).map(GroupResponse::from);
+        return groupRepository.findAllWithMemberCount(pageable).map(GroupResponse::from);
     }
 
     @Override
-    public Page<GroupWithRequestStatusResponse> findSuggestedSameGenderGroupList(Long userId, Pageable pageable) {
+    public Page<GroupWithRequestStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
         User user = loadUserByUserId(userId);
 
-        return groupRepository.findAllSuggestedGroupWithRequestStatusByUserAndGender(user, user.getGender(), pageable).map(GroupWithRequestStatusResponse::from);
+        Page<GroupWithMemberCount> joinableSameGenderGroups = groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(user.getGender(), true, user, pageable);
+        Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllGroup_IdByUser(user).stream().collect(Collectors.toUnmodifiableSet());
+
+        List<GroupWithRequestStatusResponse> groupWithRequestStatusResponses = new ArrayList<>();
+
+        for (GroupWithMemberCount joinableSameGenderGroup : joinableSameGenderGroups) {
+
+            if (myPendingJoinGroupIds.contains(joinableSameGenderGroup.getId())) {
+                groupWithRequestStatusResponses.add(GroupWithRequestStatusResponse.from(joinableSameGenderGroup, RequestStatus.PENDING));
+            } else {
+                groupWithRequestStatusResponses.add(GroupWithRequestStatusResponse.from(joinableSameGenderGroup, RequestStatus.EMPTY));
+            }
+        }
+
+        return new PageImpl<>(groupWithRequestStatusResponses, pageable, joinableSameGenderGroups.getTotalElements());
+    }
+
+    @Override
+    public Page<GroupWithLikeStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
+        Group group = loadGroupByGroupId(groupId);
+        User member = loadUserByUserId(userId);
+
+        if (!groupMemberRepository.existsByGroupAndMember(group, member)) {
+            throwException(ErrorCode.INVALID_REQUEST, String.format("User(id: %d) is not a member of Group(id: %d)", userId, groupId));
+        }
+
+        Page<GroupWithMemberCount> oppositeGenderGroups = groupRepository.findAllWithMemberCountByGenderAndIsMatched(group.getGender().getOpposite(), false, pageable);
+        Set<Long> likedGroupIds = groupLikeToDateRepository.findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(group, member).stream().collect(Collectors.toUnmodifiableSet());
+
+        List<GroupWithLikeStatusResponse> groupWithLikeStatusResponses = new ArrayList<>();
+
+        for (GroupWithMemberCount oppositeGenderGroup : oppositeGenderGroups) {
+            if (likedGroupIds.contains(oppositeGenderGroup.getId())) {
+                groupWithLikeStatusResponses.add(GroupWithLikeStatusResponse.from(oppositeGenderGroup, LikeStatus.LIKED));
+            } else {
+                groupWithLikeStatusResponses.add(GroupWithLikeStatusResponse.from(oppositeGenderGroup, LikeStatus.NOT_LIKED));
+            }
+        }
+
+        return new PageImpl<>(groupWithLikeStatusResponses, pageable, oppositeGenderGroups.getTotalElements());
     }
 
     @Override

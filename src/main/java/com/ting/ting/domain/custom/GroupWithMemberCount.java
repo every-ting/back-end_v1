@@ -7,15 +7,15 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SuggestedGroupWithRequestStatus {
+public class GroupWithMemberCount {
 
     private Long id;
     private String groupName;
     private Gender gender;
-    private String school;
+    private Long memberCount;
     private int memberSizeLimit;
+    private String school;
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;
-    private RequestStatus requestStatus;
 }

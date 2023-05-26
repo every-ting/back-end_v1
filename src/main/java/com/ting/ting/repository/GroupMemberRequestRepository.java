@@ -12,6 +12,9 @@ import java.util.Optional;
 
 public interface GroupMemberRequestRepository extends JpaRepository<GroupMemberRequest, Long> {
 
+    @Query(value = "select entity.group.id from GroupMemberRequest entity where entity.user = :user")
+    List<Long> findAllGroup_IdByUser(@Param("user") User user);
+
     Optional<GroupMemberRequest> findByGroupAndUser(Group group, User user);
 
     void deleteByGroup_IdAndUser_Id(Long groupId, Long userId);

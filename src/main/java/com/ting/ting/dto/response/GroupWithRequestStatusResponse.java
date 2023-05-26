@@ -1,7 +1,7 @@
 package com.ting.ting.dto.response;
 
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.domain.custom.SuggestedGroupWithRequestStatus;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,19 +12,10 @@ public class GroupWithRequestStatusResponse {
     private GroupResponse group;
     private RequestStatus requestStatus;
 
-    public static GroupWithRequestStatusResponse from(SuggestedGroupWithRequestStatus groupWithRequestStatus) {
+    public static GroupWithRequestStatusResponse from(GroupWithMemberCount groupWithMemberCount, RequestStatus requestStatus) {
         return new GroupWithRequestStatusResponse(
-                new GroupResponse(
-                        groupWithRequestStatus.getId(),
-                        groupWithRequestStatus.getGroupName(),
-                        groupWithRequestStatus.getGender(),
-                        groupWithRequestStatus.getMemberSizeLimit(),
-                        groupWithRequestStatus.getSchool(),
-                        groupWithRequestStatus.isMatched(),
-                        groupWithRequestStatus.isJoinable(),
-                        groupWithRequestStatus.getMemo()
-                ),
-                groupWithRequestStatus.getRequestStatus()
+                GroupResponse.from(groupWithMemberCount),
+                requestStatus
         );
     }
 }

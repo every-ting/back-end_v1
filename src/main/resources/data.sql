@@ -61,6 +61,8 @@ insert into group_member (group_id, member_id, status, role) values (1, 10, 'ACT
 insert into group_member (group_id, member_id, status, role) values (3, 1, 'ACTIVE', 'MEMBER');
 insert into group_member (group_id, member_id, status, role) values (5, 1, 'ACTIVE', 'MEMBER');
 
+insert into group_like_to_date (to_group_id, from_group_member_id) values (6, 1);
+
 insert into group_member_request (group_id, user_id) values (1, 5);
 insert into group_member_request (group_id, user_id) values (1, 4);
 insert into group_member_request (group_id, user_id) values (2, 3);

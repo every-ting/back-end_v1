@@ -30,10 +30,6 @@ public class GroupMemberRequest extends AuditingFields {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User user;
 
-    @Column(name = "request_status", nullable = false, columnDefinition = "varchar(8) default 'PENDING'")
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status = RequestStatus.PENDING;
-
     protected GroupMemberRequest() {}
 
     private GroupMemberRequest(Group group, User user) {
