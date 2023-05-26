@@ -1,9 +1,11 @@
 package com.ting.ting.domain;
 
 import lombok.Getter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Getter
 @Table(name = "\"group_invitation\"")
@@ -26,6 +28,9 @@ public class GroupInvitation extends AuditingFields {
     @NotNull
     @Column(name = "qr_image_url")
     private String qrImageUrl;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime expiredAt;
 
     protected GroupInvitation() {}
 

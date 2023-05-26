@@ -4,9 +4,11 @@ import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.MemberStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Getter
 @Table(name = "\"group_member\"")
@@ -38,6 +40,11 @@ public class GroupMember extends AuditingFields {
     @Column(name = "role", length = 6)
     @Enumerated(EnumType.STRING)
     private MemberRole role;
+
+    @Setter
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;
 
     protected GroupMember() {}
 
