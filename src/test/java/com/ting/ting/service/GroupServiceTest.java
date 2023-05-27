@@ -3,7 +3,6 @@ package com.ting.ting.service;
 import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
-import com.ting.ting.domain.constant.MemberStatus;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupDateRequestResponse;
 import com.ting.ting.dto.response.GroupDateRequestWithFromAndToResponse;
@@ -14,7 +13,6 @@ import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
-import com.ting.ting.util.S3StorageManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,9 +41,7 @@ class GroupServiceTest {
 
     @InjectMocks private GroupServiceImpl groupService;
 
-    @Mock private S3StorageManager s3StorageManager;
     @Mock private GroupRepository groupRepository;
-    @Mock private GroupInvitationRepository groupInvitationRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
     @Mock private GroupDateRepository groupDateRepository;
@@ -109,7 +105,7 @@ class GroupServiceTest {
     void Given_Nothing_When_FindMyGroupList_Then_ReturnsGroupSet() {
         //Given
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMemberAndStatus(any(), any())).willReturn(List.of(mock(Group.class), mock(Group.class)));
+        given(groupMemberRepository.findAllGroupByMember(any())).willReturn(List.of(mock(Group.class), mock(Group.class)));
 
         //When & Then
         assertThat(groupService.findMyGroupList(user.getId())).hasSize(2);
@@ -122,8 +118,8 @@ class GroupServiceTest {
         Long groupId = 1L;
 
         Group group = GroupFixture.createGroupById(groupId);
-        GroupMember member1 = GroupMember.of(group, user, MemberStatus.PENDING, MemberRole.MEMBER);
-        GroupMember member2 = GroupMember.of(group, UserFixture.createUserById(user.getId() + 1), MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember member1 = GroupMember.of(group, user, MemberRole.MEMBER);
+        GroupMember member2 = GroupMember.of(group, UserFixture.createUserById(user.getId() + 1), MemberRole.MEMBER);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(groupMemberRepository.findAllByGroup(any())).willReturn(List.of(member1, member2));
@@ -260,11 +256,11 @@ class GroupServiceTest {
         Long groupId = 1L;
 
         Group group = GroupFixture.createGroupById(groupId);
-        GroupMember memberRecordOfMember = GroupMember.of(group, user, MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember memberRecordOfMember = GroupMember.of(group, user, MemberRole.MEMBER);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfMember));
+        given(groupMemberRepository.findByGroupAndMember(any(), any())).willReturn(Optional.of(memberRecordOfMember));
 
         //When
         groupService.deleteGroupMember(groupId, user.getId());
@@ -281,12 +277,12 @@ class GroupServiceTest {
 
         Group group = GroupFixture.createGroupById(groupId);
         User newLeader = UserFixture.createUserById(user.getId() + 1);
-        GroupMember memberRecordOfLeader = GroupMember.of(group, user, MemberStatus.ACTIVE, MemberRole.LEADER);
-        GroupMember memberRecordOfMember = GroupMember.of(group, newLeader, MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, user, MemberRole.LEADER);
+        GroupMember memberRecordOfMember = GroupMember.of(group, newLeader, MemberRole.MEMBER);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupMemberRepository.findByGroupAndMember(any(), any())).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.findAvailableMemberAsALeaderInGroup(any(), any())).willReturn(List.of(memberRecordOfMember));
 
         //When
@@ -304,11 +300,11 @@ class GroupServiceTest {
         //Given
         Long groupId = 1L;
 
-        GroupMember memberRecordOfLeader = GroupMember.of(GroupFixture.createGroupById(groupId), user, MemberStatus.ACTIVE, MemberRole.LEADER);
+        GroupMember memberRecordOfLeader = GroupMember.of(GroupFixture.createGroupById(groupId), user, MemberRole.LEADER);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
-        given(groupMemberRepository.findByGroupAndMemberAndStatus(any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader));
+        given(groupMemberRepository.findByGroupAndMember(any(), any())).willReturn(Optional.of(memberRecordOfLeader));
         given(groupMemberRepository.findAvailableMemberAsALeaderInGroup(any(), any())).willReturn(List.of());
 
         //When
@@ -329,14 +325,14 @@ class GroupServiceTest {
 
         Group group = GroupFixture.createGroupById(1L);
         User newLeader = UserFixture.createUserById(user.getId() + 1);
-        GroupMember memberRecordOfLeader = GroupMember.of(group, user, MemberStatus.ACTIVE, MemberRole.LEADER);
-        GroupMember memberRecordOfMember = GroupMember.of(group, newLeader, MemberStatus.ACTIVE, MemberRole.MEMBER);
+        GroupMember memberRecordOfLeader = GroupMember.of(group, user, MemberRole.LEADER);
+        GroupMember memberRecordOfMember = GroupMember.of(group, newLeader, MemberRole.MEMBER);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(userRepository.findById(any())).willReturn(Optional.of(newLeader));
-        given(groupMemberRepository.existsByMemberAndStatusAndRole(any(), any(), any())).willReturn(false);
-        given(groupMemberRepository.findByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader)).willReturn(Optional.of(memberRecordOfMember));
+        given(groupMemberRepository.existsByMemberAndRole(any(), any())).willReturn(false);
+        given(groupMemberRepository.findByGroupAndMemberAndRole(any(), any(), any())).willReturn(Optional.of(memberRecordOfLeader)).willReturn(Optional.of(memberRecordOfMember));
 
         //When
         Set<GroupMemberResponse> actual = groupService.changeGroupLeader(groupId, user.getId(), newLeader.getId());
@@ -358,7 +354,7 @@ class GroupServiceTest {
 
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupMemberRequestRepository.findByGroup(any())).willReturn(List.of(request1, request2));
 
         //When & Then
@@ -379,8 +375,8 @@ class GroupServiceTest {
         given(groupMemberRequestRepository.findById(any())).willReturn(Optional.of(request));
         given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
         given(groupMemberRepository.countByGroup(group)).willReturn(2L);
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupMemberRepository.save(any())).willReturn(GroupMember.of(group, request.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.save(any())).willReturn(GroupMember.of(group, request.getUser(), MemberRole.MEMBER));
 
         //When
         GroupMemberResponse actual = groupService.acceptMemberJoinRequest(user.getId(), groupMemberRequestId);
@@ -448,237 +444,13 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
         given(groupMemberRequestRepository.findById(any())).willReturn(Optional.of(mock(GroupMemberRequest.class)));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
 
         //When
         groupService.rejectMemberJoinRequest(user.getId(), groupMemberRequestId);
 
         //Then
         then(groupMemberRequestRepository).should().delete(any(GroupMemberRequest.class));
-    }
-
-    @DisplayName("[팀장] : 했던 팀 초대들 조회 기능 테스트")
-    @Test
-    void Given_Group_When_GetGroupMemberInvitationList_Then_ReturnsGroupInvitationResponseSet() {
-        //Given
-        Long groupId = 1L;
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupInvitationRepository.findByGroupMember_Group(any())).willReturn(List.of(mock(GroupInvitation.class), mock(GroupInvitation.class)));
-
-        //When & Then
-        assertThat(groupService.findAllGroupMemberInvitation(groupId, user.getId())).hasSize(2);
-    }
-
-    @DisplayName("[팀장] : 과팅 멤버 초대 기능 테스트")
-    @Test
-    void Given_Group_When_CreateGroupMemberInvitation_Then_ReturnsGroupInvitationResponse() {
-        //Given
-        Long groupId = 1L;
-
-        Group group = GroupFixture.createGroupById(groupId);
-        group.setMemberSizeLimit(2);
-
-        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupMemberRepository.countByGroup(group)).willReturn(1L);
-        given(s3StorageManager.uploadByteArrayToS3WithKey(any(), any())).willReturn("qrImagePath");
-        given(groupMemberRepository.save(any())).willReturn(mock(GroupMember.class));
-        given(groupInvitationRepository.save(any())).willReturn(GroupInvitation.of(mock(GroupMember.class), "invitationCode", "qrImageURl"));
-
-        //When
-        groupService.createGroupMemberInvitation(groupId, user.getId());
-
-        //Then
-        then(s3StorageManager).should().uploadByteArrayToS3WithKey(any(), any());
-        then(groupMemberRepository).should().save(any(GroupMember.class));
-        then(groupInvitationRepository).should().save(any(GroupInvitation.class));
-    }
-
-    @DisplayName("[팀장] : 과팅 멤버 초대 기능 테스트 - 멤버 수가 꽉 찼을 때")
-    @Test
-    void Given_GroupWhoseMemberCapacityLimitReached_When_CreateGroupMemberInvitation_Then_ThrowsException() {
-        //Given
-        Long groupId = 1L;
-
-        Group group = GroupFixture.createGroupById(groupId);
-        group.setMemberSizeLimit(2);
-
-        given(groupRepository.findById(groupId)).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupMemberRepository.countByGroup(group)).willReturn(2L);
-
-        //When
-        Throwable t = catchThrowable(() -> groupService.createGroupMemberInvitation(groupId, user.getId()));
-
-        //Then
-        assertThat(t)
-                .isInstanceOf(TingApplicationException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REACHED_MEMBERS_SIZE_LIMIT);
-        then(groupMemberRepository).shouldHaveNoMoreInteractions();
-        then(groupInvitationRepository).shouldHaveNoInteractions();
-    }
-
-    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 초대 레코드가 DB에 있는 경우")
-    @Test
-    void Given_GroupAndGroupInvitation_When_DeleteGroupMemberInvitation_Then_DeletesGroupInvitationRecordAndQrImage() {
-        //Given
-        Long groupId = 1L;
-        Long groupInvitationId = 1L;
-
-        Group group = GroupFixture.createGroupById(groupId);
-        GroupMember groupMember = GroupMember.of(group, UserFixture.createUserById(2L), MemberStatus.PENDING, MemberRole.MEMBER);
-        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, "invitationCode",  "invitationQrImageUrl");
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.of(groupInvitation));
-
-        //When
-        groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId);
-
-        //Then
-        then(groupInvitationRepository).should().delete(any(GroupInvitation.class));
-        then(s3StorageManager).should().deleteImageByKey(any());
-    }
-
-    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 초대 레코드가 DB에 없는 경우")
-    @Test
-    void Given_GroupAndGroupInvitationWhichDoesNotExist_When_DeleteGroupMemberInvitation_Then_ThrowsException() {
-        //Given
-        Long groupId = 1L;
-        Long groupInvitationId = 1L;
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.empty());
-
-        //When
-        Throwable t = catchThrowable(() -> groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId));
-
-        //Then
-        assertThat(t)
-                .isInstanceOf(TingApplicationException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.REQUEST_NOT_FOUND);
-        then(groupMemberRepository).shouldHaveNoMoreInteractions();
-        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
-        then(s3StorageManager).shouldHaveNoInteractions();
-    }
-
-    @DisplayName("[팀장] : 과팅 멤버 초대 취소 기능 테스트 - 그룹의 것이 아닌 초대에 대한 삭제 요청을 보냈을 때")
-    @Test
-    void Given_GroupAndGroupInvitationWhichDoesNotBelongToTheGroup_When_DeleteGroupMemberInvitation_Then_ThrowsException() {
-        //Given
-        Long groupId = 1L;
-        Long groupInvitationId = 1L;
-
-        Group group = GroupFixture.createGroupById(groupId);
-        GroupMember groupMember = GroupMember.of(GroupFixture.createGroupById(2L), UserFixture.createUserById(2L), MemberStatus.PENDING, MemberRole.MEMBER);
-        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, "invitationCode",  "invitationQrImageUrl");
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
-        given(groupInvitationRepository.findById(groupInvitationId)).willReturn(Optional.of(groupInvitation));
-
-        //When
-        Throwable t = catchThrowable(() -> groupService.deleteGroupMemberInvitation(groupId, user.getId(), groupInvitationId));
-
-        //Then
-        assertThat(t)
-                .isInstanceOf(TingApplicationException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
-        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
-        then(s3StorageManager).shouldHaveNoInteractions();
-    }
-
-    @DisplayName("과팅 초대 수락 기능 테스트")
-    @Test
-    void Given_GroupAndInvitationCode_When_AcceptGroupMemberInvitation_Then_ReturnsCreatedGroupMemberResponse() {
-        //Given
-        Long groupId = 1L;
-        String invitationCode = "invitationCode";
-
-        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
-        Group group = GroupFixture.createGroupById(groupId);
-        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
-        GroupMember groupMember = GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER);
-        GroupInvitation groupInvitation = GroupInvitation.of(groupMember, invitationCode,  "invitationQrImageUrl");
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(any(), any())).willReturn(Optional.of(groupInvitation));
-        given(groupMemberRepository.saveAndFlush(any())).willReturn(groupInvitation.getGroupMember());
-
-        //When
-        GroupMemberResponse updatedResponse = groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode);
-
-        //Then
-        assertThat(updatedResponse.getMember().getId()).isSameAs(user.getId());
-        assertThat(updatedResponse.getStatus()).isSameAs(MemberStatus.ACTIVE);
-        then(groupInvitationRepository).should().delete(any(GroupInvitation.class));
-        then(s3StorageManager).should().deleteImageByKey(any());
-    }
-
-    @DisplayName("과팅 초대 수락 기능 테스트 - 팀과 성별이 다른 user 가 초대 요청 수락을 했을 때")
-    @Test
-    void Given_GroupWhoseGenderDoesNotMatchTheUserAndInvitationCode_When_AcceptGroupMemberInvitation_Then_ThrowsException() {
-        //Given
-        Long groupId = 1L;
-        String invitationCode = "invitationCode";
-
-        ReflectionTestUtils.setField(user, "gender", Gender.MEN);
-        Group group = GroupFixture.createGroupById(groupId);
-        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-
-        //When
-        Throwable t = catchThrowable(() -> groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode));
-
-        //Then
-        assertThat(t)
-                .isInstanceOf(TingApplicationException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.GENDER_NOT_MATCH);
-        then(groupMemberRepository).shouldHaveNoInteractions();
-        then(groupInvitationRepository).shouldHaveNoInteractions();
-        then(s3StorageManager).shouldHaveNoInteractions();
-    }
-
-    @DisplayName("과팅 초대 수락 기능 테스트 - invalid 한 invitationCode 로 접근했을 때")
-    @Test
-    void Given_GroupAndInvitationCodeWhichIsInvalid_When_AcceptGroupMemberInvitation_Then_ThrowsException() {
-        //Given
-        Long groupId = 1L;
-        String invitationCode = "invitationCode";
-
-        ReflectionTestUtils.setField(user, "gender", Gender.WOMEN);
-        Group group = GroupFixture.createGroupById(groupId);
-        ReflectionTestUtils.setField(group, "gender", Gender.WOMEN);
-        GroupMember groupMember = GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER);
-
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(false);
-        given(groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(any(), any())).willReturn(Optional.empty());
-
-        //When
-        Throwable t = catchThrowable(() -> groupService.acceptGroupMemberInvitation(groupId, user.getId(), invitationCode));
-
-        //Then
-        assertThat(t)
-                .isInstanceOf(TingApplicationException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_REQUEST);
-        then(groupMemberRepository).shouldHaveNoMoreInteractions();
-        then(groupInvitationRepository).shouldHaveNoMoreInteractions();
-        then(s3StorageManager).shouldHaveNoInteractions();
     }
 
     @DisplayName("[팀장] : 과팅 요청 조회 기능 테스트")
@@ -689,7 +461,7 @@ class GroupServiceTest {
 
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupDateRequestRepository.findToGroupByFromGroup(any())).willReturn(List.of(GroupFixture.createGroupById(4L), GroupFixture.createGroupById(5L), GroupFixture.createGroupById(6L)));
         given(groupDateRequestRepository.findFromGroupByToGroup(any())).willReturn(List.of(GroupFixture.createGroupById(2L), GroupFixture.createGroupById(3L)));
 
@@ -717,7 +489,7 @@ class GroupServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.findById(any())).willReturn(Optional.of(fromGroup)).willReturn(Optional.of(toGroup));
         given(groupDateRequestRepository.existsByFromGroupAndToGroup(any(), any())).willReturn(false);
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupDateRequestRepository.existsByFromGroupAndToGroup(any(), any())).willReturn(false);
         given(groupDateRequestRepository.save(any())).willReturn(GroupDateRequest.of(fromGroup, toGroup));
 
@@ -762,7 +534,7 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.findById(any())).willReturn(Optional.of(mock(Group.class)));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
 
         //When
         groupService.deleteGroupDateRequest(user.getId(), fromGroupId, toGroupId);
@@ -787,7 +559,7 @@ class GroupServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(groupDateRequest));
         given(groupDateRepository.existsByMenGroupOrWomenGroup(any(), any())).willReturn(false);
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupDateRepository.save(any())).willReturn(GroupDate.of(toGroup, fromGroup));
 
         //When
@@ -816,7 +588,7 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(groupDateRequest));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupDateRepository.existsByMenGroupOrWomenGroup(any(), any())).willReturn(true);
 
         //When
@@ -837,7 +609,7 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
         given(groupDateRequestRepository.findById(any())).willReturn(Optional.of(mock(GroupDateRequest.class)));
-        given(groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(any(), any(), any(), any())).willReturn(true);
+        given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
 
         //When & Then
         assertDoesNotThrow(() -> groupService.rejectGroupDateRequest(user.getId(), groupDateRequestId));

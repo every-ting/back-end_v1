@@ -75,26 +75,6 @@ public interface GroupService {
     void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
-     * 팀장 - 했던 팀 초대 모두 조회
-     */
-    Set<GroupInvitationResponse> findAllGroupMemberInvitation(long groupId, long userIdOfLeader);
-
-    /**
-     * 팀장 - 팀 멤버로 초대(초대하는 QR 코드 생성)
-     */
-    GroupInvitationResponse createGroupMemberInvitation(long groupId, long userIdOfLeader);
-
-    /**
-     * 팀장 - 팀 멤버 초대 취소
-     */
-    void deleteGroupMemberInvitation(long groupId, long userIdOfLeader, long groupInvitationId);
-
-    /**
-     * 팀 초대 수락
-     */
-    GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode);
-
-    /**
      * 팀장 - 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
      */
     GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader);

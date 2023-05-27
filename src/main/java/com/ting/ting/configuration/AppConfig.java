@@ -14,7 +14,6 @@ public class AppConfig {
     private final S3StorageManager s3StorageManager;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
-    private final GroupInvitationRepository groupInvitationRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
@@ -26,7 +25,7 @@ public class AppConfig {
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(groupRepository, groupInvitationRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository, userRepository, s3StorageManager);
+        return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository, userRepository, s3StorageManager);
     }
 
     @Bean

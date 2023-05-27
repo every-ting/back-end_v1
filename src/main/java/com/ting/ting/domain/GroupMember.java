@@ -1,7 +1,6 @@
 package com.ting.ting.domain;
 
 import com.ting.ting.domain.constant.MemberRole;
-import com.ting.ting.domain.constant.MemberStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
-@Table(name = "\"group_member\"")
+@Table(name = "\"group_member\"", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_group_and_user", columnNames = {"group_id", "member_id"}),
+})
 @Entity
 public class GroupMember extends AuditingFields {
 
@@ -24,16 +25,10 @@ public class GroupMember extends AuditingFields {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Group group;
 
-    @Setter
-    @JoinColumn(name = "member_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User member;
-
-    @Setter
     @NotNull
-    @Column(name = "status", length = 7)
-    @Enumerated(EnumType.STRING)
-    private MemberStatus status;
+    @JoinColumn(name = "member_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private User member;
 
     @Setter
     @NotNull
@@ -46,14 +41,13 @@ public class GroupMember extends AuditingFields {
 
     protected GroupMember() {}
 
-    private GroupMember(Group group, User user, MemberStatus status, MemberRole role) {
+    private GroupMember(Group group, User user, MemberRole role) {
         this.group = group;
         this.member = user;
-        this.status = status;
         this.role = role;
     }
 
-    public static GroupMember of(Group group, User user, MemberStatus status, MemberRole role) {
-        return new GroupMember(group, user, status, role);
+    public static GroupMember of(Group group, User user, MemberRole role) {
+        return new GroupMember(group, user, role);
     }
 }
