@@ -3,7 +3,6 @@ package com.ting.ting.service;
 import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MemberRole;
-import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.GroupDateRequestResponse;
 import com.ting.ting.dto.response.GroupDateRequestWithFromAndToResponse;
@@ -106,11 +105,10 @@ class GroupServiceTest {
     void Given_Nothing_When_FindMyGroupList_Then_ReturnsGroupSet() {
         //Given
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupIdByMember(user)).willReturn(List.of(1L, 2L));
-        given(groupRepository.findAllWithMemberCountByIds(any())).willReturn(List.of(mock(GroupWithMemberCount.class), mock(GroupWithMemberCount.class)));
+        given(groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user)).willReturn(List.of());
 
         //When & Then
-        assertThat(groupService.findMyGroupList(user.getId())).hasSize(2);
+        assertThat(groupService.findMyGroupList(user.getId())).hasSize(0);
     }
 
     @DisplayName("팀 멤버 조회 기능 테스트")

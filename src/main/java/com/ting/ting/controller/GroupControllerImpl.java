@@ -36,7 +36,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Set<GroupResponse>> myGroupList() {
+    public Response<Set<MyGroupResponse>> myGroupList() {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findMyGroupList(userId));

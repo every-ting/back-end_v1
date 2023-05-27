@@ -28,7 +28,7 @@ public interface GroupController {
      * 내가 속한 팀 조회
      */
     @GetMapping("/my")
-    Response<Set<GroupResponse>> myGroupList();
+    Response<Set<MyGroupResponse>> myGroupList();
 
     /**
      * 팀 멤버 조회(팀장 포함)

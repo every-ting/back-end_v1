@@ -1,7 +1,6 @@
 package com.ting.ting.domain.custom;
 
 import com.ting.ting.domain.constant.Gender;
-import com.ting.ting.domain.constant.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

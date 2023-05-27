@@ -106,11 +106,10 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<GroupResponse> findMyGroupList(Long userId) {
+    public Set<MyGroupResponse> findMyGroupList(Long userId) {
         User user = loadUserByUserId(userId);
-        List<Long> userGroupIds = groupMemberRepository.findAllGroupIdByMember(user);
 
-        return groupRepository.findAllWithMemberCountByIds(userGroupIds).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user).stream().map(MyGroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
