@@ -29,8 +29,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     @Query(value = "select entity from GroupMember entity join fetch entity.member where entity.group = :group")
     List<GroupMember> findAllByGroup(@Param("group") Group group);
 
-    @Query(value = "select entity.group from GroupMember entity where entity.member = :user")
-    List<Group> findAllGroupByMember(@Param("user") User user);
+    @Query(value = "select entity.group.id from GroupMember entity where entity.member = :user")
+    List<Long> findAllGroupIdByMember(@Param("user") User user);
 
     @Query(value = "select entity from GroupMember entity join fetch entity.member " +
             "where entity.group = :group " +

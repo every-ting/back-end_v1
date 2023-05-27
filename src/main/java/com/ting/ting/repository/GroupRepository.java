@@ -10,11 +10,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findByGroupName(String name);
+
+    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo) " +
+            "from Group entity left join GroupMember gm on gm.group = entity " +
+            "where entity.id in :groupIds " +
+            "group by entity.id, entity.groupName, entity.gender, entity.gender, entity.school, entity.memberSizeLimit, entity.isMatched, entity.isJoinable, entity.memo")
+    List<GroupWithMemberCount> findAllWithMemberCountByIds(@Param("groupIds") List<Long> groupIds);
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo) " +
             "from Group entity left join GroupMember gm on gm.group = entity " +
