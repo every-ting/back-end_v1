@@ -11,8 +11,6 @@ import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
-import com.ting.ting.util.S3StorageManager;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,28 +28,23 @@ import java.util.stream.Collectors;
 @Component
 public class GroupServiceImpl extends AbstractService implements GroupService {
 
-    @Value("${server.url}")
-    private String serverUrl;
-
+    private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final GroupLikeToDateRepository groupLikeToDateRepository;
-    private final UserRepository userRepository;
-    private final S3StorageManager s3StorageManager;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository, UserRepository userRepository, S3StorageManager s3StorageManager) {
+    public GroupServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository) {
         super(ServiceType.GROUP_MEETING);
+        this.userRepository = userRepository;
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
         this.groupLikeToDateRepository = groupLikeToDateRepository;
-        this.userRepository = userRepository;
-        this.s3StorageManager = s3StorageManager;
     }
 
     @Override
