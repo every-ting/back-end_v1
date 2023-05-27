@@ -37,6 +37,12 @@ public interface GroupController {
     Response<Void> createSameGenderGroupLike(@PathVariable Long toGroupId);
 
     /**
+     * 같은 성별의 팀 찜하기 취소
+     */
+    @DeleteMapping("/likes/{toGroupId}")
+    Response<Void> deletesSameGenderGroupLike(@PathVariable Long toGroupId);
+
+    /**
      * 팀 멤버 조회(팀장 포함)
      */
     @GetMapping("/{groupId}/members")
