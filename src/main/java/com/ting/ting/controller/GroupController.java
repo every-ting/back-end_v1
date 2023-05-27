@@ -31,6 +31,12 @@ public interface GroupController {
     Response<Set<MyGroupResponse>> myGroupList();
 
     /**
+     * 같은 성별의 팀 찜하기
+     */
+    @PostMapping("/likes/{toGroupId}")
+    Response<Void> createSameGenderGroupLike(@PathVariable Long toGroupId);
+
+    /**
      * 팀 멤버 조회(팀장 포함)
      */
     @GetMapping("/{groupId}/members")
