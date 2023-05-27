@@ -26,7 +26,7 @@ public class AppConfig {
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository, userRepository, s3StorageManager);
+        return new GroupServiceImpl(groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository, groupLikeToJoinRepository, userRepository, s3StorageManager);
     }
 
     @Bean

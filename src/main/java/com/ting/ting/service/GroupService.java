@@ -17,12 +17,12 @@ public interface GroupService {
     /**
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
-    Page<GroupWithRequestStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable);
+    Page<GroupWithStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable);
 
     /**
      * 다른 성별의 팀 조회
      */
-    Page<GroupWithLikeStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable);
+    Page<GroupWithStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable);
 
     /**
      * 내가 속한 팀 조회 - request status : ACCEPTED

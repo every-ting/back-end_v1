@@ -16,13 +16,13 @@ public interface GroupController {
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
     @GetMapping
-    Response<Page<GroupWithRequestStatusResponse>> getJoinableSameGenderGroupList(@ParameterObject Pageable pageable);
+    Response<Page<GroupWithStatusResponse>> getJoinableSameGenderGroupList(@ParameterObject Pageable pageable);
 
     /**
      * 다른 성별의 팀 조회
      */
     @GetMapping("/{groupId}/opposite-gender-groups")
-    Response<Page<GroupWithLikeStatusResponse>> getOppositeGenderGroupList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+    Response<Page<GroupWithStatusResponse>> getOppositeGenderGroupList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
 
     /**
      * 내가 속한 팀 조회

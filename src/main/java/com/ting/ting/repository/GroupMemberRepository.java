@@ -31,10 +31,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     List<GroupMember> findAllByGroup(@Param("group") Group group);
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCountAndRole" +
-            "(gm.group.id, gm.group.groupName, gm.group.gender, (select count(*) from GroupMember gm2 where gm2.group = gm.group), gm.group.memberSizeLimit, gm.group.school, gm.group.isMatched, gm.group.isJoinable, gm.group.memo, gm.role) " +
-            "from GroupMember gm " +
-            "where gm.member = :user " +
-            "group by gm.group, gm.role")
+            "(gm.group.id, gm.group.groupName, gm.group.gender, (select count(*) from GroupMember gm2 where gm2.group = gm.group), gm.group.memberSizeLimit, gm.group.school, gm.group.isMatched, gm.group.isJoinable, gm.group.memo, gm.role, gm.createdAt) " +
+            "from GroupMember gm where gm.member = :user group by gm.group.id")
     List<GroupWithMemberCountAndRole> findGroupWithMemberCountAndRoleByMember(@Param("user") User user);
 
     @Query(value = "select entity from GroupMember entity join fetch entity.member " +

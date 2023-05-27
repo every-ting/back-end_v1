@@ -25,14 +25,14 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Page<GroupWithRequestStatusResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
+    public Response<Page<GroupWithStatusResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findJoinableSameGenderGroupList(userId, pageable));
     }
 
     @Override
-    public Response<Page<GroupWithLikeStatusResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
+    public Response<Page<GroupWithStatusResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findDateableOppositeGenderGroupList(groupId, userId, pageable));
