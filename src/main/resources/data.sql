@@ -47,19 +47,19 @@ insert into group_date_request(id, from_id, to_id, created_at, updated_at) value
 insert into group_date_request(id, from_id, to_id, created_at, updated_at) values (5, 1, 16, now(), now());
 insert into group_date_request(id, from_id, to_id, created_at, updated_at) values (6, 1, 19, now(), now());
 
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (1, 1, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (2, 2, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (3, 10, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (4, 18, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (5, 5, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (6, 6, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (7, 7, 'ACTIVE', 'LEADER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (8, 8, 'ACTIVE', 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (1, 1, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (2, 2, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (3, 10, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (4, 18, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (5, 5, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (6, 6, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (7, 7, 'LEADER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (8, 8, 'LEADER', now(), now());
 
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (1, 14, 'ACTIVE', 'MEMBER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (1, 10, 'ACTIVE', 'MEMBER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (3, 1, 'ACTIVE', 'MEMBER', now(), now());
-insert into group_member (group_id, member_id, status, role, created_at, updated_at) values (5, 1, 'ACTIVE', 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (1, 14, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (1, 10, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (3, 1, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (5, 1, 'MEMBER', now(), now());
 
 insert into group_member_request (group_id, user_id, created_at, updated_at) values (1, 5, now(), now());
 insert into group_member_request (group_id, user_id, created_at, updated_at) values (1, 4, now(), now());
