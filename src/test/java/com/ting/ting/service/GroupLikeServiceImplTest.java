@@ -20,8 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 
 @DisplayName("[과팅] 찜하기 관련 비즈니스 로직 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +58,21 @@ class GroupLikeServiceTest {
 
         //Then
         then(groupLikeToJoinRepository).should().save(any());
+    }
+
+    @DisplayName("같은 성별의 팀 찜하기 취소 기능 테스트")
+    @Test
+    void Given_Group_When_DeleteSameGenderGroupLike_Then_DeletesGroupLikeToJoin() {
+        //Given
+        Long groupId = 1L;
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+
+        //When
+        groupLikeService.deleteSameGenderGroupLike(groupId, user.getId());
+
+        //Then
+        then(groupLikeToJoinRepository).should().deleteByFromUser_IdAndToGroup_Id(any(), any());
+        then(groupLikeToJoinRepository).shouldHaveNoMoreInteractions();
     }
 
 }

@@ -42,6 +42,13 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
         groupLikeToJoinRepository.save(GroupLikeToJoin.of(user, group));
     }
 
+    @Override
+    public void deleteSameGenderGroupLike(Long groupId, Long userId) {
+        loadUserByUserId(userId); // 유저 검증
+
+        groupLikeToJoinRepository.deleteByFromUser_IdAndToGroup_Id(userId, groupId);
+    }
+
     private Group loadGroupByGroupId(Long groupId) {
         return groupRepository.findById(groupId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId))
