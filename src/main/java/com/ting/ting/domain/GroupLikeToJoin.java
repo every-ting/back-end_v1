@@ -9,7 +9,7 @@ import javax.persistence.*;
         @UniqueConstraint(name = "unique_group_and_user", columnNames = {"from_user_id", "to_group_id"}),
 })
 @Entity
-public class GroupLikeToJoin {
+public class GroupLikeToJoin extends AuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
