@@ -55,6 +55,12 @@ public interface GroupController {
     Response<Void> deleteOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
 
     /**
+     * 팀 기준 - 찜한 목록 조회
+     */
+    @GetMapping("/{groupId}/likes")
+    Response<Page<LikedDateableGroupResponse>>  getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+
+    /**
      * 팀 멤버 조회(팀장 포함)
      */
     @GetMapping("/{groupId}/members")
