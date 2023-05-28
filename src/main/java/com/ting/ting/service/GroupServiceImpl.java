@@ -1,17 +1,16 @@
 package com.ting.ting.service;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.ting.ting.domain.*;
-import com.ting.ting.domain.constant.*;
+import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
+import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
-import com.ting.ting.util.QRCodeGenerator;
-import com.ting.ting.util.S3StorageManager;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -30,30 +28,23 @@ import java.util.stream.Collectors;
 @Component
 public class GroupServiceImpl extends AbstractService implements GroupService {
 
-    @Value("${server.url}")
-    private String serverUrl;
-
+    private final UserRepository userRepository;
     private final GroupRepository groupRepository;
-    private final GroupInvitationRepository groupInvitationRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final GroupLikeToDateRepository groupLikeToDateRepository;
-    private final UserRepository userRepository;
-    private final S3StorageManager s3StorageManager;
 
-    public GroupServiceImpl(GroupRepository groupRepository, GroupInvitationRepository groupInvitationRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository, UserRepository userRepository, S3StorageManager s3StorageManager) {
+    public GroupServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository) {
         super(ServiceType.GROUP_MEETING);
+        this.userRepository = userRepository;
         this.groupRepository = groupRepository;
-        this.groupInvitationRepository = groupInvitationRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
         this.groupLikeToDateRepository = groupLikeToDateRepository;
-        this.userRepository = userRepository;
-        this.s3StorageManager = s3StorageManager;
     }
 
     @Override
@@ -111,7 +102,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     public Set<GroupResponse> findMyGroupList(Long userId) {
         User member = loadUserByUserId(userId);
 
-        return groupMemberRepository.findAllGroupByMemberAndStatus(member, MemberStatus.ACTIVE).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
+        return groupMemberRepository.findAllGroupByMember(member).stream().map(GroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -130,7 +121,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         });
 
         Group group = groupRepository.save(request.toEntity());
-        groupMemberRepository.save(GroupMember.of(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER));
+        groupMemberRepository.save(GroupMember.of(group, leader, MemberRole.LEADER));
 
         return GroupResponse.from(group);
     }
@@ -169,7 +160,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         Group group = loadGroupByGroupId(groupId);
         User member = loadUserByUserId(userId);
 
-        GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMemberAndStatus(group, member, MemberStatus.ACTIVE).orElseThrow(() ->
+        GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
         );
 
@@ -194,14 +185,14 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User leader = loadUserByUserId(userIdOfLeader);
         User newLeader = loadUserByUserId(userIdOfNewLeader);
 
-        if (groupMemberRepository.existsByMemberAndStatusAndRole(newLeader, MemberStatus.ACTIVE, MemberRole.LEADER)) {
+        if (groupMemberRepository.existsByMemberAndRole(newLeader, MemberRole.LEADER)) {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a leader in another group", newLeader.getId()));
         }
 
-        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER).orElseThrow(() ->
+        GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndRole(group, leader, MemberRole.LEADER).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not the leader of Group(id: %d)", userIdOfLeader, groupId))
         );
-        GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndStatusAndRole(group, newLeader, MemberStatus.ACTIVE, MemberRole.MEMBER).orElseThrow(() ->
+        GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndRole(group, newLeader, MemberRole.MEMBER).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", userIdOfNewLeader, groupId))
         );
 
@@ -241,7 +232,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
 
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
-        GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberStatus.ACTIVE, MemberRole.MEMBER));
+        GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
 
         if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
@@ -261,89 +252,6 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
         groupMemberRequestRepository.delete(groupMemberRequest);
-    }
-
-    @Override
-    public Set<GroupInvitationResponse> findAllGroupMemberInvitation(long groupId, long userIdOfLeader) {
-        Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(userIdOfLeader);
-
-        throwIfUserIsNotTheLeaderOfGroup(leader, group);
-
-        return groupInvitationRepository.findByGroupMember_Group(group).stream().map(GroupInvitationResponse::from).collect(Collectors.toUnmodifiableSet());
-    }
-
-    @Override
-    public GroupInvitationResponse createGroupMemberInvitation(long groupId, long userIdOfLeader) {
-        Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(userIdOfLeader);
-
-        throwIfUserIsNotTheLeaderOfGroup(leader, group);
-
-        Long currentNumberOfMembers = groupMemberRepository.countByGroup(group);
-
-        if (currentNumberOfMembers >= group.getMemberSizeLimit()) {
-            throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupId, group.getMemberSizeLimit()));
-        }
-
-        // 초대 번호를 이용한 초대 qr 생성
-        String invitationCode = groupId + UUID.randomUUID().toString();
-        byte[] qrImageBytes = generateGroupInvitationQRCodeBytes(groupId, invitationCode);
-        String qrImageUrl = uploadGroupInvitationQRCodeToStorage(groupId, invitationCode, qrImageBytes);
-        GroupMember pendingReservedMember = groupMemberRepository.save(GroupMember.of(group, null, MemberStatus.PENDING, MemberRole.MEMBER));
-        GroupInvitation created = groupInvitationRepository.save(GroupInvitation.of(pendingReservedMember, invitationCode, qrImageUrl));
-
-        return GroupInvitationResponse.from(created);
-    }
-
-    @Override
-    public void deleteGroupMemberInvitation(long groupId, long userIdOfLeader, long groupInvitationId) {
-        Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(userIdOfLeader);
-
-        throwIfUserIsNotTheLeaderOfGroup(leader, group);
-
-        GroupInvitation groupInvitation = groupInvitationRepository.findById(groupInvitationId).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupInvitation(id: %d) not found", groupInvitationId))
-        );
-
-        if (!groupInvitation.getGroupMember().getGroup().equals(group)) {
-            throwException(ErrorCode.INVALID_REQUEST, String.format("GroupInvitation(id: %d) does not belong to Group(id: %d)", groupInvitationId, groupId));
-        }
-
-        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
-
-        groupInvitationRepository.delete(groupInvitation);
-        groupMemberRepository.delete(reservedGroupMemberRecord);
-        deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
-    }
-
-    @Override
-    public GroupMemberResponse acceptGroupMemberInvitation(long groupId, long userId, String invitationCode) {
-        Group group = loadGroupByGroupId(groupId);
-        User invitedUser = loadUserByUserId(userId);
-
-        if (group.getGender() != invitedUser.getGender()) {
-            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
-        }
-
-        if (groupMemberRepository.existsByGroupAndMember(group, invitedUser)) {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", userId, groupId));
-        }
-
-        GroupInvitation groupInvitation = groupInvitationRepository.findByGroupMember_GroupAndInvitationCode(group, invitationCode).orElseThrow(() ->
-                throwException(ErrorCode.INVALID_REQUEST, String.format("InvitationCode(%s) is invalid", invitationCode))
-        );
-
-        GroupMember reservedGroupMemberRecord = groupInvitation.getGroupMember();
-        reservedGroupMemberRecord.setMember(invitedUser);
-        reservedGroupMemberRecord.setStatus(MemberStatus.ACTIVE);
-        GroupMember updated = groupMemberRepository.saveAndFlush(reservedGroupMemberRecord);
-
-        groupInvitationRepository.delete(groupInvitation);
-        deleteGroupInvitationQRCodeFromStorage(groupId, groupInvitation.getInvitationCode());
-
-        return GroupMemberResponse.from(updated);
     }
 
     @Override
@@ -450,37 +358,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         groupDateRequestRepository.delete(groupDateRequest);
     }
 
-    private byte[] generateGroupInvitationQRCodeBytes(long groupId, String invitationCode) {
-        // TODO : linkedUrl에 front url이 담겨야 함. 추후에 front url 확정되면 수정
-        String linkedUrl = serverUrl + "/groups/" + groupId + "/members/invitations/" + invitationCode;
-        byte[] qrImage = null;
-
-        try {
-            qrImage = QRCodeGenerator.generateQRCodeImageBytes(linkedUrl);
-        } catch (Exception e) {
-            throwException(ErrorCode.QR_GENERATOR_ERROR);
-        }
-
-        return qrImage;
-    }
-
-    private String uploadGroupInvitationQRCodeToStorage(long groupId, String imageFileName, byte[] qrImageBytes) {
-        String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
-        return s3StorageManager.uploadByteArrayToS3WithKey(qrImageBytes, qrImageKey);
-    }
-
-    private void deleteGroupInvitationQRCodeFromStorage(long groupId, String imageFileName) {
-        String qrImageKey = "qr/" + groupId + "/" + imageFileName + ".png";
-
-        try {
-            s3StorageManager.deleteImageByKey(qrImageKey);
-        } catch (AmazonS3Exception e) {
-            throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("QR Image with the key : %s does not exist in the bucket", qrImageKey));
-        }
-    }
-
     private void throwIfUserIsNotTheLeaderOfGroup(User leader, Group group) {
-        if (!groupMemberRepository.existsByGroupAndMemberAndStatusAndRole(group, leader, MemberStatus.ACTIVE, MemberRole.LEADER)) {
+        if (!groupMemberRepository.existsByGroupAndMemberAndRole(group, leader, MemberRole.LEADER)) {
             throwException(ErrorCode.INVALID_PERMISSION, String.format("User(id: %d) is not the leader of Group(id: %d)", leader.getId(), group.getId()));
         }
     }
