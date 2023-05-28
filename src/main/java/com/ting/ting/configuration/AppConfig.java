@@ -31,7 +31,7 @@ public class AppConfig {
 
     @Bean
     public GroupLikeService groupLikeService() {
-        return new GroupLikeServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository);
+        return new GroupLikeServiceImpl(userRepository, groupRepository, groupMemberRepository, groupLikeToJoinRepository, groupLikeToDateRepository);
     }
 
     @Bean
