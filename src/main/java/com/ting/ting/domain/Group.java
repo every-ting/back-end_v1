@@ -9,6 +9,11 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Table(name = "\"group\"")
@@ -50,6 +55,9 @@ public class Group extends AuditingFields {
 
     private String memo;
 
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private Set<GroupMember> groupMembers;
+
     protected Group() {}
 
     private Group(String groupName, Gender gender, String school, int memberSizeLimit, String memo) {
@@ -62,5 +70,27 @@ public class Group extends AuditingFields {
 
     public static Group of(String groupName, Gender gender, String school, int memberSizeLimit, String memo) {
         return new Group(groupName, gender, school, memberSizeLimit, memo);
+    }
+
+    // groupMembers 평균 나이 구하는 함수
+    public int getAverageAgeOfMembers() {
+        LocalDate currentDate = LocalDate.now();
+        List<Integer> ages = groupMembers.stream()
+                .map(member -> Period.between(member.getMember().getBirth(), currentDate).getYears())
+                .collect(Collectors.toList());
+
+        if (ages.isEmpty()) {
+            return 0;
+        }
+
+        double sum = ages.stream().mapToInt(Integer::intValue).sum();
+        return (int)sum / ages.size();
+    }
+
+    // groupMembers 의 전공 리스트 반환하는 함수
+    public List<String> getAllMajorsOfMembers() {
+        return groupMembers.stream()
+                .map(member -> member.getMember().getMajor())
+                .collect(Collectors.toList());
     }
 }

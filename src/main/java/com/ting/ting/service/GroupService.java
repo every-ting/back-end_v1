@@ -25,9 +25,14 @@ public interface GroupService {
     Page<GroupWithStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable);
 
     /**
-     * 내가 속한 팀 조회 - request status : ACCEPTED
+     * 내가 속한 팀 조회
      */
     Set<MyGroupResponse> findMyGroupList(Long userId);
+
+    /**
+     * 팀 기준 - 찜한 목록 조회
+     */
+    Page<LikedDateableGroupResponse> findGroupLikeToDateList(Long groupId, Long userId, Pageable pageable);
 
     /**
      * 팀 멤버 조회

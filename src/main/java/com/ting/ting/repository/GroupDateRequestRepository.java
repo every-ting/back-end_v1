@@ -16,6 +16,8 @@ public interface GroupDateRequestRepository extends JpaRepository<GroupDateReque
 
     void deleteByFromGroup_IdAndToGroup_Id(Long fromGroupId, Long toGroupId);
 
+    List<GroupDateRequest> findAllByFromGroup(Group fromGroup);
+
     @Query(value = "select distinct entity.fromGroup from GroupDateRequest entity join entity.fromGroup where entity.toGroup = :toGroup")
     List<Group> findFromGroupByToGroup(@Param("toGroup") Group toGroup);
 
