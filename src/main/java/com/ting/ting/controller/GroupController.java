@@ -40,7 +40,19 @@ public interface GroupController {
      * 같은 성별의 팀 찜하기 취소
      */
     @DeleteMapping("/likes/{toGroupId}")
-    Response<Void> deletesSameGenderGroupLike(@PathVariable Long toGroupId);
+    Response<Void> deleteSameGenderGroupLike(@PathVariable Long toGroupId);
+
+    /**
+     * 다른 성별의 팀 찜하기
+     */
+    @PostMapping("/{fromGroupId}/likes/{toGroupId}")
+    Response<Void> createOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 다른 성별의 팀 찜하기 취소
+     */
+    @DeleteMapping("/{fromGroupId}/likes/{toGroupId}")
+    Response<Void> deleteOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
 
     /**
      * 팀 멤버 조회(팀장 포함)
