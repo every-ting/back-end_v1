@@ -27,7 +27,7 @@ public interface GroupService {
     /**
      * 내가 속한 팀 조회 - request status : ACCEPTED
      */
-    Set<GroupResponse> findMyGroupList(Long userId);
+    Set<MyGroupResponse> findMyGroupList(Long userId);
 
     /**
      * 팀 멤버 조회

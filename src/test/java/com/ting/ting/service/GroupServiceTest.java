@@ -105,10 +105,10 @@ class GroupServiceTest {
     void Given_Nothing_When_FindMyGroupList_Then_ReturnsGroupSet() {
         //Given
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findAllGroupByMember(any())).willReturn(List.of(mock(Group.class), mock(Group.class)));
+        given(groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user)).willReturn(List.of());
 
         //When & Then
-        assertThat(groupService.findMyGroupList(user.getId())).hasSize(2);
+        assertThat(groupService.findMyGroupList(user.getId())).hasSize(0);
     }
 
     @DisplayName("팀 멤버 조회 기능 테스트")
