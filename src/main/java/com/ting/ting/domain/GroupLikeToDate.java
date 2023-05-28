@@ -13,22 +13,22 @@ public class GroupLikeToDate extends AuditingFields{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "to_group_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Group toGroup;
-
     @JoinColumn(name = "from_group_member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private GroupMember fromGroupMember;
 
+    @JoinColumn(name = "to_group_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Group toGroup;
+
     protected GroupLikeToDate() {}
 
-    private GroupLikeToDate(Group toGroup, GroupMember fromGroupMember) {
-        this.toGroup = toGroup;
+    private GroupLikeToDate(GroupMember fromGroupMember, Group toGroup) {
         this.fromGroupMember = fromGroupMember;
+        this.toGroup = toGroup;
     }
 
-    public static GroupLikeToDate of(Group toGroup, GroupMember fromGroupMember) {
-        return new GroupLikeToDate(toGroup, fromGroupMember);
+    public static GroupLikeToDate of(GroupMember fromGroupMember, Group toGroup) {
+        return new GroupLikeToDate(fromGroupMember, toGroup);
     }
 }
