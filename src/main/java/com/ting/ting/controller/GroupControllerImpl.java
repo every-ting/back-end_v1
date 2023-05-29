@@ -3,6 +3,7 @@ package com.ting.ting.controller;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
+import com.ting.ting.service.GroupLikeService;
 import com.ting.ting.service.GroupService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,21 +16,23 @@ import java.util.Set;
 public class GroupControllerImpl extends AbstractController implements GroupController {
 
     private final GroupService groupService;
+    private final GroupLikeService groupLikeService;
 
-    public GroupControllerImpl(GroupService groupService) {
+    public GroupControllerImpl(GroupService groupService, GroupLikeService groupLikeService) {
         super(ServiceType.GROUP_MEETING);
         this.groupService = groupService;
+        this.groupLikeService = groupLikeService;
     }
 
     @Override
-    public Response<Page<GroupWithRequestStatusResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
+    public Response<Page<GroupWithStatusResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findJoinableSameGenderGroupList(userId, pageable));
     }
 
     @Override
-    public Response<Page<GroupWithLikeStatusResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
+    public Response<Page<GroupWithStatusResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findDateableOppositeGenderGroupList(groupId, userId, pageable));
@@ -40,6 +43,22 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findMyGroupList(userId));
+    }
+
+    @Override
+    public Response<Void> createSameGenderGroupLike(Long toGroupId) {
+        Long fromUserId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        groupLikeService.createSameGenderGroupLike(toGroupId, fromUserId);
+        return success();
+    }
+
+    @Override
+    public Response<Void> deletesSameGenderGroupLike(Long toGroupId) {
+        Long fromUserId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        groupLikeService.deleteSameGenderGroupLike(toGroupId, fromUserId);
+        return success();
     }
 
     @Override

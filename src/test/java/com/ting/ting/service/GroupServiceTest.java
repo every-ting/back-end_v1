@@ -47,6 +47,7 @@ class GroupServiceTest {
     @Mock private GroupDateRepository groupDateRepository;
     @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private GroupLikeToDateRepository groupLikeToDateRepository;
+    @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
     @Mock private UserRepository userRepository;
 
     private User user;
@@ -69,12 +70,14 @@ class GroupServiceTest {
 
     @DisplayName("같은 성별 팀 가입을 위한 조회 기능 테스트")
     @Test
-    void Given_Nothing_When_FindSuggestedSameGenderGroupList_Then_ReturnsGroupWithRequestStatusResponsePage() {
+    void Given_Nothing_When_FindJoinableSameGenderGroupList_Then_ReturnsGroupWithRequestStatusResponsePage() {
         //Given
         Pageable pageable = Pageable.ofSize(20);
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(any(), anyBoolean(), any(), any())).willReturn(Page.empty());
+        given(groupMemberRequestRepository.findAllGroupByUser(user)).willReturn(List.of());
+        given(groupLikeToJoinRepository.findAllToGroupByFromUser(user)).willReturn(List.of());
 
         //When
         assertThat(groupService.findJoinableSameGenderGroupList(user.getId(), pageable)).isEmpty();

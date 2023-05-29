@@ -17,13 +17,19 @@ public class AppConfig {
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final GroupLikeToDateRepository groupLikeToDateRepository;
+    private final GroupLikeToJoinRepository groupLikeToJoinRepository;
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
     private final BlindLikeRepository blindLikeRepository;
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToDateRepository);
+        return new GroupServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToJoinRepository, groupLikeToDateRepository);
+    }
+
+    @Bean
+    public GroupLikeService groupLikeService() {
+        return new GroupLikeServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository);
     }
 
     @Bean

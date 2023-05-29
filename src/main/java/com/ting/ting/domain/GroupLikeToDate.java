@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Getter
 @Table(name = "\"group_like_to_date\"")
 @Entity
-public class GroupLikeToDate {
+public class GroupLikeToDate extends AuditingFields{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

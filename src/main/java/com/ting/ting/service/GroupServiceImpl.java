@@ -34,9 +34,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRepository groupDateRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
+    private final GroupLikeToJoinRepository groupLikeToJoinRepository;
     private final GroupLikeToDateRepository groupLikeToDateRepository;
 
-    public GroupServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository, GroupLikeToDateRepository groupLikeToDateRepository) {
+    public GroupServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRepository groupDateRepository, GroupDateRequestRepository groupDateRequestRepository,
+                            GroupLikeToJoinRepository groupLikeToJoinRepository, GroupLikeToDateRepository groupLikeToDateRepository) {
         super(ServiceType.GROUP_MEETING);
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
@@ -44,6 +46,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRepository = groupDateRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
+        this.groupLikeToJoinRepository = groupLikeToJoinRepository;
         this.groupLikeToDateRepository = groupLikeToDateRepository;
     }
 
@@ -53,28 +56,36 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<GroupWithRequestStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
+    public Page<GroupWithStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
         User user = loadUserByUserId(userId);
 
         Page<GroupWithMemberCount> joinableSameGenderGroups = groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(user.getGender(), true, user, pageable);
-        Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllGroup_IdByUser(user).stream().collect(Collectors.toUnmodifiableSet());
+        Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllGroupByUser(user).stream().map(Group::getId).collect(Collectors.toUnmodifiableSet());
+        Set<Long> myLikeGroupIds = groupLikeToJoinRepository.findAllToGroupByFromUser(user).stream().map(Group::getId).collect(Collectors.toUnmodifiableSet());
 
-        List<GroupWithRequestStatusResponse> groupWithRequestStatusResponses = new ArrayList<>();
+        List<GroupWithStatusResponse> groupWithStatusResponses = joinableSameGenderGroups.stream()
+                .map(joinableSameGenderGroup -> {
+                    GroupWithStatusResponse response = GroupWithStatusResponse.from(joinableSameGenderGroup, RequestStatus.EMPTY, null);
 
-        for (GroupWithMemberCount joinableSameGenderGroup : joinableSameGenderGroups) {
+                    if (myPendingJoinGroupIds.contains(joinableSameGenderGroup.getId())) {
+                        response.setRequestStatus(RequestStatus.PENDING);
+                    }
 
-            if (myPendingJoinGroupIds.contains(joinableSameGenderGroup.getId())) {
-                groupWithRequestStatusResponses.add(GroupWithRequestStatusResponse.from(joinableSameGenderGroup, RequestStatus.PENDING));
-            } else {
-                groupWithRequestStatusResponses.add(GroupWithRequestStatusResponse.from(joinableSameGenderGroup, RequestStatus.EMPTY));
-            }
-        }
+                    if (myLikeGroupIds.contains(joinableSameGenderGroup.getId())) {
+                        response.setLikeStatus(LikeStatus.LIKED);
+                    } else {
+                        response.setLikeStatus(LikeStatus.NOT_LIKED);
+                    }
 
-        return new PageImpl<>(groupWithRequestStatusResponses, pageable, joinableSameGenderGroups.getTotalElements());
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(groupWithStatusResponses, pageable, joinableSameGenderGroups.getTotalElements());
     }
 
     @Override
-    public Page<GroupWithLikeStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
+    public Page<GroupWithStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
         Group group = loadGroupByGroupId(groupId);
         User member = loadUserByUserId(userId);
 
@@ -85,13 +96,13 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         Page<GroupWithMemberCount> oppositeGenderGroups = groupRepository.findAllWithMemberCountByGenderAndIsMatched(group.getGender().getOpposite(), false, pageable);
         Set<Long> likedGroupIds = groupLikeToDateRepository.findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(group, member).stream().collect(Collectors.toUnmodifiableSet());
 
-        List<GroupWithLikeStatusResponse> groupWithLikeStatusResponses = new ArrayList<>();
+        List<GroupWithStatusResponse> groupWithLikeStatusResponses = new ArrayList<>();
 
         for (GroupWithMemberCount oppositeGenderGroup : oppositeGenderGroups) {
             if (likedGroupIds.contains(oppositeGenderGroup.getId())) {
-                groupWithLikeStatusResponses.add(GroupWithLikeStatusResponse.from(oppositeGenderGroup, LikeStatus.LIKED));
+                groupWithLikeStatusResponses.add(GroupWithStatusResponse.from(oppositeGenderGroup, null, LikeStatus.LIKED));
             } else {
-                groupWithLikeStatusResponses.add(GroupWithLikeStatusResponse.from(oppositeGenderGroup, LikeStatus.NOT_LIKED));
+                groupWithLikeStatusResponses.add(GroupWithStatusResponse.from(oppositeGenderGroup, null, LikeStatus.NOT_LIKED));
             }
         }
 

@@ -6,6 +6,8 @@ import com.ting.ting.domain.custom.GroupWithMemberCount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Getter
 public class GroupResponse {
@@ -19,6 +21,7 @@ public class GroupResponse {
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;
+    private LocalDateTime createdAt;
 
     public static GroupResponse from(Group entity) {
         return new GroupResponse(
@@ -30,7 +33,8 @@ public class GroupResponse {
                 entity.getSchool(),
                 entity.isMatched(),
                 entity.isJoinable(),
-                entity.getMemo()
+                entity.getMemo(),
+                entity.getCreatedAt()
         );
     }
 
@@ -44,7 +48,8 @@ public class GroupResponse {
                 entity.getSchool(),
                 entity.isMatched(),
                 entity.isJoinable(),
-                entity.getMemo()
+                entity.getMemo(),
+                entity.getCreatedAt()
         );
     }
 }
