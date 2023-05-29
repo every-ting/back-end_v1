@@ -48,10 +48,7 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
         idToBeRemoved.add(userId);
 
-        if (user.getGender() == Gender.MEN) {
-            return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.WOMEN, idToBeRemoved, pageable));
-        }
-        return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(Gender.MEN, idToBeRemoved, pageable));
+        return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(user.getGender().getOpposite(), idToBeRemoved, pageable));
     }
 
     private Page<BlindUserWithRequestStatusAndLikeStatusResponse> getBlindUserWithRequestStatusAndLikeStatusResponses(User user, Pageable pageable, Page<User> otherUsers) {
@@ -80,16 +77,12 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     private Set<Long> getUserIdOfMyDateMatchedUsers(User user) {
-        Set<Long> idToBeRemoved = new HashSet<>();
-
         Set<BlindDate> matchedUsers = blindDateRepository.getByMyMatchedUsers(user);
 
-        for (BlindDate blindDate : matchedUsers) {
-            idToBeRemoved.add(blindDate.getMenUser().getId());
-            idToBeRemoved.add(blindDate.getWomenUser().getId());
+        if (user.getGender() == Gender.MEN) {
+            return matchedUsers.stream().map(BlindDate::getWomenUser).map(User::getId).collect(Collectors.toSet());
         }
-
-        return idToBeRemoved;
+        return matchedUsers.stream().map(BlindDate::getMenUser).map(User::getId).collect(Collectors.toSet());
     }
 
     @Override
@@ -139,20 +132,18 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         );
     }
 
-    private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> blindDateResponses) {
+    private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> myRelatedUsersInfo) {
         User user = getUserById(userId);
 
         Set<BlindRequestResponse> blindRequestResponses = new LinkedHashSet<>();
 
-        Set<Long> blindLikedUserId = getMyLikedUserId(user);
+        Set<Long> blindLikedUserId = getMyLikedUser(user).stream().map(User::getId).collect(Collectors.toUnmodifiableSet());
 
-        for (BlindDateResponse blindDateResponse : blindDateResponses) {
-            long toUserId = blindDateResponse.getId();
-
-            if (blindLikedUserId.contains(toUserId)) {
-                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.LIKED));
+        for (BlindDateResponse myRelatedUser : myRelatedUsersInfo) {
+            if (blindLikedUserId.contains(myRelatedUser.getId())) {
+                blindRequestResponses.add(BlindRequestResponse.of(myRelatedUser, LikeStatus.LIKED));
             } else {
-                blindRequestResponses.add(BlindRequestResponse.of(blindDateResponse, LikeStatus.NOT_LIKED));
+                blindRequestResponses.add(BlindRequestResponse.of(myRelatedUser, LikeStatus.NOT_LIKED));
             }
         }
 
@@ -160,32 +151,15 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     private Set<BlindDateResponse> myRequest(long fromUserId) {
-        User fromUser = getUserById(fromUserId);
+        Set<BlindRequest> usersOfMyRequestInfo = blindRequestRepository.findAllByFromUserAndStatus(getUserById(fromUserId), RequestStatus.PENDING);
 
-        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByFromUserAndStatus(fromUser, RequestStatus.PENDING);
-
-        LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
-
-        for (BlindRequest requestToMeUserInfo : usersOfRequestedInfo) {
-            Long toUserId = requestToMeUserInfo.getToUser().getId();
-            User toUser = getUserById(toUserId);
-            usersOfRequested.add(toUser);
-        }
-
-        return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfMyRequestInfo.stream().map(BlindRequest::getToUser).map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private Set<BlindDateResponse> requestToMe(long toUserId) {
-        Set<BlindRequest> usersOfRequestedInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
+        Set<BlindRequest> usersOfRequestToMeInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
 
-        LinkedHashSet<User> usersOfRequested = new LinkedHashSet<>();
-
-        for (BlindRequest requestToMeUserInfo : usersOfRequestedInfo) {
-            Long fromUserId = requestToMeUserInfo.getFromUser().getId();
-            usersOfRequested.add(getUserById(fromUserId));
-        }
-
-        return usersOfRequested.stream().map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfRequestToMeInfo.stream().map(BlindRequest::getFromUser).map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
@@ -247,38 +221,14 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     private Set<User> getMyRequestPendingUsers(User user) {
-        Set<User> myRequestPendingUsers = new HashSet<>();
-
         Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
 
-        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
-            myRequestPendingUsers.add(blindRequest.getToUser());
-        }
-
-        return myRequestPendingUsers;
+        return myRequestPendingUsersInfo.stream().map(BlindRequest::getToUser).collect(Collectors.toUnmodifiableSet());
     }
 
     private Set<User> getMyLikedUser(User user) {
-        Set<User> myLikedUser = new HashSet<>();
-
         Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
 
-        for (BlindLike blindLike : myLikedUserInfo) {
-            myLikedUser.add(blindLike.getToUser());
-        }
-
-        return myLikedUser;
-    }
-
-    private Set<Long> getMyLikedUserId(User user) {
-        Set<Long> myLikedUserId = new HashSet<>();
-
-        Set<BlindLike> myLikedUserInfo = blindLikeRepository.findAllByFromUser(user);
-
-        for (BlindLike blindLike : myLikedUserInfo) {
-            myLikedUserId.add(blindLike.getToUser().getId());
-        }
-
-        return myLikedUserId;
+        return myLikedUserInfo.stream().map(BlindLike::getToUser).collect(Collectors.toUnmodifiableSet());
     }
 }
