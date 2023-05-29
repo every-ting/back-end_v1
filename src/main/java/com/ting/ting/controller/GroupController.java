@@ -22,7 +22,7 @@ public interface GroupController {
      * 다른 성별의 팀 조회
      */
     @GetMapping("/{groupId}/opposite-gender-groups")
-    Response<Page<GroupWithStatusResponse>> getOppositeGenderGroupList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+    Response<Page<DateableGroupResponse>> getOppositeGenderGroupList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
 
     /**
      * 내가 속한 팀 조회
@@ -58,7 +58,7 @@ public interface GroupController {
      * 팀 기준 - 찜한 목록 조회
      */
     @GetMapping("/{groupId}/likes")
-    Response<Page<LikedDateableGroupResponse>>  getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+    Response<Page<DateableGroupResponse>>  getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
 
     /**
      * 팀 멤버 조회(팀장 포함)

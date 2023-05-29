@@ -23,7 +23,4 @@ public interface GroupLikeToDateRepository extends JpaRepository<GroupLikeToDate
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupIdWithLikeCount(entity.toGroup.id, count(*)) from GroupLikeToDate entity where entity.fromGroupMember.group = :fromGroup group by entity.toGroup.id")
     Page<GroupIdWithLikeCount> findAllToGroupIdAndLikeCountByFromGroupMember_Group(@Param("fromGroup") Group fromGroup, Pageable pageable);
-
-    @Query(value = "select entity.toGroup.id from GroupLikeToDate entity where entity.fromGroupMember.group = :group and entity.fromGroupMember.member = :member")
-    List<Long> findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(@Param("group") Group group, @Param("member") User member);
 }
