@@ -54,7 +54,7 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
             if (myRequestPendingUsersId.contains(toUserId)) {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
             } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.DISABLED));
             } else {
                 blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
             }
