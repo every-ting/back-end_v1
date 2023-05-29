@@ -37,7 +37,8 @@ public class AppConfig {
         return new BlindServiceImpl(userRepository, blindRequestRepository, blindDateRepository, blindLikeRepository);
     }
 
-    @Bean BlindLikeService blindLikeService() {
+    @Bean
+    public BlindLikeService blindLikeService() {
         return new BlindLikeServiceImpl(blindLikeRepository, userRepository, blindRequestRepository, blindDateRepository);
     }
 }
