@@ -4,6 +4,7 @@ import com.ting.ting.domain.BlindDate;
 import com.ting.ting.domain.BlindLike;
 import com.ting.ting.domain.BlindRequest;
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.dto.response.BlindDateResponse;
 import com.ting.ting.dto.response.BlindLikeResponse;
@@ -15,9 +16,9 @@ import com.ting.ting.repository.BlindRequestRepository;
 import com.ting.ting.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class BlindLikeServiceImpl extends AbstractService implements BlindLikeService {
@@ -33,6 +34,33 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
         this.userRepository = userRepository;
         this.blindRequestRepository = blindRequestRepository;
         this.blindDateRepository = blindDateRepository;
+    }
+
+    @Override
+    public Set<BlindLikeResponse> getBlindLike(long userId) {
+        User user = getUserById(userId);
+
+        Set<BlindDateResponse> blindDateResponses = blindLikeRepository.findAllByFromUser(user).stream().map(BlindLike::getToUser).map(BlindDateResponse::from).collect(Collectors.toUnmodifiableSet());
+
+        Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
+
+        Set<Long> myRequestPendingUsersId = getMyRequestPendingUsersId(user);
+
+        Set<Long> userIdOfMeAndMyDateMatchedUsers = getUserIdOfMyDateMatchedUsers(user);
+
+        for (BlindDateResponse blindDateResponse : blindDateResponses) {
+            Long toUserId = blindDateResponse.getId();
+
+            if (myRequestPendingUsersId.contains(toUserId)) {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
+            } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
+            } else {
+                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
+            }
+        }
+
+        return blindLikeResponses;
     }
 
     @Override
@@ -66,65 +94,23 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
         blindLikeRepository.delete(request);
     }
 
-    @Override
-    public Set<BlindLikeResponse> getBlindLike(long userId) {
-        User user = getUserById(userId);
-        Set<BlindLike> allLikedUserInfos = blindLikeRepository.findAllByFromUser(user);
-        Set<BlindDateResponse> blindDateResponses = new LinkedHashSet<>();
-
-        for (BlindLike blindLikeInfo : allLikedUserInfos) {
-            User toUser = blindLikeInfo.getToUser();
-            blindDateResponses.add(BlindDateResponse.from(toUser));
-        }
-
-        Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
-
-        Set<Long> myRequestPendingUsersId = getMyRequestPendingUsersId(user);
-
-        Set<Long> userIdOfMeAndMyDateMatchedUsers = getUserIdOfMyDateMatchedUsers(user);
-
-        for (BlindDateResponse blindDateResponse : blindDateResponses) {
-            Long toUserId = blindDateResponse.getId();
-
-            if (myRequestPendingUsersId.contains(toUserId)) {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
-            } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
-            } else {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
-            }
-        }
-
-        return blindLikeResponses;
-    }
-
     private User getUserById(long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 
     private Set<Long> getMyRequestPendingUsersId(User user) {
-        Set<Long> myRequestPendingUsersId = new HashSet<>();
-
         Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
 
-        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
-            myRequestPendingUsersId.add(blindRequest.getToUser().getId());
-        }
-
-        return myRequestPendingUsersId;
+        return myRequestPendingUsersInfo.stream().map(BlindRequest::getToUser).map(User::getId).collect(Collectors.toUnmodifiableSet());
     }
 
     private Set<Long> getUserIdOfMyDateMatchedUsers(User user) {
-        Set<Long> blindDateMatchedUsedId = new HashSet<>();
-
         Set<BlindDate> matchedUsers = blindDateRepository.getByMyMatchedUsers(user);
 
-        for (BlindDate blindDate : matchedUsers) {
-            blindDateMatchedUsedId.add(blindDate.getMenUser().getId());
-            blindDateMatchedUsedId.add(blindDate.getWomenUser().getId());
+        if (user.getGender() == Gender.MEN) {
+            return matchedUsers.stream().map(BlindDate::getWomenUser).map(User::getId).collect(Collectors.toSet());
         }
-
-        return blindDateMatchedUsedId;
+        return matchedUsers.stream().map(BlindDate::getMenUser).map(User::getId).collect(Collectors.toSet());
     }
 }
