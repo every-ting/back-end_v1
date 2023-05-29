@@ -30,11 +30,6 @@ public interface GroupService {
     Set<MyGroupResponse> findMyGroupList(Long userId);
 
     /**
-     * 팀 기준 - 찜한 목록 조회
-     */
-    Page<DateableGroupResponse> findGroupLikeToDateList(Long groupId, Long userId, Pageable pageable);
-
-    /**
      * 팀 멤버 조회
      */
     Set<GroupMemberResponse> findGroupMemberList(Long groupId);

@@ -1,9 +1,15 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.Group;
+import com.ting.ting.domain.GroupLikeToDate;
 import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
+import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.RequestStatus;
+import com.ting.ting.domain.custom.GroupIdWithLikeCount;
+import com.ting.ting.dto.response.DateableGroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
@@ -14,10 +20,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -32,6 +47,7 @@ class GroupLikeServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
+    @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
     @Mock private GroupLikeToDateRepository groupLikeToDateRepository;
 
@@ -40,6 +56,43 @@ class GroupLikeServiceTest {
     @BeforeEach
     private void setUpUser() {
         user = UserFixture.createUserById(1L);
+    }
+
+    @DisplayName("팀 기준 - 찜한 목록 조회 기능 테스트")
+    @Test
+    void Given_Group_When_FindGroupLikeToDateList_Then_ReturnsDateableGroupResponse() {
+        //Given
+        Long groupId = 1L;
+        Pageable pageable = PageRequest.of(0, 20);
+
+        Group fromGroup = GroupFixture.createGroupById(groupId);
+        Group toGroup = GroupFixture.createGroupById(groupId + 1);
+        User toGroupMember = UserFixture.createUserById(user.getId() + 1);
+        ReflectionTestUtils.setField(toGroupMember, "birth", LocalDate.ofYearDay(LocalDate.now().getYear() - 10, LocalDate.now().getDayOfMonth()));
+        GroupMember fromGroupMemberRecord = GroupMember.of(fromGroup, user, MemberRole.MEMBER);
+        GroupMember toGroupMemberRecord = GroupMember.of(toGroup, toGroupMember, MemberRole.LEADER);
+        ReflectionTestUtils.setField(toGroup, "groupMembers", Set.of(toGroupMemberRecord));
+        GroupLikeToDate groupLikeToDateRecord = GroupLikeToDate.of(fromGroupMemberRecord, toGroup);
+
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(fromGroup));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(groupMemberRepository.findByGroupAndMember(fromGroup, user)).willReturn(Optional.of(fromGroupMemberRecord));
+        given(groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_Group(fromGroup, pageable)).willReturn(new PageImpl<>(List.of(new GroupIdWithLikeCount(toGroup.getId(), 2L))));
+        given(groupRepository.findAllWithMembersInfoByIdIn(List.of(groupLikeToDateRecord.getToGroup().getId()))).willReturn(List.of(toGroup));
+        given(groupDateRequestRepository.findAllByFromGroup(fromGroup)).willReturn(List.of());
+        given(groupLikeToDateRepository.findAllByFromGroupMember(fromGroupMemberRecord)).willReturn(List.of());
+
+        //When
+        Page<DateableGroupResponse> created = groupLikeService.findGroupLikeToDateList(groupId, user.getId(), pageable);
+
+        //Then
+        List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
+        assertThat(createdList).hasSize(1);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.EMPTY);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.NOT_LIKED);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeCount", 2);
+        assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);
+        assertThat(createdList.get(0).getGroup().getAverageAgeOfMembers()).isSameAs(10);
     }
 
     @DisplayName("같은 성별의 팀 찜하기 기능 테스트")

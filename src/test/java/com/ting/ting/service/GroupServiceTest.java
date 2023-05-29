@@ -146,43 +146,6 @@ class GroupServiceTest {
         assertThat(groupService.findGroupMemberList(group.getId())).hasSize(2);
     }
 
-    @DisplayName("팀 기준 - 찜한 목록 조회 기능 테스트")
-    @Test
-    void Given_Group_When_FindGroupLikeToDateList_Then_ReturnsDateableGroupResponse() {
-        //Given
-        Long groupId = 1L;
-        Pageable pageable = PageRequest.of(0, 20);
-
-        Group fromGroup = GroupFixture.createGroupById(groupId);
-        Group toGroup = GroupFixture.createGroupById(groupId + 1);
-        User toGroupMember = UserFixture.createUserById(user.getId() + 1);
-        ReflectionTestUtils.setField(toGroupMember, "birth", LocalDate.ofYearDay(LocalDate.now().getYear() - 10, LocalDate.now().getDayOfMonth()));
-        GroupMember fromGroupMemberRecord = GroupMember.of(fromGroup, user, MemberRole.MEMBER);
-        GroupMember toGroupMemberRecord = GroupMember.of(toGroup, toGroupMember, MemberRole.LEADER);
-        ReflectionTestUtils.setField(toGroup, "groupMembers", Set.of(toGroupMemberRecord));
-        GroupLikeToDate groupLikeToDateRecord = GroupLikeToDate.of(fromGroupMemberRecord, toGroup);
-
-        given(groupRepository.findById(groupId)).willReturn(Optional.of(fromGroup));
-        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(groupMemberRepository.findByGroupAndMember(fromGroup, user)).willReturn(Optional.of(fromGroupMemberRecord));
-        given(groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_Group(fromGroup, pageable)).willReturn(new PageImpl<>(List.of(new GroupIdWithLikeCount(toGroup.getId(), 2L))));
-        given(groupRepository.findAllWithMembersInfoByIdIn(List.of(groupLikeToDateRecord.getToGroup().getId()))).willReturn(List.of(toGroup));
-        given(groupDateRequestRepository.findAllByFromGroup(fromGroup)).willReturn(List.of());
-        given(groupLikeToDateRepository.findAllByFromGroupMember(fromGroupMemberRecord)).willReturn(List.of());
-
-        //When
-        Page<DateableGroupResponse> created = groupService.findGroupLikeToDateList(groupId, user.getId(), pageable);
-
-        //Then
-        List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
-        assertThat(createdList).hasSize(1);
-        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.EMPTY);
-        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.NOT_LIKED);
-        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeCount", 2);
-        assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);
-        assertThat(createdList.get(0).getGroup().getAverageAgeOfMembers()).isSameAs(10);
-    }
-
     @DisplayName("팀 생성 기능 테스트")
     @Test
     void Given_GroupRequest_When_SaveGroup_Then_ReturnsCreatedGroup() {

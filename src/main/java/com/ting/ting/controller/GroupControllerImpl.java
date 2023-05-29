@@ -81,7 +81,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<Page<DateableGroupResponse>> getGroupLikeToDateList(Long groupId, Pageable pageable) {
         Long userId = 1L;
 
-        return success(groupService.findGroupLikeToDateList(groupId, userId, pageable));
+        return success(groupLikeService.findGroupLikeToDateList(groupId, userId, pageable));
     }
 
     @Override

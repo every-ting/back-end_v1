@@ -5,7 +5,6 @@ import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.domain.custom.GroupIdWithLikeCount;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
@@ -19,7 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -109,48 +109,6 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User user = loadUserByUserId(userId);
 
         return groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user).stream().map(MyGroupResponse::from).collect(Collectors.toUnmodifiableSet());
-    }
-
-    @Override
-    public Page<DateableGroupResponse> findGroupLikeToDateList(Long groupId, Long userId, Pageable pageable) {
-        Group group = loadGroupByGroupId(groupId);
-        User member = loadUserByUserId(userId);
-
-        GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
-        );
-
-        Page<GroupIdWithLikeCount> idAndLikeCountOfGroupsLikeToDate = groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_Group(group, pageable);
-        Map<Long, Integer> groupIdWithLikeCountMap = idAndLikeCountOfGroupsLikeToDate.stream().collect(Collectors.toMap(GroupIdWithLikeCount::getGroupId, GroupIdWithLikeCount::getLikeCount));
-
-        // 찜한 기록이 없는 경우는 바로 return
-        if (idAndLikeCountOfGroupsLikeToDate.isEmpty()) {
-            return new PageImpl<>(List.of(), pageable, idAndLikeCountOfGroupsLikeToDate.getTotalElements());
-        }
-
-        Set<Group> likedGroups = groupRepository.findAllWithMembersInfoByIdIn(idAndLikeCountOfGroupsLikeToDate.stream().map(GroupIdWithLikeCount::getGroupId).collect(Collectors.toList())).stream().collect(Collectors.toUnmodifiableSet());
-
-        Set<Long> pendingDateGroupIds = groupDateRequestRepository.findAllByFromGroup(group).stream().map(GroupDateRequest::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
-        Set<Long> myLikeGroupIds = groupLikeToDateRepository.findAllByFromGroupMember(memberRecordOfUser).stream().map(GroupLikeToDate::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
-
-        List<DateableGroupResponse> likedDateableGroupResponses = likedGroups.stream()
-                .map(likedGroup -> {
-                    DateableGroupResponse response = DateableGroupResponse.from(likedGroup, RequestStatus.EMPTY, null, groupIdWithLikeCountMap.get(likedGroup.getId()));
-
-                    if (pendingDateGroupIds.contains(likedGroup.getId())) {
-                        response.setRequestStatus(RequestStatus.PENDING);
-                    }
-
-                    if (myLikeGroupIds.contains(likedGroup.getId())) {
-                        response.setLikeStatus(LikeStatus.LIKED);
-                    } else {
-                        response.setLikeStatus(LikeStatus.NOT_LIKED);
-                    }
-
-                    return response;
-        }).collect(Collectors.toList());
-
-        return new PageImpl<>(likedDateableGroupResponses, pageable, idAndLikeCountOfGroupsLikeToDate.getTotalElements());
     }
 
     @Override
