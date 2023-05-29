@@ -1,5 +1,6 @@
 package com.ting.ting.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
@@ -8,6 +9,9 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_NULL)
 @AllArgsConstructor
 @Getter
 public class GroupResponse {
