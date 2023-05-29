@@ -55,16 +55,16 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<GroupWithStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
+    public Page<JoinableGroupResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
         User user = loadUserByUserId(userId);
 
         Page<GroupWithMemberCount> joinableSameGenderGroups = groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(user.getGender(), true, user, pageable);
-        Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllGroupByUser(user).stream().map(Group::getId).collect(Collectors.toUnmodifiableSet());
-        Set<Long> myLikeGroupIds = groupLikeToJoinRepository.findAllToGroupByFromUser(user).stream().map(Group::getId).collect(Collectors.toUnmodifiableSet());
+        Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllByUser(user).stream().map(GroupMemberRequest::getGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
+        Set<Long> myLikeGroupIds = groupLikeToJoinRepository.findAllByFromUser(user).stream().map(GroupLikeToJoin::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
 
-        List<GroupWithStatusResponse> groupWithStatusResponses = joinableSameGenderGroups.stream()
+        List<JoinableGroupResponse> joinableGroupRespons = joinableSameGenderGroups.stream()
                 .map(joinableSameGenderGroup -> {
-                    GroupWithStatusResponse response = GroupWithStatusResponse.from(joinableSameGenderGroup, RequestStatus.EMPTY, null);
+                    JoinableGroupResponse response = JoinableGroupResponse.from(joinableSameGenderGroup, RequestStatus.EMPTY, null);
 
                     if (myPendingJoinGroupIds.contains(joinableSameGenderGroup.getId())) {
                         response.setRequestStatus(RequestStatus.PENDING);
@@ -79,7 +79,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
                     return response;
         }).collect(Collectors.toList());
 
-        return new PageImpl<>(groupWithStatusResponses, pageable, joinableSameGenderGroups.getTotalElements());
+        return new PageImpl<>(joinableGroupRespons, pageable, joinableSameGenderGroups.getTotalElements());
     }
 
     @Override

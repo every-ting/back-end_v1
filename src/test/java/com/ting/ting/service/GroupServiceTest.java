@@ -75,8 +75,8 @@ class GroupServiceTest {
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(any(), anyBoolean(), any(), any())).willReturn(Page.empty());
-        given(groupMemberRequestRepository.findAllGroupByUser(user)).willReturn(List.of());
-        given(groupLikeToJoinRepository.findAllToGroupByFromUser(user)).willReturn(List.of());
+        given(groupMemberRequestRepository.findAllByUser(user)).willReturn(List.of());
+        given(groupLikeToJoinRepository.findAllByFromUser(user)).willReturn(List.of());
 
         //When
         assertThat(groupService.findJoinableSameGenderGroupList(user.getId(), pageable)).isEmpty();

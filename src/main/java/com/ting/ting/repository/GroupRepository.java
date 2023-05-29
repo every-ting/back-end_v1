@@ -24,6 +24,10 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     List<Group> findAllWithMembersInfoByIdIn(List<Long> groupIds);
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo, entity.createdAt) " +
+            "from Group entity left join GroupMember gm on gm.group = entity where entity.id in :groupIds group by entity.id")
+    List<GroupWithMemberCount> findAllWithMemberCountByIdIn(@Param("groupIds") List<Long> groupIds);
+
+    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo, entity.createdAt) " +
             "from Group entity left join GroupMember gm on gm.group = entity group by entity.id")
     Page<GroupWithMemberCount> findAllWithMemberCount(Pageable pageable);
 

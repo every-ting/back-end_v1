@@ -4,7 +4,9 @@ import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupIdWithLikeCount;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.response.DateableGroupResponse;
+import com.ting.ting.dto.response.JoinableGroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
@@ -26,16 +28,18 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final GroupMemberRequestRepository groupMemberRequestRepository;
     private final GroupDateRequestRepository groupDateRequestRepository;
     private final GroupLikeToJoinRepository groupLikeToJoinRepository;
     private final GroupLikeToDateRepository groupLikeToDateRepository;
 
-    public GroupLikeServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupDateRequestRepository groupDateRequestRepository,
+    public GroupLikeServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, GroupDateRequestRepository groupDateRequestRepository,
                                 GroupLikeToJoinRepository groupLikeToJoinRepository, GroupLikeToDateRepository groupLikeToDateRepository){
         super(ServiceType.GROUP_MEETING);
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
+        this.groupMemberRequestRepository = groupMemberRequestRepository;
         this.groupDateRequestRepository = groupDateRequestRepository;
         this.groupLikeToJoinRepository = groupLikeToJoinRepository;
         this.groupLikeToDateRepository = groupLikeToDateRepository;
@@ -83,6 +87,32 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
         }).collect(Collectors.toList());
 
         return new PageImpl<>(likedDateableGroupResponses, pageable, idAndLikeCountOfGroupsLikeToDate.getTotalElements());
+    }
+
+    @Override
+    public Page<JoinableGroupResponse> findGroupLikeToJoinList(Long userId, Pageable pageable) {
+        User user = loadUserByUserId(userId);
+
+        Page<GroupLikeToJoin> groupLikesToJoin = groupLikeToJoinRepository.findAllByFromUser(user, pageable);
+        List<Long> likedGroupIds = groupLikesToJoin.stream().map(GroupLikeToJoin::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableList());
+        List<GroupWithMemberCount> likedGroupsWithMemberCount = groupRepository.findAllWithMemberCountByIdIn(likedGroupIds);
+
+        Set<Long> pendingJoinRequestGroupIds = groupMemberRequestRepository.findAllByUser(user).stream().map(GroupMemberRequest::getGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
+
+        List<JoinableGroupResponse> likedJoinableGroupResponses = likedGroupsWithMemberCount.stream()
+                .map(likedGroup -> {
+                    JoinableGroupResponse response = JoinableGroupResponse.from(likedGroup, RequestStatus.EMPTY, LikeStatus.LIKED);
+
+                    if (!likedGroup.isJoinable()) {
+                        response.setRequestStatus(null);
+                    } else if (pendingJoinRequestGroupIds.contains(likedGroup.getId())) {
+                        response.setRequestStatus(RequestStatus.PENDING);
+                    }
+
+                    return response;
+                }).collect(Collectors.toList());
+
+        return new PageImpl<>(likedJoinableGroupResponses, pageable, groupLikesToJoin.getTotalElements());
     }
 
     @Override
