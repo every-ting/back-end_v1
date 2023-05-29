@@ -39,7 +39,7 @@ insert into `group` (id, group_name, gender, school, member_size_limit, is_match
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (7, '과팅팀7', 'WOMEN', '세종대학교', 4, false, true, '', now(), now());
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (8, '과팅팀8', 'WOMEN', '홍익대학교', 4, false, true, '', now(), now());
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (9, '과팅팀9', 'MEN', '가천대학교', 4, false, true, '', now(), now());
-insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (10, '과팅팀10', 'WOMEN', '명지대학교', 4, false, true, '', now(), now());
+insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (10, '과팅팀10', 'WOMEN', '명지대학교', 4, false, false, '', now(), now());
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (11, '과팅팀11', 'WOMEN', '국민대학교', 4, false, true, '', now(), now());
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (12, '과팅팀12', 'MEN', '성균관대학교', 4, false, true, '', now(), now());
 insert into `group` (id, group_name, gender, school, member_size_limit, is_matched, is_joinable, memo, created_at, updated_at) values (13, '과팅팀13', 'MEN', '충북대학교', 4, false, true, '', now(), now());
@@ -87,6 +87,9 @@ insert into group_member (group_id, member_id, role, created_at, updated_at) val
 insert into group_member (group_id, member_id, role, created_at, updated_at) values (5, 1, 'MEMBER', now(), now());
 insert into group_member (group_id, member_id, role, created_at, updated_at) values (4, 21, 'MEMBER', now(), now());
 insert into group_member (group_id, member_id, role, created_at, updated_at) values (17, 29, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (10, 29, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (10, 28, 'MEMBER', now(), now());
+insert into group_member (group_id, member_id, role, created_at, updated_at) values (10, 27, 'MEMBER', now(), now());
 
 insert into group_member_request (group_id, user_id, created_at, updated_at) values (1, 5, now(), now());
 insert into group_member_request (group_id, user_id, created_at, updated_at) values (1, 4, now(), now());
