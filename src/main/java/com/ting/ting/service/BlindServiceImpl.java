@@ -7,7 +7,10 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.*;
+import com.ting.ting.dto.response.BlindDateResponse;
+import com.ting.ting.dto.response.BlindRequestResponse;
+import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
+import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
@@ -233,80 +236,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         blindRequestRepository.delete(blindRequest);
     }
 
-    @Override
-    public void createJoinLiked(long fromUserId, long toUserId) {
-        if (fromUserId == toUserId) {
-            throwException(ErrorCode.DUPLICATED_USER_REQUEST);
-        }
-
-        User fromUser = getUserById(fromUserId);
-
-        User toUser = getUserById(toUserId);
-
-        if (fromUser.getGender() == toUser.getGender()) {
-            throwException(ErrorCode.GENDER_NOT_MATCH);
-        }
-
-        blindLikeRepository.findByFromUserAndToUser(fromUser, toUser).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST);
-        });
-
-        BlindLike request = new BlindLike();
-        request.setFromUser(fromUser);
-        request.setToUser(toUser);
-        blindLikeRepository.save(request);
-    }
-
-    @Override
-    public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
-        BlindLike request = blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
-                .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
-        blindLikeRepository.delete(request);
-    }
-
-    @Override
-    public void deleteLikedByBlindRequestId(long userId, long blindLikeId) {
-        BlindLike request = getBlindLikeById(blindLikeId);
-
-        if (request.getFromUser().getId() != userId) {
-            throwException(ErrorCode.NOT_MY_REQUEST);
-        }
-
-        blindLikeRepository.delete(request);
-    }
-
-    @Override
-    public Set<BlindLikeResponse> getBlindLike(long userId) {
-        User user = getUserById(userId);
-        Set<BlindLike> allLikedUserInfos = blindLikeRepository.findAllByFromUser(user);
-        Set<BlindDateResponse> blindDateResponses = new LinkedHashSet<>();
-
-        for (BlindLike blindLikeInfo : allLikedUserInfos) {
-            User toUser = blindLikeInfo.getToUser();
-            blindDateResponses.add(BlindDateResponse.from(toUser));
-        }
-
-        Set<BlindLikeResponse> blindLikeResponses = new LinkedHashSet<>();
-
-        Set<Long> myRequestPendingUsersId = getMyRequestUsersIdByRequestStatus(user, RequestStatus.PENDING);
-
-        Set<Long> userIdOfMeAndMyDateMatchedUsers = getUserIdOfMyDateMatchedUsers(user);
-
-        for (BlindDateResponse blindDateResponse : blindDateResponses) {
-            Long toUserId = blindDateResponse.getId();
-
-            if (myRequestPendingUsersId.contains(toUserId)) {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.PENDING));
-            } else if (userIdOfMeAndMyDateMatchedUsers.contains(toUserId)) {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, null));
-            } else {
-                blindLikeResponses.add(BlindLikeResponse.of(blindDateResponse, RequestStatus.EMPTY));
-            }
-        }
-
-        return blindLikeResponses;
-    }
-
     private User getUserById(long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%d]의 유저 정보가 존재하지 않습니다.", userId)));
@@ -314,11 +243,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
 
     private BlindRequest getBlindRequestById(long blindRequestId) {
         return blindRequestRepository.findById(blindRequestId).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND));
-    }
-
-    private BlindLike getBlindLikeById(long blindLikeId) {
-        return blindLikeRepository.findById(blindLikeId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND));
     }
 
@@ -332,18 +256,6 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         }
 
         return myRequestPendingUsers;
-    }
-
-    private Set<Long> getMyRequestUsersIdByRequestStatus(User user, RequestStatus requestStatus) {
-        Set<Long> myRequestPendingUsersId = new HashSet<>();
-
-        Set<BlindRequest> myRequestPendingUsersInfo = blindRequestRepository.findAllByFromUserAndStatus(user, RequestStatus.PENDING);
-
-        for (BlindRequest blindRequest : myRequestPendingUsersInfo) {
-            myRequestPendingUsersId.add(blindRequest.getToUser().getId());
-        }
-
-        return myRequestPendingUsersId;
     }
 
     private Set<User> getMyLikedUser(User user) {
