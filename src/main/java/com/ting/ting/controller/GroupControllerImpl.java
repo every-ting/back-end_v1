@@ -54,10 +54,26 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Void> deletesSameGenderGroupLike(Long toGroupId) {
+    public Response<Void> deleteSameGenderGroupLike(Long toGroupId) {
         Long fromUserId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         groupLikeService.deleteSameGenderGroupLike(toGroupId, fromUserId);
+        return success();
+    }
+
+    @Override
+    public Response<Void> createOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
+        Long userId = 1L;
+
+        groupLikeService.createOppositeGenderGroupLike(fromGroupId, toGroupId, userId);
+        return success();
+    }
+
+    @Override
+    public Response<Void> deleteOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
+        Long userId = 1L;
+
+        groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, toGroupId, userId);
         return success();
     }
 
