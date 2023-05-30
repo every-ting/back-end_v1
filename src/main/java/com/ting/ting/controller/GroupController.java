@@ -111,13 +111,13 @@ public interface GroupController {
     /**
      * 같은 성별인 팀에 요청
      */
-    @PostMapping("/request/{groupId}")
+    @PostMapping("/requests/{groupId}")
     Response<Void> sendJoinRequest(@PathVariable Long groupId);
 
     /**
      * 같은 성별인 팀에 했던 요청을 취소
      */
-    @DeleteMapping("/request/{groupId}")
+    @DeleteMapping("/requests/{groupId}")
     Response<Void> deleteJoinRequest(@PathVariable Long groupId);
 
     /**
