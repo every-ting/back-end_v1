@@ -103,14 +103,14 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
                 .map(likedGroup -> {
                     JoinableGroupResponse response = JoinableGroupResponse.from(likedGroup, RequestStatus.EMPTY, LikeStatus.LIKED);
 
-                    if (!likedGroup.isJoinable()) {
-                        response.setRequestStatus(null);
+                    if (likedGroup.isJoinable() == false) {
+                        response.setRequestStatus(RequestStatus.DISABLED);
                     } else if (pendingJoinRequestGroupIds.contains(likedGroup.getId())) {
                         response.setRequestStatus(RequestStatus.PENDING);
                     }
 
                     return response;
-                }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
         return new PageImpl<>(likedJoinableGroupResponses, pageable, groupLikesToJoin.getTotalElements());
     }

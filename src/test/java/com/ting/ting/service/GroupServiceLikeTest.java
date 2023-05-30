@@ -122,7 +122,7 @@ class GroupLikeServiceTest {
         assertThat(createdList).hasSize(2);
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.PENDING);
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.LIKED);
-        assertThat(createdList.get(1)).hasFieldOrPropertyWithValue("requestStatus", null);
+        assertThat(createdList.get(1)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.DISABLED);
         assertThat(createdList.get(1)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.LIKED);
     }
 
