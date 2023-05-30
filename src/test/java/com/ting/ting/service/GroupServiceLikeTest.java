@@ -1,15 +1,14 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.Group;
-import com.ting.ting.domain.GroupLikeToDate;
-import com.ting.ting.domain.GroupMember;
-import com.ting.ting.domain.User;
+import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupIdWithLikeCount;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.response.DateableGroupResponse;
+import com.ting.ting.dto.response.JoinableGroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
@@ -47,6 +46,7 @@ class GroupLikeServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
+    @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
     @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
     @Mock private GroupLikeToDateRepository groupLikeToDateRepository;
@@ -94,6 +94,36 @@ class GroupLikeServiceTest {
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeCount", 2);
         assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);
         assertThat(createdList.get(0).getGroup().getAverageAgeOfMembers()).isSameAs(10);
+    }
+
+    @DisplayName("유저 기준 - 같은 성별 팀 찜한 목록 조회 기능 테스트")
+    @Test
+    void Given_Nothing_WHen_FindGroupLikeToJoinList_Then_ReturnsJoinableGroupResponse() {
+        //Given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        Group toGroup1 = GroupFixture.createGroupById(1L);
+        Group toGroup2 = GroupFixture.createGroupById(2L);
+        GroupLikeToJoin groupLikeToJoin1 = GroupLikeToJoin.of(user, toGroup1);
+        GroupLikeToJoin groupLikeToJoin2 = GroupLikeToJoin.of(user, toGroup2);
+        GroupWithMemberCount joinableGroupWithMemberCount = new GroupWithMemberCount(toGroup1.getId(), toGroup1.getGroupName(), toGroup1.getGender(), 2L, toGroup1.getMemberSizeLimit(), toGroup1.getSchool(), toGroup1.isMatched(), true, toGroup1.getMemo(), toGroup1.getCreatedAt());
+        GroupWithMemberCount notJoinableGroupWithMemberCount = new GroupWithMemberCount(toGroup2.getId(), toGroup2.getGroupName(), toGroup2.getGender(), 2L, toGroup2.getMemberSizeLimit(), toGroup2.getSchool(), toGroup2.isMatched(), false, toGroup2.getMemo(), toGroup2.getCreatedAt());
+
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(groupLikeToJoinRepository.findAllByFromUser(user, pageable)).willReturn(new PageImpl<>(List.of(groupLikeToJoin1, groupLikeToJoin2)));
+        given(groupRepository.findAllWithMemberCountByIdIn(any())).willReturn(List.of(joinableGroupWithMemberCount, notJoinableGroupWithMemberCount));
+        given(groupMemberRequestRepository.findAllByUser(user)).willReturn(List.of(GroupMemberRequest.of(toGroup1, user)));
+
+        //When
+        Page<JoinableGroupResponse> created = groupLikeService.findGroupLikeToJoinList(user.getId(), pageable);
+
+        //Then
+        List<JoinableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
+        assertThat(createdList).hasSize(2);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.PENDING);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.LIKED);
+        assertThat(createdList.get(1)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.DISABLED);
+        assertThat(createdList.get(1)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.LIKED);
     }
 
     @DisplayName("같은 성별의 팀 찜하기 기능 테스트")

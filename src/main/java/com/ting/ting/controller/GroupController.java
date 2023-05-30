@@ -16,7 +16,7 @@ public interface GroupController {
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
     @GetMapping
-    Response<Page<GroupWithStatusResponse>> getJoinableSameGenderGroupList(@ParameterObject Pageable pageable);
+    Response<Page<JoinableGroupResponse>> getJoinableSameGenderGroupList(@ParameterObject Pageable pageable);
 
     /**
      * 다른 성별의 팀 조회
@@ -55,10 +55,16 @@ public interface GroupController {
     Response<Void> deleteOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
 
     /**
-     * 팀 기준 - 찜한 목록 조회
+     * 팀 기준 - 찜한 목록 조회(과팅 요청을 위한)
      */
     @GetMapping("/{groupId}/likes")
-    Response<Page<DateableGroupResponse>>  getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+    Response<Page<DateableGroupResponse>> getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
+
+    /**
+     * 유저 기준 - 찜한 같은 성별의 팀 목록 조회(팀 가입을 위한)
+     */
+    @GetMapping("/likes")
+    Response<Page<JoinableGroupResponse>> getGroupLikeToJoinList(@ParameterObject Pageable pageable);
 
     /**
      * 팀 멤버 조회(팀장 포함)

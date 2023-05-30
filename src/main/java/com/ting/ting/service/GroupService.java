@@ -17,7 +17,7 @@ public interface GroupService {
     /**
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
-    Page<GroupWithStatusResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable);
+    Page<JoinableGroupResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable);
 
     /**
      * 다른 성별의 팀 조회

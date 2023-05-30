@@ -12,8 +12,7 @@ import java.util.Optional;
 
 public interface GroupMemberRequestRepository extends JpaRepository<GroupMemberRequest, Long> {
 
-    @Query(value = "select entity.group from GroupMemberRequest entity where entity.user = :user")
-    List<Group> findAllGroupByUser(@Param("user") User user);
+    List<GroupMemberRequest> findAllByUser(User user);
 
     Optional<GroupMemberRequest> findByGroupAndUser(Group group, User user);
 
