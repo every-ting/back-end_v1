@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,35 +77,31 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
                     }
 
                     return response;
-                })
-                .collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
         return new PageImpl<>(groupWithStatusResponses, pageable, joinableSameGenderGroups.getTotalElements());
     }
 
     @Override
-    public Page<GroupWithStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
+    public Page<DateableGroupResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
         Group group = loadGroupByGroupId(groupId);
         User member = loadUserByUserId(userId);
 
-        if (!groupMemberRepository.existsByGroupAndMember(group, member)) {
-            throwException(ErrorCode.INVALID_REQUEST, String.format("User(id: %d) is not a member of Group(id: %d)", userId, groupId));
-        }
+        GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
+        );
 
-        Page<GroupWithMemberCount> oppositeGenderGroups = groupRepository.findAllWithMemberCountByGenderAndIsMatched(group.getGender().getOpposite(), false, pageable);
-        Set<Long> likedGroupIds = groupLikeToDateRepository.findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(group, member).stream().collect(Collectors.toUnmodifiableSet());
+        Page<Group> oppositeGenderGroups = groupRepository.findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(group.getGender().getOpposite(), false, false, group.getMemberSizeLimit(), pageable);
+        List<Group> oppositeGenderGroupsWithMemberInfo = groupRepository.findAllWithMembersInfoByIdIn(oppositeGenderGroups.stream().map(Group::getId).collect(Collectors.toList()));
+        Set<Long> likedGroupIds = groupLikeToDateRepository.findAllByFromGroupMember(memberRecordOfUser).stream().map(GroupLikeToDate::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
 
-        List<GroupWithStatusResponse> groupWithLikeStatusResponses = new ArrayList<>();
+        List<DateableGroupResponse> dateableGroupResponses = oppositeGenderGroupsWithMemberInfo.stream()
+                .map(oppositeGenderGroup -> {
+                    LikeStatus likeStatus = likedGroupIds.contains(oppositeGenderGroup.getId()) ? LikeStatus.LIKED : LikeStatus.NOT_LIKED;
+                    return DateableGroupResponse.from(oppositeGenderGroup, likeStatus);
+        }).collect(Collectors.toList());
 
-        for (GroupWithMemberCount oppositeGenderGroup : oppositeGenderGroups) {
-            if (likedGroupIds.contains(oppositeGenderGroup.getId())) {
-                groupWithLikeStatusResponses.add(GroupWithStatusResponse.from(oppositeGenderGroup, null, LikeStatus.LIKED));
-            } else {
-                groupWithLikeStatusResponses.add(GroupWithStatusResponse.from(oppositeGenderGroup, null, LikeStatus.NOT_LIKED));
-            }
-        }
-
-        return new PageImpl<>(groupWithLikeStatusResponses, pageable, oppositeGenderGroups.getTotalElements());
+        return new PageImpl<>(dateableGroupResponses, pageable, oppositeGenderGroups.getTotalElements());
     }
 
     @Override

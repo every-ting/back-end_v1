@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public class MyGroupResponse {
 
-    GroupResponse groupResponse;
+    GroupResponse group;
     MemberRole role;
 
     public static MyGroupResponse from(GroupWithMemberCountAndRole groupWithMemberCountAndRole) {

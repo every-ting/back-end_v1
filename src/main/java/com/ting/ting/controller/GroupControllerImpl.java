@@ -32,7 +32,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<Page<GroupWithStatusResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
+    public Response<Page<DateableGroupResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
         return success(groupService.findDateableOppositeGenderGroupList(groupId, userId, pageable));
@@ -75,6 +75,13 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
         groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, toGroupId, userId);
         return success();
+    }
+
+    @Override
+    public Response<Page<DateableGroupResponse>> getGroupLikeToDateList(Long groupId, Pageable pageable) {
+        Long userId = 1L;
+
+        return success(groupLikeService.findGroupLikeToDateList(groupId, userId, pageable));
     }
 
     @Override

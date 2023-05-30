@@ -22,10 +22,10 @@ public interface GroupService {
     /**
      * 다른 성별의 팀 조회
      */
-    Page<GroupWithStatusResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable);
+    Page<DateableGroupResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable);
 
     /**
-     * 내가 속한 팀 조회 - request status : ACCEPTED
+     * 내가 속한 팀 조회
      */
     Set<MyGroupResponse> findMyGroupList(Long userId);
 

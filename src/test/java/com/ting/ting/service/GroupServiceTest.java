@@ -2,12 +2,10 @@ package com.ting.ting.service;
 
 import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.GroupDateRequestResponse;
-import com.ting.ting.dto.response.GroupDateRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.GroupMemberResponse;
-import com.ting.ting.dto.response.GroupResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
@@ -21,13 +19,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
@@ -90,17 +89,29 @@ class GroupServiceTest {
         Long groupId = 1L;
         Pageable pageable = Pageable.ofSize(20);
 
-        Group group = GroupFixture.createGroupById(groupId);
-        List<Long> likedGroupIds = Arrays.asList(1L, 2L, 3L);
+        Group myGroup = GroupFixture.createGroupById(groupId);
+        Group oppositeGenderGroup = GroupFixture.createGroupById(groupId + 1);
+        User oppositeGenderGroupMember = UserFixture.createUserById(user.getId() + 1);
+        GroupMember oppositeGenderGroupMemberRecord = GroupMember.of(oppositeGenderGroup, oppositeGenderGroupMember, MemberRole.LEADER);
+        ReflectionTestUtils.setField(oppositeGenderGroup, "groupMembers", Set.of(oppositeGenderGroupMemberRecord));
 
-        given(groupRepository.findById(any())).willReturn(Optional.of(group));
-        given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
-        given(groupMemberRepository.existsByGroupAndMember(any(), any())).willReturn(true);
-        given(groupRepository.findAllWithMemberCountByGenderAndIsMatched(any(), anyBoolean(), any())).willReturn(Page.empty());
-        given(groupLikeToDateRepository.findAllToGroup_IdByFromGroupMember_GroupAndGroupMember_Member(any(), any())).willReturn(likedGroupIds);
+        given(groupRepository.findById(any())).willReturn(Optional.of(myGroup));
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(groupMemberRepository.findByGroupAndMember(any(), any())).willReturn(Optional.of(mock(GroupMember.class)));
+        given(groupRepository.findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(myGroup.getGender().getOpposite(), false, false, myGroup.getMemberSizeLimit(), pageable))
+                .willReturn(new PageImpl<>(List.of(oppositeGenderGroup)));
+        given(groupRepository.findAllWithMembersInfoByIdIn(List.of(oppositeGenderGroup.getId()))).willReturn(List.of(oppositeGenderGroup));
+        given(groupLikeToDateRepository.findAllByFromGroupMember(any())).willReturn(List.of());
 
-        //When & Then
-        assertThat(groupService.findDateableOppositeGenderGroupList(groupId, user.getId(), pageable)).isEmpty();
+        //When
+        Page<DateableGroupResponse> created = groupService.findDateableOppositeGenderGroupList(groupId, user.getId(), pageable);
+
+        //Then
+        List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
+        assertThat(createdList).hasSize(1);
+        assertThat(createdList.get(0)).hasNoNullFieldsOrPropertiesExcept("requestStatus", "likeCount");
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.NOT_LIKED);
+        assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);
     }
 
     @DisplayName("내가 속한 팀 조회 기능 테스트")

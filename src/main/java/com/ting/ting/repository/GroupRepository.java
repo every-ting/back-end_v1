@@ -6,6 +6,7 @@ import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,14 +18,15 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findByGroupName(String name);
 
+    Page<Group> findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(Gender gender, boolean isJoinable, boolean isMatched, int memberSizeLimit, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"groupMembers", "groupMembers.member"})
+    List<Group> findAllWithMembersInfoByIdIn(List<Long> groupIds);
+
     @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo, entity.createdAt) " +
             "from Group entity left join GroupMember gm on gm.group = entity group by entity.id")
     Page<GroupWithMemberCount> findAllWithMemberCount(Pageable pageable);
 
-    @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo, entity.createdAt) " +
-            "from Group entity left join GroupMember gm on gm.group = entity " +
-            "where entity.gender = :gender and entity.isMatched = :isMatched group by entity.id")
-    Page<GroupWithMemberCount> findAllWithMemberCountByGenderAndIsMatched(@Param("gender") Gender gender, @Param("isMatched") boolean isMatched, Pageable pageable);
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupWithMemberCount(entity.id, entity.groupName, entity.gender, count(gm), entity.memberSizeLimit, entity.school, entity.isMatched, entity.isJoinable, entity.memo, entity.createdAt) " +
             "from Group entity left join GroupMember gm on gm.group = entity " +
