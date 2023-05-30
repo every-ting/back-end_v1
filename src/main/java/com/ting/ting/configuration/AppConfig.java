@@ -24,12 +24,17 @@ public class AppConfig {
 
     @Bean
     public GroupService groupService() {
-        return new GroupServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRepository, groupDateRequestRepository, groupLikeToJoinRepository, groupLikeToDateRepository);
+        return new GroupServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupLikeToJoinRepository, groupLikeToDateRepository);
     }
 
     @Bean
     public GroupMemberService groupMemberService() {
         return new GroupMemberServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository, groupMemberRepository, groupMemberRequestRepository);
+    }
+
+    @Bean
+    public GroupDateService groupDateService() {
+        return new GroupDateServiceImpl(userRepository, groupRepository, groupMemberRepository, groupLikeToDateRepository, groupDateRepository, groupDateRequestRepository);
     }
 
     @Bean

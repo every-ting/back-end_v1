@@ -33,29 +33,4 @@ public interface GroupService {
      * 그룹 생성
      */
     GroupResponse saveGroup(Long userId, GroupRequest request);
-
-    /**
-     * 팀장 - 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
-     */
-    GroupDateRequestWithFromAndToResponse findAllGroupDateRequest(long groupId, long userIdOfLeader);
-
-    /**
-     * 팀장 - 다른 팀에 과팅 요청
-     */
-    GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
-
-    /**
-     * 팀장 - 다른 팀에 했던 과팅 요청을 취소
-     */
-    void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId);
-
-    /**
-     * 팀장 - 팀에 온 과팅 요청 수락
-     */
-    GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId);
-
-    /**
-     * 팀장 - 팀에 온 과팅 요청 거절
-     */
-    void rejectGroupDateRequest(long userIdOfLeader, long groupDateRequestId);
 }
