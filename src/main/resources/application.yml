@@ -26,3 +26,5 @@ kakao:
   grant-type: ${GRANT_TYPE}
   redirect-url : ${REDIRECT_URL}
   token-url: ${TOKEN_URL}
+  user-info-url: ${USER_INFO_URL}
+  user-name-attribute: id
