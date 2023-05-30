@@ -73,10 +73,10 @@ public interface GroupController {
     Response<GroupResponse> createGroup(@RequestBody GroupRequest request);
 
     /**
-     * 팀장 - 과팅 요청 조회(받은 요청, 한 요청 모두)
+     * 받은 과팅 요청 조회
      */
     @GetMapping("/{groupId}/dates/requests")
-    Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(@PathVariable Long groupId);
+    Response<Page<DateableGroupResponse>> getGroupDateRequest(@PathVariable Long groupId, @ParameterObject Pageable pageable);
 
     /**
      * 팀장 - 과팅 요청

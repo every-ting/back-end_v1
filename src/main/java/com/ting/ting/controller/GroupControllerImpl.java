@@ -3,6 +3,7 @@ package com.ting.ting.controller;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
+import com.ting.ting.service.GroupDateService;
 import com.ting.ting.service.GroupLikeService;
 import com.ting.ting.service.GroupMemberService;
 import com.ting.ting.service.GroupService;
@@ -19,12 +20,14 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     private final GroupService groupService;
     private final GroupMemberService groupMemberService;
     private final GroupLikeService groupLikeService;
+    private final GroupDateService groupDateService;
 
-    public GroupControllerImpl(GroupService groupService, GroupMemberService groupMemberService, GroupLikeService groupLikeService) {
+    public GroupControllerImpl(GroupService groupService, GroupMemberService groupMemberService, GroupLikeService groupLikeService, GroupDateService groupDateService) {
         super(ServiceType.GROUP_MEETING);
         this.groupService = groupService;
         this.groupMemberService = groupMemberService;
         this.groupLikeService = groupLikeService;
+        this.groupDateService = groupDateService;
     }
 
     @Override
@@ -101,24 +104,24 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(Long groupId) {
-        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
+    public Response<Page<DateableGroupResponse>> getGroupDateRequest(Long groupId, Pageable pageable) {
+        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findAllGroupDateRequest(groupId, userIdOfLeader));
+        return success(groupDateService.findGroupDateRequests(groupId, userId, pageable));
     }
 
     @Override
     public Response<GroupDateRequestResponse> saveGroupDateRequest(Long fromGroupId, Long toGroupId) {
         Long userIdOfLeader = 1L;
 
-        return success(groupService.saveGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId));
+        return success(groupDateService.saveGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId));
     }
 
     @Override
     public Response<Void> deleteGroupDateRequest(Long fromGroupId, Long toGroupId) {
         Long userIdOfLeader = 1L;
 
-        groupService.deleteGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId);
+        groupDateService.deleteGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId);
         return success();
     }
 
@@ -126,14 +129,14 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<GroupDateResponse> acceptGroupDateRequest(Long groupDateRequestId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId));
+        return success(groupDateService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId));
     }
 
     @Override
     public Response<Void> rejectGroupDateRequest(Long groupDateRequestId) {
         Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        groupService.rejectGroupDateRequest(userIdOfLeader, groupDateRequestId);
+        groupDateService.rejectGroupDateRequest(userIdOfLeader, groupDateRequestId);
         return success();
     }
 
