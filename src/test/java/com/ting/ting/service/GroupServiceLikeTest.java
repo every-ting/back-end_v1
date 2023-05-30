@@ -72,6 +72,7 @@ class GroupLikeServiceTest {
         GroupMember fromGroupMemberRecord = GroupMember.of(fromGroup, user, MemberRole.MEMBER);
         GroupMember toGroupMemberRecord = GroupMember.of(toGroup, toGroupMember, MemberRole.LEADER);
         ReflectionTestUtils.setField(toGroup, "groupMembers", Set.of(toGroupMemberRecord));
+        ReflectionTestUtils.setField(toGroup, "isMatched", true);
         GroupLikeToDate groupLikeToDateRecord = GroupLikeToDate.of(fromGroupMemberRecord, toGroup);
 
         given(groupRepository.findById(groupId)).willReturn(Optional.of(fromGroup));
@@ -88,7 +89,7 @@ class GroupLikeServiceTest {
         //Then
         List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
         assertThat(createdList).hasSize(1);
-        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.EMPTY);
+        assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.DISABLED);
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.NOT_LIKED);
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeCount", 2);
         assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);

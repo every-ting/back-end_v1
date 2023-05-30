@@ -25,7 +25,7 @@ insert into user (id, username, school, major, gender, birth, email, weight, hei
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (25, '김시우', 'Bentley College', 'Marketing', 'WOMEN', '1990-06-05', 'rlattldn@rambler.ru', 89, 197.2, 'http://dummyimage.com/228x100.png/dddddd/000000', 'ISTJ', now(), now());
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (26, '김서연', 'New York College of Podiatric Medicine', 'Services', 'WOMEN', '1994-12-29', 'rlatjdus@hexun.com', 148, 165.8, 'http://dummyimage.com/113x100.png/cc0000/ffffff', 'ISTP', now(), now());
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (27, '김하은', 'University of Teramo', 'Accounting', 'WOMEN', '2000-01-04', 'rlagkdms@wix.com', 36, 154.1, 'http://dummyimage.com/172x100.png/cc0000/ffffff', 'ENFJ', now(), now());
-insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (28, '김지유', 'CMJ University', 'Product Management', 'WOMEN', '2004-05-19', 'rlawldb@twitter.com', 95, 148.5, 'http://dummyimage.com/229x100.png/5fa2dd/ffffff', 'ESFP', now(), now());
+insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (28, '김지유', 'CMJ University', 'Accounting', 'WOMEN', '2004-05-19', 'rlawldb@twitter.com', 95, 148.5, 'http://dummyimage.com/229x100.png/5fa2dd/ffffff', 'ESFP', now(), now());
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (29, '김윤서', 'Alsadrain University', 'Business Development', 'WOMEN', '2004-12-18', 'rladbstj@forbes.com', 51, 147.2, 'http://dummyimage.com/246x100.png/ff4444/ffffff', 'INTP', now(), now());
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (30, '김수아', 'Aleksander Gieysztor School of Humanities in Pultusk', 'Product Management', 'WOMEN', '1999-08-19', 'rlatndk@netlog.com', 82, 193.3, 'http://dummyimage.com/120x100.png/cc0000/ffffff', 'INFP', now(), now());
 insert into user (id, username, school, major, gender, birth, email, weight, height, ideal_photo, mbti, created_at, updated_at) values (31, '김유찬', 'Aleksander Gieysztor School of Humanities in Pultusk', 'Product Management', 'MEN', '1999-08-19', 'rladbcks@netlog.com', 82, 193.3, 'http://dummyimage.com/120x100.png/cc0000/ffffff', 'INFP', now(), now());
@@ -97,10 +97,6 @@ insert into group_member_request (group_id, user_id, created_at, updated_at) val
 insert into group_member_request (group_id, user_id, created_at, updated_at) values (4, 1, now(), now());
 
 insert into group_like_to_date(from_group_member_id, to_group_id, created_at, updated_at) values (1, 10, now(), now());
-insert into group_like_to_date(from_group_member_id, to_group_id, created_at, updated_at) values (21, 10, now(), now());
-insert into group_like_to_date(from_group_member_id, to_group_id, created_at, updated_at) values (21, 20, now(), now());
-insert into group_like_to_date(from_group_member_id, to_group_id, created_at, updated_at) values (1, 11, now(), now());
-insert into group_like_to_date(from_group_member_id, to_group_id, created_at, updated_at) values (1, 17, now(), now());
 
 insert into blind_request(from_user_id, to_user_id, request_status, created_at, updated_at) values(13, 9, 'PENDING', now(), now());
 insert into blind_request(from_user_id, to_user_id, request_status, created_at, updated_at) values(16, 9, 'PENDING', now(), now());

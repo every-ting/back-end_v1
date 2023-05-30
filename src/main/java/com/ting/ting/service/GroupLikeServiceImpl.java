@@ -67,7 +67,9 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
                 .map(likedGroup -> {
                     DateableGroupResponse response = DateableGroupResponse.from(likedGroup, RequestStatus.EMPTY, null, groupIdWithLikeCountMap.get(likedGroup.getId()));
 
-                    if (pendingDateGroupIds.contains(likedGroup.getId())) {
+                    if (likedGroup.isMatched() == true) {
+                        response.setRequestStatus(RequestStatus.DISABLED);
+                    } else if (pendingDateGroupIds.contains(likedGroup.getId())) {
                         response.setRequestStatus(RequestStatus.PENDING);
                     }
 
@@ -78,7 +80,7 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
                     }
 
                     return response;
-                }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
         return new PageImpl<>(likedDateableGroupResponses, pageable, idAndLikeCountOfGroupsLikeToDate.getTotalElements());
     }
