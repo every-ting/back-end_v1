@@ -95,8 +95,13 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
 
         Page<GroupLikeToJoin> groupLikesToJoin = groupLikeToJoinRepository.findAllByFromUser(user, pageable);
         List<Long> likedGroupIds = groupLikesToJoin.stream().map(GroupLikeToJoin::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableList());
-        List<GroupWithMemberCount> likedGroupsWithMemberCount = groupRepository.findAllWithMemberCountByIdIn(likedGroupIds);
 
+        // 찜한 기록이 없는 경우는 바로 return
+        if (groupLikesToJoin.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, groupLikesToJoin.getTotalElements());
+        }
+
+        List<GroupWithMemberCount> likedGroupsWithMemberCount = groupRepository.findAllWithMemberCountByIdIn(likedGroupIds);
         Set<Long> pendingJoinRequestGroupIds = groupMemberRequestRepository.findAllByUser(user).stream().map(GroupMemberRequest::getGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
 
         List<JoinableGroupResponse> likedJoinableGroupResponses = likedGroupsWithMemberCount.stream()

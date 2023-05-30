@@ -29,7 +29,7 @@ public class AppConfig {
 
     @Bean
     public GroupMemberService groupMemberService() {
-        return new GroupMemberServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository);
+        return new GroupMemberServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository, groupMemberRepository, groupMemberRequestRepository);
     }
 
     @Bean

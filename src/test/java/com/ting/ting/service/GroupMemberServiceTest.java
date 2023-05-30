@@ -1,20 +1,18 @@
 package com.ting.ting.service;
 
-import com.ting.ting.domain.Group;
-import com.ting.ting.domain.GroupMember;
-import com.ting.ting.domain.GroupMemberRequest;
-import com.ting.ting.domain.User;
+import com.ting.ting.domain.*;
 import com.ting.ting.domain.constant.Gender;
+import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
+import com.ting.ting.domain.constant.RequestStatus;
+import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.response.GroupMemberResponse;
+import com.ting.ting.dto.response.JoinableGroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
-import com.ting.ting.repository.GroupMemberRepository;
-import com.ting.ting.repository.GroupMemberRequestRepository;
-import com.ting.ting.repository.GroupRepository;
-import com.ting.ting.repository.UserRepository;
+import com.ting.ting.repository.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,11 +21,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -44,6 +46,7 @@ public class GroupMemberServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private GroupRepository groupRepository;
+    @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
 
@@ -267,6 +270,31 @@ public class GroupMemberServiceTest {
         Assertions.assertThat(memberRecordOfMember.getRole()).isSameAs(MemberRole.LEADER);
     }
 
+    @DisplayName("유저가 한 가입 요청 조회 기능 테스트")
+    @Test
+    void Given_Nothing_When_FindUserJoinRequestList_Then_ReturnsJoinRequestResponse() {
+        //Given
+        Pageable pageable = Pageable.ofSize(20);
+
+        Group requestedGroup = GroupFixture.createGroupById(1L);
+        GroupWithMemberCount requestedGroupWithMemberCount = new GroupWithMemberCount(requestedGroup.getId(), requestedGroup.getGroupName(), requestedGroup.getGender(), 2L, requestedGroup.getMemberSizeLimit(), requestedGroup.getSchool(), requestedGroup.isMatched(), true, requestedGroup.getMemo(), requestedGroup.getCreatedAt());
+        GroupMemberRequest requests = GroupMemberRequest.of(requestedGroup, user);
+
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(groupMemberRequestRepository.findAllByUser(user, pageable)).willReturn(new PageImpl<>(List.of(requests)));
+        given(groupLikeToJoinRepository.findAllByFromUser(user)).willReturn(List.of(GroupLikeToJoin.of(user, requestedGroup)));
+        given(groupRepository.findAllWithMemberCountByIdIn(any())).willReturn(List.of(requestedGroupWithMemberCount));
+
+        //When
+        Page<JoinableGroupResponse> created = groupMemberService.findUserJoinRequestList(user.getId(), pageable);
+
+        //Then
+        List<JoinableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
+        Assertions.assertThat(createdList).hasSize(1);
+        Assertions.assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.LIKED);
+        Assertions.assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("requestStatus", RequestStatus.PENDING);
+        Assertions.assertThat(createdList.get(0).getGroup().getMemberCount()).isSameAs(2);
+    }
 
     @DisplayName("[팀장] : 멤버 가입 요청 조회 기능 테스트")
     @Test

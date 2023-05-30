@@ -2,6 +2,9 @@ package com.ting.ting.service;
 
 import com.ting.ting.dto.response.GroupMemberRequestResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
+import com.ting.ting.dto.response.JoinableGroupResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Set;
 
@@ -26,6 +29,11 @@ public interface GroupMemberService {
      * 팀장 - 팀장 넘기기
      */
     Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader);
+
+    /**
+     * 유저가 과팅 팀에 했던 가입 요청 조회
+     */
+    Page<JoinableGroupResponse> findUserJoinRequestList(Long userId, Pageable pageable);
 
     /**
      * 팀 멤버 조회
