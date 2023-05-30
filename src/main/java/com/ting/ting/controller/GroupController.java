@@ -67,16 +67,46 @@ public interface GroupController {
     Response<Page<JoinableGroupResponse>> getGroupLikeToJoinList(@ParameterObject Pageable pageable);
 
     /**
-     * 팀 멤버 조회(팀장 포함)
-     */
-    @GetMapping("/{groupId}/members")
-    Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
-
-    /**
      * 그룹 생성
      */
     @PostMapping
     Response<GroupResponse> createGroup(@RequestBody GroupRequest request);
+
+    /**
+     * 팀장 - 과팅 요청 조회(받은 요청, 한 요청 모두)
+     */
+    @GetMapping("/{groupId}/dates/requests")
+    Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(@PathVariable Long groupId);
+
+    /**
+     * 팀장 - 과팅 요청
+     */
+    @PostMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 팀장 - 과팅 요청 취소
+     */
+    @DeleteMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<Void> deleteGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 팀장 - 과팅 요청 수락
+     */
+    @PostMapping("/dates/requests/{groupDateRequestId}")
+    Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
+
+    /**
+     * 팀장 - 과팅 요청 거절
+     */
+    @DeleteMapping("/dates/requests/{groupDateRequestId}")
+    Response<Void> rejectGroupDateRequest(@PathVariable Long groupDateRequestId);
+
+    /**
+     * 팀 멤버 조회(팀장 포함)
+     */
+    @GetMapping("/{groupId}/members")
+    Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
      * 같은 성별인 팀에 요청
@@ -119,34 +149,4 @@ public interface GroupController {
      */
     @DeleteMapping("/members/requests/{groupMemberRequestId}")
     Response<Void> rejectJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
-
-    /**
-     * 팀장 - 과팅 요청 조회(받은 요청, 한 요청 모두)
-     */
-    @GetMapping("/{groupId}/dates/requests")
-    Response<GroupDateRequestWithFromAndToResponse> getGroupDateRequest(@PathVariable Long groupId);
-
-    /**
-     * 팀장 - 과팅 요청
-     */
-    @PostMapping("/{fromGroupId}/dates/requests/{toGroupId}")
-    Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
-
-    /**
-     * 팀장 - 과팅 요청 취소
-     */
-    @DeleteMapping("/{fromGroupId}/dates/requests/{toGroupId}")
-    Response<Void> deleteGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
-
-    /**
-     * 팀장 - 과팅 요청 수락
-     */
-    @PostMapping("/dates/requests/{groupDateRequestId}")
-    Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
-
-    /**
-     * 팀장 - 과팅 요청 거절
-     */
-    @DeleteMapping("/dates/requests/{groupDateRequestId}")
-    Response<Void> rejectGroupDateRequest(@PathVariable Long groupDateRequestId);
 }

@@ -30,49 +30,9 @@ public interface GroupService {
     Set<MyGroupResponse> findMyGroupList(Long userId);
 
     /**
-     * 팀 멤버 조회
-     */
-    Set<GroupMemberResponse> findGroupMemberList(Long groupId);
-
-    /**
      * 그룹 생성
      */
     GroupResponse saveGroup(Long userId, GroupRequest request);
-
-    /**
-     * 같은 성별인 팀에 요청
-     */
-    void saveJoinRequest(long groupId, long userId);
-
-    /**
-     * 같은 성별인 팀에 했던 요청을 취소
-     */
-    void deleteJoinRequest(long groupId, long userId);
-
-    /**
-     * 팀 멤버에서 삭제
-     */
-    void deleteGroupMember(long groupId, long userId);
-
-    /**
-     * 팀장 - 팀장 넘기기
-     */
-    Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader);
-
-    /**
-     * 팀장 - 팀에 온 멤버 가입 요청을 조회
-     */
-    Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long userIdOfLeader);
-
-    /**
-     * 팀장 - 팀에 온 멤버 가입 요청을 수락
-     */
-    GroupMemberResponse acceptMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
-
-    /**
-     * 팀장 - 팀에 온 멤버 가입 요청을 거절
-     */
-    void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId);
 
     /**
      * 팀장 - 팀이 한 과팅 요청과, 받은 과팅 요청 모두 조회
