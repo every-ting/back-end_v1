@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Getter
@@ -21,7 +21,7 @@ public class GroupWithMemberInfoResponse {
     private boolean isJoinable;
     private String memo;
     private int averageAgeOfMembers;
-    private List<String> majorsOfMembers;
+    private Set<String> majorsOfMembers;
     private LocalDateTime createdAt;
 
     public static GroupWithMemberInfoResponse from(Group entity) {

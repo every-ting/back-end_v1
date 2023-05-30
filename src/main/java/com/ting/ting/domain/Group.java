@@ -72,7 +72,6 @@ public class Group extends AuditingFields {
         return new Group(groupName, gender, school, memberSizeLimit, memo);
     }
 
-    // groupMembers 평균 나이 구하는 함수
     public int getAverageAgeOfMembers() {
         LocalDate currentDate = LocalDate.now();
         List<Integer> ages = groupMembers.stream()
@@ -87,10 +86,9 @@ public class Group extends AuditingFields {
         return (int)sum / ages.size();
     }
 
-    // groupMembers 의 전공 리스트 반환하는 함수
-    public List<String> getAllMajorsOfMembers() {
+    public Set<String> getAllMajorsOfMembers() {
         return groupMembers.stream()
                 .map(member -> member.getMember().getMajor())
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 }
