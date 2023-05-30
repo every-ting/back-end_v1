@@ -109,7 +109,13 @@ public interface GroupController {
     Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
-     * 같은 성별인 팀에 요청
+     * 과팅 가입 요청 조회
+     */
+    @GetMapping("/requests")
+    Response<Page<JoinableGroupResponse>> getUserJoinRequestList(@ParameterObject Pageable pageable);
+
+    /**
+     * 같은 성별인 팀에 가입 요청
      */
     @PostMapping("/requests/{groupId}")
     Response<Void> sendJoinRequest(@PathVariable Long groupId);

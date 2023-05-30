@@ -143,6 +143,13 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
+    public Response<Page<JoinableGroupResponse>> getUserJoinRequestList(Pageable pageable) {
+        Long userId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
+
+        return success(groupMemberService.findUserJoinRequestList(userId, pageable));
+    }
+
+    @Override
     public Response<Void> sendJoinRequest(Long groupId) {
         Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
 
