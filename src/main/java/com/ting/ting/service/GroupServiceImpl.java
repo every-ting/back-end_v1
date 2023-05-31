@@ -6,10 +6,7 @@ import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
 import com.ting.ting.dto.request.GroupRequest;
-import com.ting.ting.dto.response.DateableGroupResponse;
-import com.ting.ting.dto.response.GroupResponse;
-import com.ting.ting.dto.response.JoinableGroupResponse;
-import com.ting.ting.dto.response.MyGroupResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
@@ -48,6 +45,22 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     @Override
     public Page<GroupResponse> findAllGroups(Pageable pageable) {
         return groupRepository.findAllWithMemberCount(pageable).map(GroupResponse::from);
+    }
+
+    @Override
+    public GroupDetailResponse findGroupDetail(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId))
+        );
+
+        GroupMember memberRecordOfUser = group.getGroupMembers().stream()
+                .filter(groupMember -> groupMember.getMember().getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() ->
+                        throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group.getId()))
+                );
+
+        return GroupDetailResponse.from(group, memberRecordOfUser.getRole());
     }
 
     @Override
