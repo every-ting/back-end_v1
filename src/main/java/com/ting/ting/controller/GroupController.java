@@ -19,6 +19,12 @@ public interface GroupController {
     Response<Page<JoinableGroupResponse>> getJoinableSameGenderGroupList(@ParameterObject Pageable pageable);
 
     /**
+     * 내가 속한 과팅 팀 상세 조회
+     */
+    @GetMapping("/{groupId}")
+    Response<GroupDetailResponse> getGroupDetail(@PathVariable Long groupId);
+
+    /**
      * 다른 성별의 팀 조회
      */
     @GetMapping("/{groupId}/opposite-gender-groups")
@@ -31,28 +37,10 @@ public interface GroupController {
     Response<Set<MyGroupResponse>> myGroupList();
 
     /**
-     * 같은 성별의 팀 찜하기
+     * 유저 기준 - 찜한 같은 성별의 팀 목록 조회(팀 가입을 위한)
      */
-    @PostMapping("/likes/{toGroupId}")
-    Response<Void> createSameGenderGroupLike(@PathVariable Long toGroupId);
-
-    /**
-     * 같은 성별의 팀 찜하기 취소
-     */
-    @DeleteMapping("/likes/{toGroupId}")
-    Response<Void> deleteSameGenderGroupLike(@PathVariable Long toGroupId);
-
-    /**
-     * 다른 성별의 팀 찜하기
-     */
-    @PostMapping("/{fromGroupId}/likes/{toGroupId}")
-    Response<Void> createOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
-
-    /**
-     * 다른 성별의 팀 찜하기 취소
-     */
-    @DeleteMapping("/{fromGroupId}/likes/{toGroupId}")
-    Response<Void> deleteOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+    @GetMapping("/likes")
+    Response<Page<JoinableGroupResponse>> getGroupLikeToJoinList(@ParameterObject Pageable pageable);
 
     /**
      * 팀 기준 - 찜한 목록 조회(과팅 요청을 위한)
@@ -61,46 +49,10 @@ public interface GroupController {
     Response<Page<DateableGroupResponse>> getGroupLikeToDateList(@PathVariable Long groupId, @ParameterObject Pageable pageable);
 
     /**
-     * 유저 기준 - 찜한 같은 성별의 팀 목록 조회(팀 가입을 위한)
-     */
-    @GetMapping("/likes")
-    Response<Page<JoinableGroupResponse>> getGroupLikeToJoinList(@ParameterObject Pageable pageable);
-
-    /**
-     * 그룹 생성
-     */
-    @PostMapping
-    Response<GroupResponse> createGroup(@RequestBody GroupRequest request);
-
-    /**
      * 받은 과팅 요청 조회
      */
     @GetMapping("/{groupId}/dates/requests")
     Response<Page<DateableGroupResponse>> getGroupDateRequest(@PathVariable Long groupId, @ParameterObject Pageable pageable);
-
-    /**
-     * 팀장 - 과팅 요청
-     */
-    @PostMapping("/{fromGroupId}/dates/requests/{toGroupId}")
-    Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
-
-    /**
-     * 팀장 - 과팅 요청 취소
-     */
-    @DeleteMapping("/{fromGroupId}/dates/requests/{toGroupId}")
-    Response<Void> deleteGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
-
-    /**
-     * 팀장 - 과팅 요청 수락
-     */
-    @PostMapping("/dates/requests/{groupDateRequestId}")
-    Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
-
-    /**
-     * 팀장 - 과팅 요청 거절
-     */
-    @DeleteMapping("/dates/requests/{groupDateRequestId}")
-    Response<Void> rejectGroupDateRequest(@PathVariable Long groupDateRequestId);
 
     /**
      * 팀 멤버 조회(팀장 포함)
@@ -115,10 +67,82 @@ public interface GroupController {
     Response<Page<JoinableGroupResponse>> getUserJoinRequestList(@ParameterObject Pageable pageable);
 
     /**
+     * 팀장 - 팀 멤버 가입 요청 조회
+     */
+    @GetMapping("/{groupId}/members/requests")
+    Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(@PathVariable Long groupId);
+
+    /**
+     * 같은 성별의 팀 찜하기
+     */
+    @PostMapping("/likes/{toGroupId}")
+    Response<Void> createSameGenderGroupLike(@PathVariable Long toGroupId);
+
+    /**
+     * 다른 성별의 팀 찜하기
+     */
+    @PostMapping("/{fromGroupId}/likes/{toGroupId}")
+    Response<Void> createOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 그룹 생성
+     */
+    @PostMapping
+    Response<GroupResponse> createGroup(@RequestBody GroupRequest request);
+
+    /**
+     * 팀장 - 과팅 요청
+     */
+    @PostMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<GroupDateRequestResponse> saveGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 팀장 - 과팅 요청 수락
+     */
+    @PostMapping("/dates/requests/{groupDateRequestId}")
+    Response<GroupDateResponse> acceptGroupDateRequest(@PathVariable Long groupDateRequestId);
+
+    /**
      * 같은 성별인 팀에 가입 요청
      */
     @PostMapping("/requests/{groupId}")
     Response<Void> sendJoinRequest(@PathVariable Long groupId);
+
+    /**
+     * 팀장 - 팀 멤버 가입 요청 수락
+     */
+    @PostMapping("/members/requests/{groupMemberRequestId}")
+    Response<GroupMemberResponse> acceptJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
+
+    /**
+     * 팀장 - 팀장 넘기기
+     */
+    @PutMapping("/{groupId}/leader/{userIdOfNewLeader}")
+    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long userIdOfNewLeader);
+
+    /**
+     * 같은 성별의 팀 찜하기 취소
+     */
+    @DeleteMapping("/likes/{toGroupId}")
+    Response<Void> deleteSameGenderGroupLike(@PathVariable Long toGroupId);
+
+    /**
+     * 다른 성별의 팀 찜하기 취소
+     */
+    @DeleteMapping("/{fromGroupId}/likes/{toGroupId}")
+    Response<Void> deleteOppositeGenderGroupLike(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 팀장 - 과팅 요청 취소
+     */
+    @DeleteMapping("/{fromGroupId}/dates/requests/{toGroupId}")
+    Response<Void> deleteGroupDateRequest(@PathVariable Long fromGroupId, @PathVariable Long toGroupId);
+
+    /**
+     * 팀장 - 과팅 요청 거절
+     */
+    @DeleteMapping("/dates/requests/{groupDateRequestId}")
+    Response<Void> rejectGroupDateRequest(@PathVariable Long groupDateRequestId);
 
     /**
      * 같은 성별인 팀에 했던 요청을 취소
@@ -131,24 +155,6 @@ public interface GroupController {
      */
     @DeleteMapping("/{groupId}/members")
     Response<Void> deleteGroupMember(@PathVariable Long groupId);
-
-    /**
-     * 팀장 - 팀장 넘기기
-     */
-    @PutMapping("/{groupId}/leader/{userIdOfNewLeader}")
-    Response<Set<GroupMemberResponse>> changeGroupLeader(@PathVariable Long groupId, @PathVariable Long userIdOfNewLeader);
-
-    /**
-     * 팀장 - 팀 멤버 가입 요청 조회
-     */
-    @GetMapping("/{groupId}/members/requests")
-    Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(@PathVariable Long groupId);
-
-    /**
-     * 팀장 - 팀 멤버 가입 요청 수락
-     */
-    @PostMapping("/members/requests/{groupMemberRequestId}")
-    Response<GroupMemberResponse> acceptJoinRequestToMyGroup(@PathVariable Long groupMemberRequestId);
 
     /**
      * 팀장 - 팀 멤버 가입 요청 거절
