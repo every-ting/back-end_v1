@@ -28,6 +28,11 @@ public class AppConfig {
     }
 
     @Bean
+    public GroupMemberService groupMemberService() {
+        return new GroupMemberServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository, groupMemberRepository, groupMemberRequestRepository);
+    }
+
+    @Bean
     public GroupLikeService groupLikeService() {
         return new GroupLikeServiceImpl(userRepository, groupRepository, groupMemberRepository, groupMemberRequestRepository, groupDateRequestRepository, groupLikeToJoinRepository, groupLikeToDateRepository);
     }

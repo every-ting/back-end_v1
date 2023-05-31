@@ -99,6 +99,7 @@ insert into group_member_request (id, group_id, user_id, created_at, updated_at)
 insert into group_member_request (id, group_id, user_id, created_at, updated_at) values (2, 1, 4, now(), now());
 insert into group_member_request (id, group_id, user_id, created_at, updated_at) values (3, 2, 3, now(), now());
 insert into group_member_request (id, group_id, user_id, created_at, updated_at) values (4, 4, 1, now(), now());
+insert into group_member_request (id, group_id, user_id, created_at, updated_at) values (5, 19, 1, now(), now());
 
 insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (1, 1, 10, now(), now());
 
