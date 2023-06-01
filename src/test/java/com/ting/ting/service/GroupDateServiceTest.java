@@ -76,7 +76,7 @@ public class GroupDateServiceTest {
         given(groupRepository.findById(any())).willReturn(Optional.of(myGroup));
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupMemberRepository.findByGroupAndMember(myGroup, user)).willReturn(Optional.of(memberRecordOfUser));
-        given(groupDateRequestRepository.findAllByToGroup(myGroup, pageable)).willReturn(new PageImpl<>(List.of(dateRequest)));
+        given(groupDateRequestRepository.findAllByFromGroup_IsMatchedAndToGroup(false, myGroup, pageable)).willReturn(new PageImpl<>(List.of(dateRequest)));
         given(groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_GroupAndToGroupIdsIn(myGroup, List.of(fromGroup))).willReturn(List.of(fromGroupIdWithLikeCount));
         given(groupRepository.findAllWithMembersInfoByIdIn(List.of(fromGroup.getId()))).willReturn(List.of(fromGroup));
 

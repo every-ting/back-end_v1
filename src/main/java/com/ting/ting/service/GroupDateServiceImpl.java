@@ -51,7 +51,7 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
         );
 
-        Page<GroupDateRequest> dateRequests = groupDateRequestRepository.findAllByToGroup(group, pageable);
+        Page<GroupDateRequest> dateRequests = groupDateRequestRepository.findAllByFromGroup_IsMatchedAndToGroup(false, group, pageable);
         List<Group> fromGroups = dateRequests.stream().map(GroupDateRequest::getFromGroup).collect(Collectors.toUnmodifiableList());
 
         // 과팅 요청이 없는 경우는 바로 return

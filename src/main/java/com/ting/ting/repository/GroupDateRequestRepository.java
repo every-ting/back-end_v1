@@ -2,7 +2,6 @@ package com.ting.ting.repository;
 
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupDateRequest;
-import com.ting.ting.domain.custom.GroupIdWithLikeCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,11 +20,5 @@ public interface GroupDateRequestRepository extends JpaRepository<GroupDateReque
 
     List<GroupDateRequest> findAllByFromGroup(Group fromGroup);
 
-    Page<GroupDateRequest> findAllByToGroup(Group fromGroup, Pageable pageable);
-
-    @Query(value = "select distinct entity.fromGroup from GroupDateRequest entity join entity.fromGroup where entity.toGroup = :toGroup")
-    List<Group> findFromGroupByToGroup(@Param("toGroup") Group toGroup);
-
-    @Query(value = "select distinct entity.toGroup from GroupDateRequest entity join entity.toGroup where entity.fromGroup = :fromGroup")
-    List<Group> findToGroupByFromGroup(@Param("fromGroup") Group fromGroup);
+    Page<GroupDateRequest> findAllByFromGroup_IsMatchedAndToGroup(boolean isMatched, Group fromGroup, Pageable pageable);
 }
