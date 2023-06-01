@@ -20,3 +20,11 @@ cloud:
     credentials:
       accessKey: ${S3_BUCKET_ACCESS_KEY}
       secretKey: ${S3_BUCKET_SECRET_KEY}
+
+kakao:
+  client-id : ${CLIENT_ID}
+  grant-type: ${GRANT_TYPE}
+  redirect-url : ${REDIRECT_URL}
+  token-url: ${TOKEN_URL}
+  user-info-url: ${USER_INFO_URL}
+  user-name-attribute: id
