@@ -18,6 +18,9 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findByGroupName(String name);
 
+    @EntityGraph(attributePaths = {"groupMembers", "groupMembers.member"})
+    Optional<Group> findById(Long groupId);
+
     Page<Group> findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(Gender gender, boolean isJoinable, boolean isMatched, int memberSizeLimit, Pageable pageable);
 
     @EntityGraph(attributePaths = {"groupMembers", "groupMembers.member"})

@@ -15,6 +15,11 @@ public interface GroupService {
     Page<GroupResponse> findAllGroups(Pageable pageable);
 
     /**
+     * 팀 상세 조회
+     */
+    GroupDetailResponse findGroupDetail(Long groupId, Long userId);
+
+    /**
      * 같은 성별 이면서 내가 속한 팀이 아닌 팀 조회
      */
     Page<JoinableGroupResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable);

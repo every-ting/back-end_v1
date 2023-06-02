@@ -7,6 +7,7 @@ import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.DateableGroupResponse;
+import com.ting.ting.dto.response.GroupDetailResponse;
 import com.ting.ting.dto.response.GroupResponse;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
@@ -54,7 +55,7 @@ class GroupServiceTest {
         user = UserFixture.createUserById(1L);
     }
 
-    @DisplayName("모든 팀 조회 성공")
+    @DisplayName("모든 팀 조회 기능 테스트")
     @Test
     void Given_Nothing_When_FindAllGroups_Then_ReturnsGroupResponsePage() {
         //Given
@@ -63,6 +64,28 @@ class GroupServiceTest {
 
         //When & Then
         assertThat(groupService.findAllGroups(pageable)).isEmpty();
+    }
+
+    @DisplayName("내가 속한 팀 상세 조회 기능 테스트")
+    @Test
+    void Given_Group_When_FindGroupDetail_Then_ReturnsGroupDetailResponse() {
+        //Given
+        Long groupId = 1L;
+
+        Group group = GroupFixture.createGroupById(groupId);
+        GroupMember memberRecordOfUser = GroupMember.of(group, user, MemberRole.MEMBER);
+        ReflectionTestUtils.setField(group, "groupMembers", Set.of(memberRecordOfUser));
+
+        given(groupRepository.findById(any())).willReturn(Optional.of(group));
+
+        //When
+        GroupDetailResponse response = groupService.findGroupDetail(groupId, user.getId());
+
+        //Then
+        assertThat(response).hasNoNullFieldsOrProperties();
+        assertThat(response.getGroup()).hasFieldOrPropertyWithValue("id", group.getId());
+        assertThat(response.getMembers()).hasSize(1);
+        assertThat(response).hasFieldOrPropertyWithValue("myRole", memberRecordOfUser.getRole());
     }
 
     @DisplayName("같은 성별 팀 가입을 위한 조회 기능 테스트")
