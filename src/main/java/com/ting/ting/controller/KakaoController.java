@@ -20,7 +20,7 @@ public class KakaoController extends AbstractController {
     private final KakaoInfoGenerator kakaoInfoGenerator;
 
     public KakaoController(KakaoInfoGenerator kakaoInfoGenerator) {
-        super(ServiceType.USER);
+        super(ServiceType.KAKAO);
         this.kakaoInfoGenerator = kakaoInfoGenerator;
     }
 

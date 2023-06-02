@@ -28,6 +28,9 @@ public class KakaoInfoGenerator {
     @Value("${kakao.user-info-url}")
     String userInfoUrl;
 
+    @Value("${kakao.logout-url}")
+    String logOutURL;
+
     private final WebClient webClient = WebClient.create();
 
     public KakaoTokenResponse getKakaoTokenResponse(String code) {
@@ -56,7 +59,7 @@ public class KakaoInfoGenerator {
 
     public KakaoLogOutResponse kakaoLogOut(String accessToken) {
         return webClient.post()
-                .uri("https://kapi.kakao.com/v1/user/logout")
+                .uri(logOutURL)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
