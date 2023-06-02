@@ -14,7 +14,7 @@ public class GroupDetailResponse {
 
     private GroupResponse group;
     private Set<GroupMemberResponse> members;
-    private MemberRole role;
+    private MemberRole myRole;
 
     public static GroupDetailResponse from(Group entity, MemberRole role) {
         return new GroupDetailResponse(

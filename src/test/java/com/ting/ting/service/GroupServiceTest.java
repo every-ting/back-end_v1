@@ -85,7 +85,7 @@ class GroupServiceTest {
         assertThat(response).hasNoNullFieldsOrProperties();
         assertThat(response.getGroup()).hasFieldOrPropertyWithValue("id", group.getId());
         assertThat(response.getMembers()).hasSize(1);
-        assertThat(response).hasFieldOrPropertyWithValue("role", memberRecordOfUser.getRole());
+        assertThat(response).hasFieldOrPropertyWithValue("myRole", memberRecordOfUser.getRole());
     }
 
     @DisplayName("같은 성별 팀 가입을 위한 조회 기능 테스트")
