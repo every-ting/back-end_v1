@@ -29,3 +29,6 @@ kakao:
   user-info-url: ${USER_INFO_URL}
   logout-url: ${LOGOUT_URL}
   user-name-attribute: id
+
+jwt:
+  secret: ${JWT_SECRET}
