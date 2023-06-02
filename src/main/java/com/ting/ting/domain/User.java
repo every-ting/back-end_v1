@@ -33,6 +33,10 @@ public class User extends AuditingFields {
     private String username;
 
     @Email @NotNull
+    @Column(name = "social_email",unique = true, nullable = false, length = 100)
+    private String socialEmail;
+
+    @Email @NotNull
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
@@ -69,9 +73,10 @@ public class User extends AuditingFields {
 
     protected User() {}
 
-    private User(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
+    private User(Long id, String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
         this.id = id;
         this.username = username;
+        this.socialEmail = socialEmail;
         this.email = email;
         this.school = school;
         this.major = major;
@@ -83,11 +88,11 @@ public class User extends AuditingFields {
         this.idealPhoto = idealPhoto;
     }
 
-    public static User of(String username, String email, String school, String major, Gender gender, LocalDate birth) {
-        return User.of(null, username, email, school, major, gender, birth);
+    public static User of(String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth) {
+        return User.of(null, username, socialEmail ,email, school, major, gender, birth);
     }
 
-    public static User of(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth) {
-        return new User(id, username, email, school, major, gender, birth, null, null, null, null);
+    public static User of(Long id, String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth) {
+        return new User(id, username, socialEmail, email, school, major, gender, birth, null, null, null, null);
     }
 }

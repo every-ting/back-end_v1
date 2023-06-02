@@ -27,4 +27,5 @@ kakao:
   redirect-url : ${REDIRECT_URL}
   token-url: ${TOKEN_URL}
   user-info-url: ${USER_INFO_URL}
+  logout-url: ${LOGOUT_URL}
   user-name-attribute: id
