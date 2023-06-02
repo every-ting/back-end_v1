@@ -49,5 +49,14 @@ public class JwtTokenGenerator {
             throw new TingApplicationException(ErrorCode.TOKEN_ERROR, ServiceType.UTIL, "Invalid JWT token");
         }
     }
+
+    public Long getIdByToken(String token) {
+        Claims body = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return body.get("id", Long.class);
+    }
 }
 
