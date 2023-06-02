@@ -31,6 +31,10 @@ public class UserService extends AbstractService{
                 .orElse(new LogInResponse(false));
     }
 
+    public Long test(String token) {
+        return jwtTokenGenerator.getIdByToken(token);
+    }
+
     private String createToken(String socialEmail) {
         User user = getUserBySocialEmail(socialEmail);
         return jwtTokenGenerator.createTokenById(user.getId());

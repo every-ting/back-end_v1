@@ -24,4 +24,9 @@ public class UserController extends AbstractController {
     public Response<LogInResponse> logIn(@RequestParam String code) {
         return success(userService.logIn(code));
     }
+
+    @GetMapping("/test")
+    public Long test(@RequestParam String token) {
+        return userService.test(token);
+    }
 }
