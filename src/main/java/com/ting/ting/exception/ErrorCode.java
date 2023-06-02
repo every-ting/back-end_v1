@@ -23,6 +23,7 @@ public enum ErrorCode {
     REQUEST_NOT_MINE(HttpStatus.BAD_REQUEST,"This is not the request information that came to me"),
     NOT_MY_REQUEST(HttpStatus.BAD_REQUEST,"This is not a request I sent."),
     QR_GENERATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred in the QR generator"),
+    TOKEN_ERROR(HttpStatus.BAD_REQUEST, "Token generation error"),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")
     ;
