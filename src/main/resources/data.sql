@@ -102,6 +102,8 @@ insert into group_member_request (id, group_id, user_id, created_at, updated_at)
 insert into group_member_request (id, group_id, user_id, created_at, updated_at) values (5, 19, 1, now(), now());
 
 insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (1, 1, 10, now(), now());
+insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (2, 8, 1, now(), now());
+insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (3, 1, 8, now(), now());
 
 insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(1, 13, 9, 'PENDING', now(), now());
 insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(2, 16, 9, 'PENDING', now(), now());

@@ -3,7 +3,6 @@ package com.ting.ting.repository;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupLikeToDate;
 import com.ting.ting.domain.GroupMember;
-import com.ting.ting.domain.User;
 import com.ting.ting.domain.custom.GroupIdWithLikeCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +22,7 @@ public interface GroupLikeToDateRepository extends JpaRepository<GroupLikeToDate
 
     @Query(value = "select new com.ting.ting.domain.custom.GroupIdWithLikeCount(entity.toGroup.id, count(*)) from GroupLikeToDate entity where entity.fromGroupMember.group = :fromGroup group by entity.toGroup.id")
     Page<GroupIdWithLikeCount> findAllToGroupIdAndLikeCountByFromGroupMember_Group(@Param("fromGroup") Group fromGroup, Pageable pageable);
+
+    @Query(value = "select new com.ting.ting.domain.custom.GroupIdWithLikeCount(entity.toGroup.id, count(*)) from GroupLikeToDate entity where entity.fromGroupMember.group = :fromGroup and entity.toGroup in :toGroups group by entity.toGroup.id")
+    List<GroupIdWithLikeCount> findAllToGroupIdAndLikeCountByFromGroupMember_GroupAndToGroupIdsIn(@Param("fromGroup") Group fromGroup, @Param("toGroups") List<Group> toGroups);
 }
