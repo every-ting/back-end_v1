@@ -59,4 +59,3 @@ public class JwtTokenGenerator {
         return body.get("id", Long.class);
     }
 }
-
