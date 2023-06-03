@@ -1,7 +1,9 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.User;
+import com.ting.ting.dto.request.SignUpRequest;
 import com.ting.ting.dto.response.LogInResponse;
+import com.ting.ting.dto.response.SignUpResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.UserRepository;
@@ -10,7 +12,7 @@ import com.ting.ting.util.KakaoInfoGenerator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserService extends AbstractService{
+public class UserService extends AbstractService {
 
     private final UserRepository userRepository;
     private final KakaoInfoGenerator kakaoInfoGenerator;
@@ -27,15 +29,29 @@ public class UserService extends AbstractService{
         String socialEmail = getSocialEmailByCode(code);
 
         return userRepository.findBySocialEmail(socialEmail)
-                .map(response -> new LogInResponse(true, createToken(socialEmail)))
+                .map(response -> new LogInResponse(true, createTokenBySocialEmail(socialEmail)))
                 .orElse(new LogInResponse(false));
     }
 
-    public Long test(String token) {
-        return jwtTokenGenerator.getIdByToken(token);
+    public SignUpResponse signUp(SignUpRequest request) {
+        userRepository.findByUsername(request.getUsername()).ifPresent(username ->
+                throwException(ErrorCode.DUPLICATE_USERNAME)
+        );
+
+        userRepository.findByEmail(request.getEmail()).ifPresent(email ->
+                throwException(ErrorCode.DUPLICATE_EMAIL));
+
+        User newUser = User.from(request);
+        userRepository.save(newUser);
+
+        return new SignUpResponse(request.getUsername(), createTokenById(newUser.getId()));
     }
 
-    private String createToken(String socialEmail) {
+    private String createTokenById(Long id) {
+        return jwtTokenGenerator.createTokenById(id);
+    }
+
+    private String createTokenBySocialEmail(String socialEmail) {
         User user = getUserBySocialEmail(socialEmail);
         return jwtTokenGenerator.createTokenById(user.getId());
     }
