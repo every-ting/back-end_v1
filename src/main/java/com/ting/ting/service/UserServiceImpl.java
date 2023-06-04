@@ -8,20 +8,20 @@ import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.UserRepository;
 import com.ting.ting.util.JwtTokenGenerator;
-import com.ting.ting.util.KakaoInfoGenerator;
+import com.ting.ting.util.KakaoManger;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserServiceImpl extends AbstractService implements UserService {
 
     private final UserRepository userRepository;
-    private final KakaoInfoGenerator kakaoInfoGenerator;
+    private final KakaoManger kakaoManger;
     private final JwtTokenGenerator jwtTokenGenerator;
 
-    public UserServiceImpl(UserRepository userRepository, KakaoInfoGenerator kakaoInfoGenerator, JwtTokenGenerator jwtTokenGenerator) {
+    public UserServiceImpl(UserRepository userRepository, KakaoManger kakaoManger, JwtTokenGenerator jwtTokenGenerator) {
         super(ServiceType.USER);
         this.userRepository = userRepository;
-        this.kakaoInfoGenerator = kakaoInfoGenerator;
+        this.kakaoManger = kakaoManger;
         this.jwtTokenGenerator = jwtTokenGenerator;
     }
 
@@ -29,7 +29,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
         String socialEmail = getSocialEmailByCode(code);
 
         return userRepository.findBySocialEmail(socialEmail)
-                .map(response -> new LogInResponse(true, createTokenBySocialEmail(socialEmail)))
+                .map(response -> {
+                    User user = getUserBySocialEmail(socialEmail);
+                    return new LogInResponse(true, createTokenById(user.getId()));
+                })
                 .orElse(new LogInResponse(false));
     }
 
@@ -51,14 +54,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return jwtTokenGenerator.createTokenById(id);
     }
 
-    private String createTokenBySocialEmail(String socialEmail) {
-        User user = getUserBySocialEmail(socialEmail);
-        return jwtTokenGenerator.createTokenById(user.getId());
-    }
-
     private String getSocialEmailByCode(String code) {
-        String accessToken = kakaoInfoGenerator.getKakaoTokenResponse(code).getAccess_token();
-        return kakaoInfoGenerator.getKakaoUserInfoResponse(accessToken).getKakao_account().getEmail();
+        String accessToken = kakaoManger.getKakaoTokenResponse(code).getAccess_token();
+        return kakaoManger.getKakaoUserInfoResponse(accessToken).getKakao_account().getEmail();
     }
 
     private User getUserBySocialEmail(String socialEmail) {
