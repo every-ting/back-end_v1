@@ -31,7 +31,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, createTokenById(user.getId()));
+                    return new LogInResponse(true, jwtTokenGenerator.createTokenById(user.getId()));
                 })
                 .orElse(new LogInResponse(false));
     }
@@ -47,11 +47,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         User newUser = User.from(request);
         userRepository.save(newUser);
 
-        return new SignUpResponse(request.getUsername(), createTokenById(newUser.getId()));
-    }
-
-    private String createTokenById(Long id) {
-        return jwtTokenGenerator.createTokenById(id);
+        return new SignUpResponse(request.getUsername(), jwtTokenGenerator.createTokenById(newUser.getId()));
     }
 
     private String getSocialEmailByCode(String code) {

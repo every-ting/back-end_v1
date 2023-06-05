@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 public class LogInResponse {
 
-    private boolean registerStatus;
+    private boolean isRegistered;
     private String token;
 
     public LogInResponse(boolean isRegistered) {
-        this.registerStatus = isRegistered;
+        this.isRegistered = isRegistered;
     }
 }
