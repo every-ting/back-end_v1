@@ -35,7 +35,7 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    public boolean validToken(String token) {
+    public boolean isValidToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(this.key).build().parseClaimsJws(token).getBody();
             return true;
