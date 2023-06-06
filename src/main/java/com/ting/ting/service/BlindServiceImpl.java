@@ -7,10 +7,7 @@ import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.RequestStatus;
-import com.ting.ting.dto.response.BlindDateResponse;
-import com.ting.ting.dto.response.BlindRequestResponse;
-import com.ting.ting.dto.response.BlindRequestWithFromAndToResponse;
-import com.ting.ting.dto.response.BlindUserWithRequestStatusAndLikeStatusResponse;
+import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.BlindDateRepository;
@@ -132,34 +129,36 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
         );
     }
 
-    private Set<BlindRequestResponse> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindDateResponse> myRelatedUsersInfo) {
+    private Set<BlindRequestResponseWithLikeStatus> getBlindRequestResponseByBlindDateResponse(long userId, Set<BlindRequestResponse> myRelatedUsersInfo) {
         User user = getUserById(userId);
 
-        Set<BlindRequestResponse> blindRequestResponses = new LinkedHashSet<>();
+        Set<BlindRequestResponseWithLikeStatus> blindRequestResponseWithLikeStatus = new LinkedHashSet<>();
 
         Set<Long> blindLikedUserId = getMyLikedUser(user).stream().map(User::getId).collect(Collectors.toUnmodifiableSet());
 
-        for (BlindDateResponse myRelatedUser : myRelatedUsersInfo) {
-            if (blindLikedUserId.contains(myRelatedUser.getId())) {
-                blindRequestResponses.add(BlindRequestResponse.of(myRelatedUser, LikeStatus.LIKED));
+        for (BlindRequestResponse blindRequestResponse : myRelatedUsersInfo) {
+            Long oppositeUserId = blindRequestResponse.getUserId();
+
+            if (blindLikedUserId.contains(oppositeUserId)) {
+                blindRequestResponseWithLikeStatus.add(BlindRequestResponseWithLikeStatus.of(blindRequestResponse, LikeStatus.LIKED));
             } else {
-                blindRequestResponses.add(BlindRequestResponse.of(myRelatedUser, LikeStatus.NOT_LIKED));
+                blindRequestResponseWithLikeStatus.add(BlindRequestResponseWithLikeStatus.of(blindRequestResponse, LikeStatus.NOT_LIKED));
             }
         }
 
-        return blindRequestResponses;
+        return blindRequestResponseWithLikeStatus;
     }
 
-    private Set<BlindDateResponse> myRequest(long fromUserId) {
+    private Set<BlindRequestResponse> myRequest(long fromUserId) {
         Set<BlindRequest> usersOfMyRequestInfo = blindRequestRepository.findAllByFromUserAndStatus(getUserById(fromUserId), RequestStatus.PENDING);
 
-        return usersOfMyRequestInfo.stream().map(BlindRequest::getToUser).map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfMyRequestInfo.stream().map(BlindRequestResponse::toUserInfo).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private Set<BlindDateResponse> requestToMe(long toUserId) {
+    private Set<BlindRequestResponse> requestToMe(long toUserId) {
         Set<BlindRequest> usersOfRequestToMeInfo = blindRequestRepository.findAllByToUserAndStatus(getUserById(toUserId), RequestStatus.PENDING);
 
-        return usersOfRequestToMeInfo.stream().map(BlindRequest::getFromUser).map(BlindDateResponse::from).collect(Collectors.toCollection(LinkedHashSet::new));
+        return usersOfRequestToMeInfo.stream().map(BlindRequestResponse::fromUserInfo).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
