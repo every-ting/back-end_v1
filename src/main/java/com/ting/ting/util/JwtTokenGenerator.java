@@ -5,6 +5,8 @@ import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -13,13 +15,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class JwtTokenGenerator {
 
-    private final Key key;
-
-    public JwtTokenGenerator(String secret) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    }
+    @Value("${jwt.secret}")
+    private String secret;
 
     public String createTokenById(Long id) {
         Map<String, Object> payloads = new HashMap<>();
@@ -31,13 +31,13 @@ public class JwtTokenGenerator {
                 .setClaims(payloads)
                 .setExpiration(expiration)
                 .setSubject("user-auto")
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
     }
 
     public boolean isValidToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(this.key).build().parseClaimsJws(token).getBody();
+            Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody();
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             throw new TingApplicationException(ErrorCode.TOKEN_ERROR, ServiceType.UTIL, "Invalid JWT signature.");
@@ -52,10 +52,15 @@ public class JwtTokenGenerator {
 
     public Long getIdByToken(String token) {
         Claims body = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
         return body.get("id", Long.class);
+    }
+
+    private Key getKey() {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
