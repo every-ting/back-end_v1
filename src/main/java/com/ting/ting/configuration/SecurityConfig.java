@@ -29,6 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
+                .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .mvcMatchers("/ting/**").permitAll()
                         .anyRequest().authenticated()
