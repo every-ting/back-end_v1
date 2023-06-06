@@ -25,6 +25,15 @@ public class UserServiceImpl extends AbstractService implements UserService {
         this.jwtTokenGenerator = jwtTokenGenerator;
     }
 
+    @Override
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) not found", userId))
+        );
+
+        return UserDto.from(user);
+    }
+
     public LogInResponse logIn(String code) {
         String socialEmail = getSocialEmailByCode(code);
 
