@@ -2,6 +2,8 @@ package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
+import com.ting.ting.util.JwtTokenGenerator;
+import com.ting.ting.util.KakaoManger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,13 @@ public class AppConfig {
     private final BlindRequestRepository blindRequestRepository;
     private final BlindDateRepository blindDateRepository;
     private final BlindLikeRepository blindLikeRepository;
+    private final KakaoManger kakaoManger;
+    private final JwtTokenGenerator jwtTokenGenerator;
+
+    @Bean
+    public UserService userService() {
+        return new UserServiceImpl(userRepository, kakaoManger, jwtTokenGenerator);
+    }
 
     @Bean
     public GroupService groupService() {

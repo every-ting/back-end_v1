@@ -17,4 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long id);
 
     Page<User> findAllByGenderAndIdNotIn(Gender gender, Set<Long> usersId, Pageable pageable);
+
+    Optional<User> findBySocialEmail(String socialEmail);
+
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);
 }

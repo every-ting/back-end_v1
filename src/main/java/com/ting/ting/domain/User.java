@@ -2,6 +2,7 @@ package com.ting.ting.domain;
 
 import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.domain.constant.MBTI;
+import com.ting.ting.dto.request.SignUpRequest;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
@@ -28,19 +29,28 @@ public class User extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull @Size(min = 4, max = 100)
+    @NotNull
+    @Size(min = 4, max = 100)
     @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @Email @NotNull
+    @Email
+    @NotNull
+    @Column(name = "social_email", unique = true, nullable = false, length = 100)
+    private String socialEmail;
+
+    @Email
+    @NotNull
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @NotNull @Size(max = 70)
+    @NotNull
+    @Size(max = 70)
     @Column(length = 70, nullable = false)
     private String school;
 
-    @NotNull @Size(max = 50)
+    @NotNull
+    @Size(max = 50)
     @Column(length = 50, nullable = false)
     private String major;
 
@@ -61,17 +71,19 @@ public class User extends AuditingFields {
 
     private Float height;
 
-    @Column(name="ideal_photo")
+    @Column(name = "ideal_photo")
     private String idealPhoto;
 
     @Column(name = "deleted_at")  // soft-delete
     private LocalDateTime deletedAt;
 
-    protected User() {}
+    protected User() {
+    }
 
-    private User(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
+    private User(Long id, String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth, MBTI mbti, Float weight, Float height, String idealPhoto) {
         this.id = id;
         this.username = username;
+        this.socialEmail = socialEmail;
         this.email = email;
         this.school = school;
         this.major = major;
@@ -83,11 +95,33 @@ public class User extends AuditingFields {
         this.idealPhoto = idealPhoto;
     }
 
-    public static User of(String username, String email, String school, String major, Gender gender, LocalDate birth) {
-        return User.of(null, username, email, school, major, gender, birth);
+    public User(String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth) {
+        this.username = username;
+        this.socialEmail = socialEmail;
+        this.email = email;
+        this.school = school;
+        this.major = major;
+        this.gender = gender;
+        this.birth = birth;
     }
 
-    public static User of(Long id, String username, String email, String school, String major, Gender gender, LocalDate birth) {
-        return new User(id, username, email, school, major, gender, birth, null, null, null, null);
+    public static User from(SignUpRequest request) {
+        return new User(
+                request.getUsername(),
+                request.getSocialEmail(),
+                request.getEmail(),
+                request.getSchool(),
+                request.getMajor(),
+                request.getGender(),
+                request.getBirth()
+        );
+    }
+
+    public static User of(String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth) {
+        return User.of(null, username, socialEmail, email, school, major, gender, birth);
+    }
+
+    public static User of(Long id, String username, String socialEmail, String email, String school, String major, Gender gender, LocalDate birth) {
+        return new User(id, username, socialEmail, email, school, major, gender, birth, null, null, null, null);
     }
 }
