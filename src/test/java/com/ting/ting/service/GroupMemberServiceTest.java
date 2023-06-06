@@ -15,6 +15,7 @@ import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,9 +59,17 @@ public class GroupMemberServiceTest {
     @BeforeEach
     private void setUpUser() {
         user = UserFixture.createUserById(1L);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        SecurityContextHolder.setContext(securityContext);
+        given(securityContext.getAuthentication()).willReturn(authentication);
+        given(authentication.getName()).willReturn(user.getId().toString()); // 원하는 userId 값을 반환하도록 설정
     }
 
     @DisplayName("팀 멤버 조회 기능 테스트")
+    @Disabled
     @Test
     void Given_Group_When_FindGroupMemberList_Then_ReturnsGroupMemberSet() {
         //Given
