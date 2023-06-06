@@ -22,6 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -43,8 +46,6 @@ class GroupServiceTest {
     @Mock private GroupRepository groupRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
-    @Mock private GroupDateRepository groupDateRepository;
-    @Mock private GroupDateRequestRepository groupDateRequestRepository;
     @Mock private GroupLikeToDateRepository groupLikeToDateRepository;
     @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
 
@@ -79,7 +80,7 @@ class GroupServiceTest {
         given(groupRepository.findById(any())).willReturn(Optional.of(group));
 
         //When
-        GroupDetailResponse response = groupService.findGroupDetail(groupId, user.getId());
+        GroupDetailResponse response = groupService.findGroupDetail(groupId);
 
         //Then
         assertThat(response).hasNoNullFieldsOrProperties();
@@ -100,7 +101,7 @@ class GroupServiceTest {
         given(groupLikeToJoinRepository.findAllByFromUser(user)).willReturn(List.of());
 
         //When
-        assertThat(groupService.findJoinableSameGenderGroupList(user.getId(), pageable)).isEmpty();
+        assertThat(groupService.findJoinableSameGenderGroupList(pageable)).isEmpty();
     }
 
     @DisplayName("다른 성별 팀 과팅 요청을 위한 조회 기능 테스트")
@@ -125,7 +126,7 @@ class GroupServiceTest {
         given(groupLikeToDateRepository.findAllByFromGroupMember(any())).willReturn(List.of());
 
         //When
-        Page<DateableGroupResponse> created = groupService.findDateableOppositeGenderGroupList(groupId, user.getId(), pageable);
+        Page<DateableGroupResponse> created = groupService.findDateableOppositeGenderGroupList(groupId, pageable);
 
         //Then
         List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
@@ -143,7 +144,7 @@ class GroupServiceTest {
         given(groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user)).willReturn(List.of());
 
         //When & Then
-        assertThat(groupService.findMyGroupList(user.getId())).hasSize(0);
+        assertThat(groupService.findMyGroupList()).hasSize(0);
     }
 
     @DisplayName("팀 생성 기능 테스트")
@@ -157,7 +158,7 @@ class GroupServiceTest {
         given(groupRepository.save(any())).willReturn(request.toEntity());
 
         //When
-        GroupResponse actual = groupService.saveGroup(user.getId(), request);
+        GroupResponse actual = groupService.saveGroup(request);
 
         //Then
         assertThat(actual.getGroupName()).isSameAs(request.getGroupName());

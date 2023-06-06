@@ -48,24 +48,24 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public GroupDetailResponse findGroupDetail(Long groupId, Long userId) {
+    public GroupDetailResponse findGroupDetail(Long groupId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("Group(id: %d) not found", groupId))
         );
 
         GroupMember memberRecordOfUser = group.getGroupMembers().stream()
-                .filter(groupMember -> groupMember.getMember().getId().equals(userId))
+                .filter(groupMember -> groupMember.getMember().getId().equals(getCurrentUserId()))
                 .findFirst()
                 .orElseThrow(() ->
-                        throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group.getId()))
+                        throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", getCurrentUserId(), group.getId()))
                 );
 
         return GroupDetailResponse.from(group, memberRecordOfUser.getRole());
     }
 
     @Override
-    public Page<JoinableGroupResponse> findJoinableSameGenderGroupList(Long userId, Pageable pageable) {
-        User user = loadUserByUserId(userId);
+    public Page<JoinableGroupResponse> findJoinableSameGenderGroupList(Pageable pageable) {
+        User user = loadUserByUserId(getCurrentUserId());
 
         Page<GroupWithMemberCount> joinableSameGenderGroups = groupRepository.findAllJoinableGroupWithMemberCountByGenderAndIsJoinableAndNotGroupMembers_Member(user.getGender(), true, user, pageable);
         Set<Long> myPendingJoinGroupIds = groupMemberRequestRepository.findAllByUser(user).stream().map(GroupMemberRequest::getGroup).map(Group::getId).collect(Collectors.toUnmodifiableSet());
@@ -92,12 +92,12 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Page<DateableGroupResponse> findDateableOppositeGenderGroupList(Long groupId, Long userId, Pageable pageable) {
+    public Page<DateableGroupResponse> findDateableOppositeGenderGroupList(Long groupId, Pageable pageable) {
         Group group = loadGroupByGroupId(groupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
         );
 
         Page<Group> oppositeGenderGroups = groupRepository.findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(group.getGender().getOpposite(), false, false, group.getMemberSizeLimit(), pageable);
@@ -114,15 +114,15 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public Set<MyGroupResponse> findMyGroupList(Long userId) {
-        User user = loadUserByUserId(userId);
+    public Set<MyGroupResponse> findMyGroupList() {
+        User user = loadUserByUserId(getCurrentUserId());
 
         return groupMemberRepository.findGroupWithMemberCountAndRoleByMember(user).stream().map(MyGroupResponse::from).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public GroupResponse saveGroup(Long userId, GroupRequest request) {
-        User leader = loadUserByUserId(userId);
+    public GroupResponse saveGroup(GroupRequest request) {
+        User leader = loadUserByUserId(getCurrentUserId());
 
         groupRepository.findByGroupName(request.getGroupName()).ifPresent(it -> {
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", request.getGroupName()));

@@ -23,6 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -57,6 +60,13 @@ public class GroupDateServiceTest {
     @BeforeEach
     private void setUpUser() {
         user = UserFixture.createUserById(1L);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        SecurityContextHolder.setContext(securityContext);
+        given(securityContext.getAuthentication()).willReturn(authentication);
+        given(authentication.getName()).willReturn(user.getId().toString()); // 원하는 userId 값을 반환하도록 설정
     }
 
     @DisplayName("[팀장] : 과팅 요청 조회 기능 테스트")
@@ -81,7 +91,7 @@ public class GroupDateServiceTest {
         given(groupRepository.findAllWithMembersInfoByIdIn(List.of(fromGroup.getId()))).willReturn(List.of(fromGroup));
 
         //When
-        Page<DateableGroupResponse> created = groupDateService.findGroupDateRequests(groupId, user.getId(), pageable);
+        Page<DateableGroupResponse> created = groupDateService.findGroupDateRequests(groupId, pageable);
 
         //Then
         List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
@@ -112,7 +122,7 @@ public class GroupDateServiceTest {
         given(groupDateRequestRepository.save(any())).willReturn(GroupDateRequest.of(fromGroup, toGroup));
 
         //When
-        GroupDateRequestResponse created = groupDateService.saveGroupDateRequest(user.getId(), fromGroupId, toGroupId);
+        GroupDateRequestResponse created = groupDateService.saveGroupDateRequest(fromGroupId, toGroupId);
 
         //Then
         assertThat(created.getFromGroup().getId()).isSameAs(fromGroup.getId());
@@ -135,7 +145,7 @@ public class GroupDateServiceTest {
         given(groupRepository.findById(any())).willReturn(Optional.of(fromGroup)).willReturn(Optional.of(toGroup));
 
         //When
-        Throwable t = catchThrowable(() -> groupDateService.saveGroupDateRequest(user.getId(), fromGroupId, toGroupId));
+        Throwable t = catchThrowable(() -> groupDateService.saveGroupDateRequest(fromGroupId, toGroupId));
 
         //Then
         assertThat(t)
@@ -155,7 +165,7 @@ public class GroupDateServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
 
         //When
-        groupDateService.deleteGroupDateRequest(user.getId(), fromGroupId, toGroupId);
+        groupDateService.deleteGroupDateRequest(fromGroupId, toGroupId);
 
         //Then
         then(groupDateRequestRepository).should().deleteByFromGroup_IdAndToGroup_Id(any(), any());
@@ -181,7 +191,7 @@ public class GroupDateServiceTest {
         given(groupDateRepository.save(any())).willReturn(GroupDate.of(toGroup, fromGroup));
 
         //When
-        groupDateService.acceptGroupDateRequest(user.getId(), groupDateRequestId);
+        groupDateService.acceptGroupDateRequest(groupDateRequestId);
 
         //Then
         assertThat(toGroup.isMatched()).isSameAs(true);
@@ -210,7 +220,7 @@ public class GroupDateServiceTest {
         given(groupDateRepository.existsByMenGroupOrWomenGroup(any(), any())).willReturn(true);
 
         //When
-        Throwable t = catchThrowable(() -> groupDateService.acceptGroupDateRequest(user.getId(), groupDateRequestId));
+        Throwable t = catchThrowable(() -> groupDateService.acceptGroupDateRequest(groupDateRequestId));
 
         //Then
         assertThat(t)
@@ -230,6 +240,6 @@ public class GroupDateServiceTest {
         given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
 
         //When & Then
-        assertDoesNotThrow(() -> groupDateService.rejectGroupDateRequest(user.getId(), groupDateRequestId));
+        assertDoesNotThrow(() -> groupDateService.rejectGroupDateRequest(groupDateRequestId));
     }
 }

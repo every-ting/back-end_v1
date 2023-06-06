@@ -23,6 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
@@ -56,6 +59,13 @@ class GroupLikeServiceTest {
     @BeforeEach
     private void setUpUser() {
         user = UserFixture.createUserById(1L);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        SecurityContextHolder.setContext(securityContext);
+        given(securityContext.getAuthentication()).willReturn(authentication);
+        given(authentication.getName()).willReturn(user.getId().toString()); // 원하는 userId 값을 반환하도록 설정
     }
 
     @DisplayName("팀 기준 - 찜한 목록 조회 기능 테스트")
@@ -84,7 +94,7 @@ class GroupLikeServiceTest {
         given(groupLikeToDateRepository.findAllByFromGroupMember(fromGroupMemberRecord)).willReturn(List.of());
 
         //When
-        Page<DateableGroupResponse> created = groupLikeService.findGroupLikeToDateList(groupId, user.getId(), pageable);
+        Page<DateableGroupResponse> created = groupLikeService.findGroupLikeToDateList(groupId, pageable);
 
         //Then
         List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
@@ -115,7 +125,7 @@ class GroupLikeServiceTest {
         given(groupMemberRequestRepository.findAllByUser(user)).willReturn(List.of(GroupMemberRequest.of(toGroup1, user)));
 
         //When
-        Page<JoinableGroupResponse> created = groupLikeService.findGroupLikeToJoinList(user.getId(), pageable);
+        Page<JoinableGroupResponse> created = groupLikeService.findGroupLikeToJoinList(pageable);
 
         //Then
         List<JoinableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
@@ -141,7 +151,7 @@ class GroupLikeServiceTest {
         given(groupLikeToJoinRepository.existsByFromUserAndToGroup(any(), any())).willReturn(false);
 
         //When
-        groupLikeService.createSameGenderGroupLike(groupId, user.getId());
+        groupLikeService.createSameGenderGroupLike(groupId);
 
         //Then
         then(groupLikeToJoinRepository).should().save(any());
@@ -152,10 +162,9 @@ class GroupLikeServiceTest {
     void Given_Group_When_DeleteSameGenderGroupLike_Then_DeletesGroupLikeToJoin() {
         //Given
         Long groupId = 1L;
-        given(userRepository.findById(any())).willReturn(Optional.of(user));
 
         //When
-        groupLikeService.deleteSameGenderGroupLike(groupId, user.getId());
+        groupLikeService.deleteSameGenderGroupLike(groupId);
 
         //Then
         then(groupLikeToJoinRepository).should().deleteByFromUser_IdAndToGroup_Id(any(), any());
@@ -180,7 +189,7 @@ class GroupLikeServiceTest {
         given(groupLikeToDateRepository.existsByFromGroupMemberAndToGroup(any(), any())).willReturn(false);
 
         //When
-        groupLikeService.createOppositeGenderGroupLike(fromGroupId, toGroupId, user.getId());
+        groupLikeService.createOppositeGenderGroupLike(fromGroupId, toGroupId);
 
         //Then
         then(groupLikeToDateRepository).should().save(any());
@@ -198,7 +207,7 @@ class GroupLikeServiceTest {
         given(groupMemberRepository.findByGroupAndMember(any(), any())).willReturn(Optional.of(mock(GroupMember.class)));
 
         //When
-        groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, user.getId(), toGroupId);
+        groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, toGroupId);
 
         //Then
         then(groupLikeToDateRepository).should().deleteByFromGroupMemberAndToGroup(any(), any());
