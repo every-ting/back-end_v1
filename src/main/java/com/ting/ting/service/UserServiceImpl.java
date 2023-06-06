@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.User;
+import com.ting.ting.dto.UserDto;
 import com.ting.ting.dto.request.SignUpRequest;
 import com.ting.ting.dto.response.LogInResponse;
 import com.ting.ting.dto.response.SignUpResponse;
@@ -34,6 +35,12 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return UserDto.from(user);
     }
 
+    @Override
+    public LogInResponse logInTest(Long userId) {
+        return new LogInResponse(true, jwtTokenGenerator.createTokenById(userId));
+    }
+
+    @Override
     public LogInResponse logIn(String code) {
         String socialEmail = getSocialEmailByCode(code);
 
@@ -45,6 +52,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 .orElse(new LogInResponse(false));
     }
 
+    @Override
     public SignUpResponse signUp(SignUpRequest request) {
         userRepository.findByUsername(request.getUsername()).ifPresent(username ->
                 throwException(ErrorCode.DUPLICATE_USERNAME)

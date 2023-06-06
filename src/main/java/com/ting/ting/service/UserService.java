@@ -1,5 +1,6 @@
 package com.ting.ting.service;
 
+import com.ting.ting.dto.UserDto;
 import com.ting.ting.dto.request.SignUpRequest;
 import com.ting.ting.dto.response.LogInResponse;
 import com.ting.ting.dto.response.SignUpResponse;
@@ -17,7 +18,12 @@ public interface UserService {
     LogInResponse logIn(String code);
 
     /**
+     * 테스트용
+     */
+    LogInResponse logInTest(Long userId);
+
+    /**
      * 회원가입 로직 구현
      */
-    public SignUpResponse signUp(SignUpRequest request);
+    SignUpResponse signUp(SignUpRequest request);
 }

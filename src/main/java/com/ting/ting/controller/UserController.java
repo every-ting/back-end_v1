@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.*;
 public interface UserController {
 
     /**
+     * 테스트 용
+     */
+    @GetMapping("/{userId}")
+    Response<LogInResponse> logIn(@PathVariable Long userId);
+
+    /**
      * 로그인 구현
      */
     @GetMapping("/logIn")
