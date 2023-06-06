@@ -31,9 +31,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, jwtTokenGenerator.createTokenById(user.getId()));
+                    return new LogInResponse(true, socialEmail, jwtTokenGenerator.createTokenById(user.getId()));
                 })
-                .orElse(new LogInResponse(false));
+                .orElse(new LogInResponse(false, socialEmail));
     }
 
     public SignUpResponse signUp(SignUpRequest request) {
