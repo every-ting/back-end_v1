@@ -2,6 +2,7 @@ package com.ting.ting.configuration;
 
 import com.ting.ting.repository.*;
 import com.ting.ting.service.*;
+import com.ting.ting.util.IdealPhotoManager;
 import com.ting.ting.util.JwtTokenGenerator;
 import com.ting.ting.util.KakaoManger;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class AppConfig {
     private final BlindDateRepository blindDateRepository;
     private final BlindLikeRepository blindLikeRepository;
     private final KakaoManger kakaoManger;
+    private final IdealPhotoManager idealPhotoManager;
     private final JwtTokenGenerator jwtTokenGenerator;
 
     @Bean
@@ -38,7 +40,7 @@ public class AppConfig {
 
     @Bean
     public GroupMemberService groupMemberService() {
-        return new GroupMemberServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository, groupMemberRepository, groupMemberRequestRepository);
+        return new GroupMemberServiceImpl(userRepository, groupRepository, groupLikeToJoinRepository, groupMemberRepository, groupMemberRequestRepository, idealPhotoManager);
     }
 
     @Bean
