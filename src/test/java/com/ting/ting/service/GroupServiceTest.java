@@ -163,7 +163,7 @@ class GroupServiceTest {
         GroupRequest request = GroupFixture.request();
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
-        given(groupRepository.findByGroupName(request.getGroupName())).willReturn(Optional.empty());
+        given(groupRepository.existsByGroupName(request.getGroupName())).willReturn(false);
         given(groupRepository.save(any())).willReturn(request.toEntity());
 
         //When

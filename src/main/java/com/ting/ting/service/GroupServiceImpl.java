@@ -123,15 +123,29 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     @Override
     public GroupResponse saveGroup(GroupRequest request) {
         User leader = loadUserByUserId(getCurrentUserId());
+        validateGroupName(request.getGroupName());
 
-        groupRepository.findByGroupName(request.getGroupName()).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", request.getGroupName()));
-        });
-
-        Group group = groupRepository.save(request.toEntity());
-        groupMemberRepository.save(GroupMember.of(group, leader, MemberRole.LEADER));
+        Group group = createGroupFromRequest(request, leader);
+        saveGroupAndLeader(group, leader);
 
         return GroupResponse.from(group);
+    }
+
+    private void validateGroupName(String groupName) {
+        if (groupRepository.existsByGroupName(groupName)) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("Group whose name is (%s) already exists", groupName));
+        }
+    }
+
+    private Group createGroupFromRequest(GroupRequest request, User leader) {
+        Group group = request.toEntity();
+        group.setIdealPhoto(leader.getIdealPhoto());
+        return group;
+    }
+
+    private void saveGroupAndLeader(Group group, User leader) {
+        groupRepository.save(group);
+        groupMemberRepository.save(GroupMember.of(group, leader, MemberRole.LEADER));
     }
 
     private Group loadGroupByGroupId(Long groupId) {

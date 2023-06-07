@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
-    Optional<Group> findByGroupName(String name);
+    boolean existsByGroupName(String name);
 
     @EntityGraph(attributePaths = {"groupMembers", "groupMembers.member"})
     Optional<Group> findById(Long groupId);
