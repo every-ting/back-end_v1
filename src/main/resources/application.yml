@@ -32,3 +32,6 @@ kakao:
 
 jwt:
   secret: ${JWT_SECRET}
+
+machine-learning:
+  server-url: ${MACHINE_LEARNING_SERVER_URL}
