@@ -25,6 +25,7 @@ public class GroupResponse {
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;
+    private String idealPhoto;
     private LocalDateTime createdAt;
 
     public static GroupResponse from(Group entity) {
@@ -38,6 +39,7 @@ public class GroupResponse {
                 entity.isMatched(),
                 entity.isJoinable(),
                 entity.getMemo(),
+                entity.getIdealPhoto(),
                 entity.getCreatedAt()
         );
     }
@@ -53,6 +55,7 @@ public class GroupResponse {
                 entity.isMatched(),
                 entity.isJoinable(),
                 entity.getMemo(),
+                entity.getIdealPhoto(),
                 entity.getCreatedAt()
         );
     }

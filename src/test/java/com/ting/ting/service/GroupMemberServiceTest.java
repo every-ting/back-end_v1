@@ -289,7 +289,7 @@ public class GroupMemberServiceTest {
         Pageable pageable = Pageable.ofSize(20);
 
         Group requestedGroup = GroupFixture.createGroupById(1L);
-        GroupWithMemberCount requestedGroupWithMemberCount = new GroupWithMemberCount(requestedGroup.getId(), requestedGroup.getGroupName(), requestedGroup.getGender(), 2L, requestedGroup.getMemberSizeLimit(), requestedGroup.getSchool(), requestedGroup.isMatched(), true, requestedGroup.getMemo(), requestedGroup.getCreatedAt());
+        GroupWithMemberCount requestedGroupWithMemberCount = new GroupWithMemberCount(requestedGroup.getId(), requestedGroup.getGroupName(), requestedGroup.getGender(), 2L, requestedGroup.getMemberSizeLimit(), requestedGroup.getSchool(), requestedGroup.isMatched(), true, requestedGroup.getMemo(), requestedGroup.getIdealPhoto(), requestedGroup.getCreatedAt());
         GroupMemberRequest requests = GroupMemberRequest.of(requestedGroup, user);
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
