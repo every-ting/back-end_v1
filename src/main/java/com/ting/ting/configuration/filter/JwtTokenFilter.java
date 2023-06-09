@@ -67,7 +67,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        List<String> excludedUrls = List.of("/ting");
+        List<String> excludedUrls = List.of("/ting", "/kakao");
         return excludedUrls.stream().anyMatch(request.getRequestURI()::contains);
     }
 }

@@ -31,7 +31,7 @@ public class SecurityConfig {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .mvcMatchers("/ting/**").permitAll()
+                        .mvcMatchers("/ting/**", "/kakao/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()
