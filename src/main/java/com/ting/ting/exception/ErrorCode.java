@@ -24,7 +24,9 @@ public enum ErrorCode {
     NOT_MY_REQUEST(HttpStatus.BAD_REQUEST,"This is not a request I sent."),
     QR_GENERATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred in the QR generator"),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "Username already exists."),
+    LIMIT_USERNAME_LENGTH(HttpStatus.CONFLICT, "Username's minimum length is 4"),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Email already exists."),
+    DUPLICATE_SOCIAL_EMAIL(HttpStatus.CONFLICT, "Social Email already exists."),
     TOKEN_ERROR(HttpStatus.BAD_REQUEST, "Token generation error"),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token is invalid"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")

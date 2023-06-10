@@ -54,12 +54,21 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public SignUpResponse signUp(SignUpRequest request) {
-        userRepository.findByUsername(request.getUsername()).ifPresent(username ->
+        String newUsername = request.getUsername();
+
+        userRepository.findByUsername(newUsername).ifPresent(username ->
                 throwException(ErrorCode.DUPLICATE_USERNAME)
         );
 
+        if(newUsername.length() < 4) {
+            throwException(ErrorCode.LIMIT_USERNAME_LENGTH);
+        }
+
         userRepository.findByEmail(request.getEmail()).ifPresent(email ->
                 throwException(ErrorCode.DUPLICATE_EMAIL));
+
+        userRepository.findBySocialEmail(request.getSocialEmail()).ifPresent(email ->
+                throwException(ErrorCode.DUPLICATE_SOCIAL_EMAIL));
 
         User newUser = User.from(request);
         userRepository.save(newUser);
