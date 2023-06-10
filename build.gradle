@@ -32,6 +32,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'mysql:mysql-connector-java'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
