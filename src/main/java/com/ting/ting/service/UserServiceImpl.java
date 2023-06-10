@@ -49,7 +49,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                     User user = getUserBySocialEmail(socialEmail);
                     return new LogInResponse(true, jwtTokenUtil.createTokenById(user.getId()));
                 })
-                .orElse(new LogInResponse(false));
+                .orElse(new LogInResponse(false, socialEmail));
     }
 
     @Override

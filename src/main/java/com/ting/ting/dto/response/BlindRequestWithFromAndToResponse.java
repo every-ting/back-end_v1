@@ -9,6 +9,6 @@ import java.util.Set;
 @Getter
 public class BlindRequestWithFromAndToResponse {
 
-    private Set<BlindRequestResponse> receivedBlindRequests;
-    private Set<BlindRequestResponse> sendBlindRequests;
+    private Set<BlindRequestResponseWithLikeStatus> receivedBlindRequests;
+    private Set<BlindRequestResponseWithLikeStatus> sendBlindRequests;
 }
