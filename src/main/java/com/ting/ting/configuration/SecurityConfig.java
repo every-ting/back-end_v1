@@ -28,7 +28,7 @@ public class SecurityConfig {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .mvcMatchers("/ting/**", "/kakao/**").permitAll()
+                        .mvcMatchers("/ting/**", "/kakao/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()

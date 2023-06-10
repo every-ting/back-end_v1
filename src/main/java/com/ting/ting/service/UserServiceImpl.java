@@ -37,7 +37,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public LogInResponse logInTest(Long userId) {
-        return new LogInResponse(true, jwtTokenUtil.createTokenById(userId));
+        return new LogInResponse(true, "", jwtTokenUtil.createTokenById(userId));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, jwtTokenUtil.createTokenById(user.getId()));
+                    return new LogInResponse(true, socialEmail, jwtTokenUtil.createTokenById(user.getId()));
                 })
                 .orElse(new LogInResponse(false, socialEmail));
     }
