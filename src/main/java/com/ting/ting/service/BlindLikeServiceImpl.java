@@ -37,8 +37,8 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
     }
 
     @Override
-    public Set<BlindLikeResponse> getBlindLike(long userId) {
-        User user = getUserById(userId);
+    public Set<BlindLikeResponse> getBlindLike() {
+        User user = getUserById(getCurrentUserId());
 
         Set<BlindDateResponse> blindDateResponses = blindLikeRepository.findAllByFromUser(user).stream().map(BlindLike::getToUser).map(BlindDateResponse::from).collect(Collectors.toUnmodifiableSet());
 
@@ -64,7 +64,9 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
     }
 
     @Override
-    public void createJoinLiked(long fromUserId, long toUserId) {
+    public void createJoinLiked(long toUserId) {
+        Long fromUserId = getCurrentUserId();
+
         if (fromUserId == toUserId) {
             throwException(ErrorCode.DUPLICATED_USER_REQUEST);
         }
@@ -88,8 +90,8 @@ public class BlindLikeServiceImpl extends AbstractService implements BlindLikeSe
     }
 
     @Override
-    public void deleteLikedByFromUserIdAndToUserId(long userId, long toUserId) {
-        BlindLike request = blindLikeRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+    public void deleteLikedByFromUserIdAndToUserId(long toUserId) {
+        BlindLike request = blindLikeRepository.findByFromUser_IdAndToUser_Id(getCurrentUserId(), toUserId)
                 .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
         blindLikeRepository.delete(request);
     }
