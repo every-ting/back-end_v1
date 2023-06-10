@@ -8,7 +8,7 @@ import com.ting.ting.dto.response.SignUpResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.UserRepository;
-import com.ting.ting.util.JwtTokenGenerator;
+import com.ting.ting.util.JwtTokenUtil;
 import com.ting.ting.util.KakaoManger;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +17,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     private final UserRepository userRepository;
     private final KakaoManger kakaoManger;
-    private final JwtTokenGenerator jwtTokenGenerator;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public UserServiceImpl(UserRepository userRepository, KakaoManger kakaoManger, JwtTokenGenerator jwtTokenGenerator) {
+    public UserServiceImpl(UserRepository userRepository, KakaoManger kakaoManger, JwtTokenUtil jwtTokenUtil) {
         super(ServiceType.USER);
         this.userRepository = userRepository;
         this.kakaoManger = kakaoManger;
-        this.jwtTokenGenerator = jwtTokenGenerator;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public LogInResponse logInTest(Long userId) {
-        return new LogInResponse(true, jwtTokenGenerator.createTokenById(userId));
+        return new LogInResponse(true, jwtTokenUtil.createTokenById(userId));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, jwtTokenGenerator.createTokenById(user.getId()));
+                    return new LogInResponse(true, jwtTokenUtil.createTokenById(user.getId()));
                 })
                 .orElse(new LogInResponse(false));
     }
@@ -64,7 +64,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         User newUser = User.from(request);
         userRepository.save(newUser);
 
-        return new SignUpResponse(request.getUsername(), jwtTokenGenerator.createTokenById(newUser.getId()));
+        return new SignUpResponse(request.getUsername(), jwtTokenUtil.createTokenById(newUser.getId()));
     }
 
     private String getSocialEmailByCode(String code) {

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class JwtTokenGenerator {
+public class JwtTokenUtil {
 
     @Value("${jwt.secret}")
     private String secret;
@@ -35,10 +35,9 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    public boolean isValidToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody();
-            return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             throw new TingApplicationException(ErrorCode.TOKEN_ERROR, ServiceType.UTIL, "Invalid JWT signature.");
         } catch (ExpiredJwtException e) {
