@@ -43,12 +43,12 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
     }
 
     @Override
-    public Page<DateableGroupResponse> findGroupDateRequests(long groupId, long userId, Pageable pageable) {
+    public Page<DateableGroupResponse> findGroupDateRequests(long groupId, Pageable pageable) {
         Group group = loadGroupByGroupId(groupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
         );
 
         Page<GroupDateRequest> dateRequests = groupDateRequestRepository.findAllByFromGroup_IsMatchedAndToGroup(false, group, pageable);
@@ -81,8 +81,8 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
     }
 
     @Override
-    public GroupDateRequestResponse saveGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public GroupDateRequestResponse saveGroupDateRequest(long fromGroupId, long toGroupId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         Group fromGroup = loadGroupByGroupId(fromGroupId);
         Group toGroup = loadGroupByGroupId(toGroupId);
         Group menGroup, womenGroup;
@@ -113,8 +113,8 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
     }
 
     @Override
-    public void deleteGroupDateRequest(long userIdOfLeader, long fromGroupId, long toGroupId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public void deleteGroupDateRequest(long fromGroupId, long toGroupId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         Group fromGroup = loadGroupByGroupId(fromGroupId);
 
         throwIfUserIsNotTheLeaderOfGroup(leader, fromGroup);
@@ -123,8 +123,8 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
     }
 
     @Override
-    public GroupDateResponse acceptGroupDateRequest(long userIdOfLeader, long groupDateRequestId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public GroupDateResponse acceptGroupDateRequest(long groupDateRequestId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         Group menGroup, womenGroup;
         GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
@@ -160,8 +160,8 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
     }
 
     @Override
-    public void rejectGroupDateRequest(long userIdOfLeader, long groupDateRequestId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public void rejectGroupDateRequest(long groupDateRequestId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         GroupDateRequest groupDateRequest = groupDateRequestRepository.findById(groupDateRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupDateRequest(id: %d) not found", groupDateRequestId))
         );

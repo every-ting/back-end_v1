@@ -26,6 +26,7 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "Username already exists."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Email already exists."),
     TOKEN_ERROR(HttpStatus.BAD_REQUEST, "Token generation error"),
+    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token is invalid"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")
     ;
 

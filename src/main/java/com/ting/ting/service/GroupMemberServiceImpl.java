@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,12 +42,12 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public void saveJoinRequest(long groupId, long userId) {
+    public void saveJoinRequest(long groupId) {
         Group group = loadGroupByGroupId(groupId);
-        User user = loadUserByUserId(userId);
+        User user = loadUserByUserId(getCurrentUserId());
 
         if (group.getGender() != user.getGender()) {
-            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, userId));
+            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", groupId, user.getId()));
         }
 
         if (group.isJoinable() == false) {
@@ -57,28 +55,28 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
         }
 
         groupMemberRequestRepository.findByGroupAndUser(group, user).ifPresent(it -> {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id:%d) already requested to join the Group(id:%d)", userId, groupId));
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id:%d) already requested to join the Group(id:%d)", user.getId(), groupId));
         });
 
         if (groupMemberRepository.existsByGroupAndMember(group, user)) {
-            throwException(ErrorCode.ALREADY_JOINED, String.format("User(id: %d) already joined to Group(id: %d)", userId, groupId));
+            throwException(ErrorCode.ALREADY_JOINED, String.format("User(id: %d) already joined to Group(id: %d)", user.getId(), groupId));
         }
 
         groupMemberRequestRepository.save(GroupMemberRequest.of(group, user));
     }
 
     @Override
-    public void deleteJoinRequest(long groupId, long userId) {
-        groupMemberRequestRepository.deleteByGroup_IdAndUser_Id(groupId, userId);
+    public void deleteJoinRequest(long groupId) {
+        groupMemberRequestRepository.deleteByGroup_IdAndUser_Id(groupId, getCurrentUserId());
     }
 
     @Override
-    public void deleteGroupMember(long groupId, long userId) {
+    public void deleteGroupMember(long groupId) {
         Group group = loadGroupByGroupId(groupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
         );
 
         // 팀에서 나가려는 유저가 그 팀의 리더라면
@@ -93,13 +91,13 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfLeader, long userIdOfNewLeader) {
-        if (userIdOfLeader == userIdOfNewLeader) {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is unable to transfer ownership to themselves.", userIdOfLeader));
+    public Set<GroupMemberResponse> changeGroupLeader(long groupId, long userIdOfNewLeader) {
+        if (getCurrentUserId() == userIdOfNewLeader) {
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is unable to transfer ownership to themselves.", getCurrentUserId()));
         }
 
         Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(userIdOfLeader);
+        User leader = loadUserByUserId(getCurrentUserId());
         User newLeader = loadUserByUserId(userIdOfNewLeader);
 
         if (groupMemberRepository.existsByMemberAndRole(newLeader, MemberRole.LEADER)) {
@@ -107,7 +105,7 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
         }
 
         GroupMember memberRecordOfLeader = groupMemberRepository.findByGroupAndMemberAndRole(group, leader, MemberRole.LEADER).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not the leader of Group(id: %d)", userIdOfLeader, groupId))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not the leader of Group(id: %d)", leader.getId(), groupId))
         );
         GroupMember memberRecordOfNewLeader = groupMemberRepository.findByGroupAndMemberAndRole(group, newLeader, MemberRole.MEMBER).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of Group(id: %d)", userIdOfNewLeader, groupId))
@@ -120,8 +118,8 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public Page<JoinableGroupResponse> findUserJoinRequestList(Long userId, Pageable pageable) {
-        User user = loadUserByUserId(userId);
+    public Page<JoinableGroupResponse> findUserJoinRequestList(Pageable pageable) {
+        User user = loadUserByUserId(getCurrentUserId());
 
         Page<GroupMemberRequest> userRequestsToJoin = groupMemberRequestRepository.findAllByUser(user, pageable);
         List<Long> requestedGroupIds = userRequestsToJoin.stream().map(GroupMemberRequest::getGroup).map(Group::getId).collect(Collectors.toUnmodifiableList());
@@ -149,9 +147,9 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId, long userIdOfLeader) {
+    public Set<GroupMemberRequestResponse> findMemberJoinRequest(long groupId) {
         Group group = loadGroupByGroupId(groupId);
-        User leader = loadUserByUserId(userIdOfLeader);
+        User leader = loadUserByUserId(getCurrentUserId());
 
         throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
@@ -159,8 +157,8 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public GroupMemberResponse acceptMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public GroupMemberResponse acceptMemberJoinRequest(long groupMemberRequestId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
@@ -189,8 +187,8 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     }
 
     @Override
-    public void rejectMemberJoinRequest(long userIdOfLeader, long groupMemberRequestId) {
-        User leader = loadUserByUserId(userIdOfLeader);
+    public void rejectMemberJoinRequest(long groupMemberRequestId) {
+        User leader = loadUserByUserId(getCurrentUserId());
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );

@@ -34,116 +34,89 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     public Response<Page<JoinableGroupResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findJoinableSameGenderGroupList(userId, pageable));
+        return success(groupService.findJoinableSameGenderGroupList(pageable));
     }
 
     @Override
     public Response<GroupDetailResponse> getGroupDetail(Long groupId) {
         Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
 
-        return success(groupService.findGroupDetail(groupId, userId));
+        return success(groupService.findGroupDetail(groupId));
     }
 
     @Override
     public Response<Page<DateableGroupResponse>> getOppositeGenderGroupList(Long groupId, Pageable pageable) {
-        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupService.findDateableOppositeGenderGroupList(groupId, userId, pageable));
+        return success(groupService.findDateableOppositeGenderGroupList(groupId, pageable));
     }
 
     @Override
     public Response<Set<MyGroupResponse>> myGroupList() {
-        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupService.findMyGroupList(userId));
+        return success(groupService.findMyGroupList());
     }
 
     @Override
     public Response<Void> createSameGenderGroupLike(Long toGroupId) {
-        Long fromUserId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupLikeService.createSameGenderGroupLike(toGroupId, fromUserId);
+        groupLikeService.createSameGenderGroupLike(toGroupId);
         return success();
     }
 
     @Override
     public Response<Void> deleteSameGenderGroupLike(Long toGroupId) {
-        Long fromUserId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupLikeService.deleteSameGenderGroupLike(toGroupId, fromUserId);
+        groupLikeService.deleteSameGenderGroupLike(toGroupId);
         return success();
     }
 
     @Override
     public Response<Void> createOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
-        Long userId = 1L;
-
-        groupLikeService.createOppositeGenderGroupLike(fromGroupId, toGroupId, userId);
+        groupLikeService.createOppositeGenderGroupLike(fromGroupId, toGroupId);
         return success();
     }
 
     @Override
     public Response<Void> deleteOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
-        Long userId = 1L;
-
-        groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, toGroupId, userId);
+        groupLikeService.deleteOppositeGenderGroupLike(fromGroupId, toGroupId);
         return success();
     }
 
     @Override
     public Response<Page<DateableGroupResponse>> getGroupLikeToDateList(Long groupId, Pageable pageable) {
-        Long userId = 1L;
-
-        return success(groupLikeService.findGroupLikeToDateList(groupId, userId, pageable));
+        return success(groupLikeService.findGroupLikeToDateList(groupId, pageable));
     }
 
     @Override
     public Response<Page<JoinableGroupResponse>> getGroupLikeToJoinList(Pageable pageable) {
-        Long userId = 1L;
-
-        return success(groupLikeService.findGroupLikeToJoinList(userId, pageable));
+        return success(groupLikeService.findGroupLikeToJoinList(pageable));
     }
 
     @Override
     public Response<GroupResponse> createGroup(GroupRequest request) {
-        Long userId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(groupService.saveGroup(userId, request));
+        return success(groupService.saveGroup(request));
     }
 
     @Override
     public Response<Page<DateableGroupResponse>> getGroupDateRequest(Long groupId, Pageable pageable) {
-        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupDateService.findGroupDateRequests(groupId, userId, pageable));
+        return success(groupDateService.findGroupDateRequests(groupId, pageable));
     }
 
     @Override
     public Response<GroupDateRequestResponse> saveGroupDateRequest(Long fromGroupId, Long toGroupId) {
-        Long userIdOfLeader = 1L;
-
-        return success(groupDateService.saveGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId));
+        return success(groupDateService.saveGroupDateRequest(fromGroupId, toGroupId));
     }
 
     @Override
     public Response<Void> deleteGroupDateRequest(Long fromGroupId, Long toGroupId) {
-        Long userIdOfLeader = 1L;
-
-        groupDateService.deleteGroupDateRequest(userIdOfLeader, fromGroupId, toGroupId);
+        groupDateService.deleteGroupDateRequest(fromGroupId, toGroupId);
         return success();
     }
 
     @Override
     public Response<GroupDateResponse> acceptGroupDateRequest(Long groupDateRequestId) {
-        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupDateService.acceptGroupDateRequest(userIdOfLeader, groupDateRequestId));
+        return success(groupDateService.acceptGroupDateRequest(groupDateRequestId));
     }
 
     @Override
     public Response<Void> rejectGroupDateRequest(Long groupDateRequestId) {
-        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupDateService.rejectGroupDateRequest(userIdOfLeader, groupDateRequestId);
+        groupDateService.rejectGroupDateRequest(groupDateRequestId);
         return success();
     }
 
@@ -154,61 +127,45 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
     @Override
     public Response<Page<JoinableGroupResponse>> getUserJoinRequestList(Pageable pageable) {
-        Long userId = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupMemberService.findUserJoinRequestList(userId, pageable));
+        return success(groupMemberService.findUserJoinRequestList(pageable));
     }
 
     @Override
     public Response<Void> sendJoinRequest(Long groupId) {
-        Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupMemberService.saveJoinRequest(groupId, userId);
+        groupMemberService.saveJoinRequest(groupId);
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinRequest(Long groupId) {
-        Long userId = groupId + 1;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupMemberService.deleteJoinRequest(groupId, userId);
+        groupMemberService.deleteJoinRequest(groupId);
         return success();
     }
 
     @Override
     public Response<Void> deleteGroupMember(Long groupId) {
-        Long userId = 1L;
-
-        groupMemberService.deleteGroupMember(groupId, userId);
+        groupMemberService.deleteGroupMember(groupId);
         return success();
     }
 
     @Override
     public Response<Set<GroupMemberResponse>> changeGroupLeader(Long groupId, Long userIdOfNewLeader) {
-        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupMemberService.changeGroupLeader(groupId, userIdOfLeader, userIdOfNewLeader));
+        return success(groupMemberService.changeGroupLeader(groupId, userIdOfNewLeader));
     }
 
     @Override
     public Response<Set<GroupMemberRequestResponse>> getMemberRequestToJoinMyGroup(Long groupId) {
-        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupMemberService.findMemberJoinRequest(groupId, userIdOfLeader));
+        return success(groupMemberService.findMemberJoinRequest(groupId));
     }
 
     @Override
     public Response<GroupMemberResponse> acceptJoinRequestToMyGroup(Long groupMemberRequestId) {
-        Long userIdOfLeader = 1L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        return success(groupMemberService.acceptMemberJoinRequest(userIdOfLeader, groupMemberRequestId));
+        return success(groupMemberService.acceptMemberJoinRequest(groupMemberRequestId));
     }
 
     @Override
     public Response<Void> rejectJoinRequestToMyGroup(Long groupMemberRequestId) {
-        Long userIdOfLeader = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
-        groupMemberService.rejectMemberJoinRequest(userIdOfLeader, groupMemberRequestId);
+        groupMemberService.rejectMemberJoinRequest(groupMemberRequestId);
         return success();
     }
 }

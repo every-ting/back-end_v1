@@ -46,12 +46,12 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
     }
 
     @Override
-    public Page<DateableGroupResponse> findGroupLikeToDateList(Long groupId, Long userId, Pageable pageable) {
+    public Page<DateableGroupResponse> findGroupLikeToDateList(Long groupId, Pageable pageable) {
         Group group = loadGroupByGroupId(groupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
         );
 
         Page<GroupIdWithLikeCount> idAndLikeCountOfGroupsLikeToDate = groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_Group(group, pageable);
@@ -90,8 +90,8 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
     }
 
     @Override
-    public Page<JoinableGroupResponse> findGroupLikeToJoinList(Long userId, Pageable pageable) {
-        User user = loadUserByUserId(userId);
+    public Page<JoinableGroupResponse> findGroupLikeToJoinList(Pageable pageable) {
+        User user = loadUserByUserId(getCurrentUserId());
 
         Page<GroupLikeToJoin> groupLikesToJoin = groupLikeToJoinRepository.findAllByFromUser(user, pageable);
         List<Long> likedGroupIds = groupLikesToJoin.stream().map(GroupLikeToJoin::getToGroup).map(Group::getId).collect(Collectors.toUnmodifiableList());
@@ -121,57 +121,55 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
     }
 
     @Override
-    public void createSameGenderGroupLike(Long toGroupId, Long fromUserId) {
+    public void createSameGenderGroupLike(Long toGroupId) {
         Group group = loadGroupByGroupId(toGroupId);
-        User user = loadUserByUserId(fromUserId);
+        User user = loadUserByUserId(getCurrentUserId());
 
         if (group.getGender() != user.getGender()) {
-            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", toGroupId, fromUserId));
+            throwException(ErrorCode.GENDER_NOT_MATCH, String.format("Gender values of Group(id:%d) and User(id:%d) do not match", toGroupId, user.getId()));
         }
 
         if (groupLikeToJoinRepository.existsByFromUserAndToGroup(user, group)) {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) already liked Group(id: %d)", fromUserId, toGroupId));
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) already liked Group(id: %d)", user.getId(), toGroupId));
         }
 
         groupLikeToJoinRepository.save(GroupLikeToJoin.of(user, group));
     }
 
     @Override
-    public void deleteSameGenderGroupLike(Long groupId, Long userId) {
-        loadUserByUserId(userId); // 유저 검증
-
-        groupLikeToJoinRepository.deleteByFromUser_IdAndToGroup_Id(userId, groupId);
+    public void deleteSameGenderGroupLike(Long groupId) {
+        groupLikeToJoinRepository.deleteByFromUser_IdAndToGroup_Id(getCurrentUserId(), groupId);
     }
 
     @Override
-    public void createOppositeGenderGroupLike(Long fromGroupId, Long toGroupId, Long userId) {
+    public void createOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
         Group fromGroup = loadGroupByGroupId(fromGroupId);
         Group toGroup = loadGroupByGroupId(toGroupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         if (fromGroup.getGender() == toGroup.getGender()) {
             throwException(ErrorCode.INVALID_REQUEST, String.format("The genders of fromGroup(id: %d) and toGroup(id: %d) are the same", fromGroupId, toGroupId));
         }
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(fromGroup, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, fromGroupId))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), fromGroupId))
         );
 
         if (groupLikeToDateRepository.existsByFromGroupMemberAndToGroup(memberRecordOfUser, toGroup)) {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) already liked Group(id: %d)", userId, toGroupId));
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) already liked Group(id: %d)", member.getId(), toGroupId));
         }
 
         groupLikeToDateRepository.save(GroupLikeToDate.of(memberRecordOfUser, toGroup));
     }
 
     @Override
-    public void deleteOppositeGenderGroupLike(Long fromGroupId, Long toGroupId, Long userId) {
+    public void deleteOppositeGenderGroupLike(Long fromGroupId, Long toGroupId) {
         Group fromGroup = loadGroupByGroupId(fromGroupId);
         Group toGroup = loadGroupByGroupId(toGroupId);
-        User member = loadUserByUserId(userId);
+        User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(fromGroup, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", userId, fromGroupId))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), fromGroupId))
         );
 
         groupLikeToDateRepository.deleteByFromGroupMemberAndToGroup(memberRecordOfUser, toGroup);

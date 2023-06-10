@@ -20,6 +20,11 @@ public class UserControllerImpl extends AbstractController implements UserContro
         this.userService = userService;
     }
 
+    @Override
+    public Response<LogInResponse> logIn(Long userId) {
+        return success(userService.logInTest(userId));
+    }
+
     public Response<LogInResponse> logIn(String code) {
         return success(userService.logIn(code));
     }
