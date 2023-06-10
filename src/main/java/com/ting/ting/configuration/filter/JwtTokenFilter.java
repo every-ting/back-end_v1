@@ -5,7 +5,7 @@ import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.service.UserService;
-import com.ting.ting.util.JwtTokenGenerator;
+import com.ting.ting.util.JwtTokenUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -26,13 +26,13 @@ import java.util.List;
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final UserService userService;
-    private final JwtTokenGenerator jwtTokenGenerator;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = extractTokenFromHeader(request);
-            validateToken(token);
+            jwtTokenUtil.validateToken(token);
             authenticateUser(token, request);
         } catch (TingApplicationException e) {
             logger.error(e.getMessageForServer());
@@ -50,12 +50,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         return header.split(" ")[1].trim();
     }
 
-    private void validateToken(String token) {
-        jwtTokenGenerator.isValidToken(token);
-    }
-
     private void authenticateUser(String token, HttpServletRequest request) {
-        Long userId = jwtTokenGenerator.getIdByToken(token);
+        Long userId = jwtTokenUtil.getIdByToken(token);
 //        UserDto user = userService.getUserById(userId); // 레디스와 같은 캐시를 통해 조회해야 함. 지금은 레디스가 없으므로 db 접근을 줄이기 위해 token 안 userId에 대한 검증은 안한다. TODO: redis 도입 후 수정
         UserDto user = new UserDto(userId, null, null, null, null, null, null, null, null, null);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -67,7 +63,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        List<String> excludedUrls = List.of("/ting");
+        List<String> excludedUrls = List.of("/ting", "/kakao");
         return excludedUrls.stream().anyMatch(request.getRequestURI()::contains);
     }
 }

@@ -8,9 +8,11 @@ import lombok.Getter;
 public class LogInResponse {
 
     private boolean isRegistered;
+    private String socialEmail;
     private String token;
 
-    public LogInResponse(boolean isRegistered) {
+    public LogInResponse(boolean isRegistered, String socialEmail) {
         this.isRegistered = isRegistered;
+        this.socialEmail = socialEmail;
     }
 }

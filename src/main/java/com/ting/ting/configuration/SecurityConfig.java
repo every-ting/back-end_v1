@@ -3,26 +3,23 @@ package com.ting.ting.configuration;
 import com.ting.ting.configuration.filter.JwtTokenFilter;
 import com.ting.ting.exception.CustomAuthenticationEntryPoint;
 import com.ting.ting.service.UserService;
-import com.ting.ting.util.JwtTokenGenerator;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.ting.ting.util.JwtTokenUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 
 @Configuration
 public class SecurityConfig {
 
     private final UserService userService;
-    private final JwtTokenGenerator jwtTokenGenerator;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public SecurityConfig(UserService userService, JwtTokenGenerator jwtTokenGenerator) {
+    public SecurityConfig(UserService userService, JwtTokenUtil jwtTokenUtil) {
         this.userService = userService;
-        this.jwtTokenGenerator = jwtTokenGenerator;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @Bean
@@ -31,13 +28,13 @@ public class SecurityConfig {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .mvcMatchers("/ting/**").permitAll()
+                        .mvcMatchers("/ting/**", "/kakao/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(new JwtTokenFilter(userService, jwtTokenGenerator), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtTokenFilter(userService, jwtTokenUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and()
