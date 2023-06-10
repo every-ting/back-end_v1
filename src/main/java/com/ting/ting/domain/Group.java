@@ -55,6 +55,11 @@ public class Group extends AuditingFields {
 
     private String memo;
 
+    @Setter
+    @NotNull
+    @Column(name="ideal_photo")
+    private String idealPhoto;
+
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private Set<GroupMember> groupMembers;
 

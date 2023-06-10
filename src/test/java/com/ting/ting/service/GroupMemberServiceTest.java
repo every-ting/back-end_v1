@@ -6,6 +6,7 @@ import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
+import com.ting.ting.dto.idealPhoto.MixedImageResponse;
 import com.ting.ting.dto.response.GroupMemberResponse;
 import com.ting.ting.dto.response.JoinableGroupResponse;
 import com.ting.ting.exception.ErrorCode;
@@ -13,6 +14,7 @@ import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
+import com.ting.ting.util.IdealPhotoManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -53,6 +55,7 @@ public class GroupMemberServiceTest {
     @Mock private GroupLikeToJoinRepository groupLikeToJoinRepository;
     @Mock private GroupMemberRepository groupMemberRepository;
     @Mock private GroupMemberRequestRepository groupMemberRequestRepository;
+    @Mock private IdealPhotoManager idealPhotoManager;
 
     private User user;
 
@@ -289,7 +292,7 @@ public class GroupMemberServiceTest {
         Pageable pageable = Pageable.ofSize(20);
 
         Group requestedGroup = GroupFixture.createGroupById(1L);
-        GroupWithMemberCount requestedGroupWithMemberCount = new GroupWithMemberCount(requestedGroup.getId(), requestedGroup.getGroupName(), requestedGroup.getGender(), 2L, requestedGroup.getMemberSizeLimit(), requestedGroup.getSchool(), requestedGroup.isMatched(), true, requestedGroup.getMemo(), requestedGroup.getCreatedAt());
+        GroupWithMemberCount requestedGroupWithMemberCount = new GroupWithMemberCount(requestedGroup.getId(), requestedGroup.getGroupName(), requestedGroup.getGender(), 2L, requestedGroup.getMemberSizeLimit(), requestedGroup.getSchool(), requestedGroup.isMatched(), true, requestedGroup.getMemo(), requestedGroup.getIdealPhoto(), requestedGroup.getCreatedAt());
         GroupMemberRequest requests = GroupMemberRequest.of(requestedGroup, user);
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -343,6 +346,7 @@ public class GroupMemberServiceTest {
         given(groupMemberRepository.countByGroup(group)).willReturn(2L);
         given(groupMemberRepository.existsByGroupAndMemberAndRole(any(), any(), any())).willReturn(true);
         given(groupMemberRepository.save(any())).willReturn(GroupMember.of(group, request.getUser(), MemberRole.MEMBER));
+        given(idealPhotoManager.mixIdealPhotos(any(), any())).willReturn(mock(MixedImageResponse.class));
 
         //When
         GroupMemberResponse actual = groupMemberService.acceptMemberJoinRequest(groupMemberRequestId);

@@ -20,6 +20,7 @@ public class GroupWithMemberInfoResponse {
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;
+    private String idealPhoto;
     private int averageAgeOfMembers;
     private Set<String> majorsOfMembers;
     private LocalDateTime createdAt;
@@ -34,6 +35,7 @@ public class GroupWithMemberInfoResponse {
                 entity.isMatched(),
                 entity.isJoinable(),
                 entity.getMemo(),
+                entity.getIdealPhoto(),
                 entity.getAverageAgeOfMembers(),
                 entity.getAllMajorsOfMembers(),
                 entity.getCreatedAt()

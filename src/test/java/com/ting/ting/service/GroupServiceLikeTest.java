@@ -116,8 +116,8 @@ class GroupLikeServiceTest {
         Group toGroup2 = GroupFixture.createGroupById(2L);
         GroupLikeToJoin groupLikeToJoin1 = GroupLikeToJoin.of(user, toGroup1);
         GroupLikeToJoin groupLikeToJoin2 = GroupLikeToJoin.of(user, toGroup2);
-        GroupWithMemberCount joinableGroupWithMemberCount = new GroupWithMemberCount(toGroup1.getId(), toGroup1.getGroupName(), toGroup1.getGender(), 2L, toGroup1.getMemberSizeLimit(), toGroup1.getSchool(), toGroup1.isMatched(), true, toGroup1.getMemo(), toGroup1.getCreatedAt());
-        GroupWithMemberCount notJoinableGroupWithMemberCount = new GroupWithMemberCount(toGroup2.getId(), toGroup2.getGroupName(), toGroup2.getGender(), 2L, toGroup2.getMemberSizeLimit(), toGroup2.getSchool(), toGroup2.isMatched(), false, toGroup2.getMemo(), toGroup2.getCreatedAt());
+        GroupWithMemberCount joinableGroupWithMemberCount = new GroupWithMemberCount(toGroup1.getId(), toGroup1.getGroupName(), toGroup1.getGender(), 2L, toGroup1.getMemberSizeLimit(), toGroup1.getSchool(), toGroup1.isMatched(), true, toGroup1.getMemo(), toGroup1.getIdealPhoto(), toGroup1.getCreatedAt());
+        GroupWithMemberCount notJoinableGroupWithMemberCount = new GroupWithMemberCount(toGroup2.getId(), toGroup2.getGroupName(), toGroup2.getGender(), 2L, toGroup2.getMemberSizeLimit(), toGroup2.getSchool(), toGroup2.isMatched(), false, toGroup2.getMemo(), toGroup2.getIdealPhoto(), toGroup2.getCreatedAt());
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
         given(groupLikeToJoinRepository.findAllByFromUser(user, pageable)).willReturn(new PageImpl<>(List.of(groupLikeToJoin1, groupLikeToJoin2)));

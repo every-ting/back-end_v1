@@ -11,6 +11,7 @@ import com.ting.ting.dto.response.JoinableGroupResponse;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.repository.*;
+import com.ting.ting.util.IdealPhotoManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,14 +32,16 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
     private final GroupLikeToJoinRepository groupLikeToJoinRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberRequestRepository groupMemberRequestRepository;
+    private final IdealPhotoManager idealPhotoManager;
 
-    public GroupMemberServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupLikeToJoinRepository groupLikeToJoinRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository) {
+    public GroupMemberServiceImpl(UserRepository userRepository, GroupRepository groupRepository, GroupLikeToJoinRepository groupLikeToJoinRepository, GroupMemberRepository groupMemberRepository, GroupMemberRequestRepository groupMemberRequestRepository, IdealPhotoManager idealPhotoManager) {
         super(ServiceType.GROUP_MEETING);
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
         this.groupLikeToJoinRepository = groupLikeToJoinRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberRequestRepository = groupMemberRequestRepository;
+        this.idealPhotoManager = idealPhotoManager;
     }
 
     @Override
@@ -163,21 +166,26 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
 
+        // validate group member
         if (groupMemberRepository.existsByGroupAndMember(groupMemberRequest.getGroup(), groupMemberRequest.getUser())) {
             groupMemberRequestRepository.delete(groupMemberRequest);
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", groupMemberRequest.getUser().getId(), groupMemberRequest.getGroup().getId()));
         }
 
+        // validate group size
         Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
-
         if (actualNumOfMembers >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
             throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getMemberSizeLimit()));
         }
 
         throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
 
+        // save group member
         GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
+
+        // update group ideal photo
+        groupMemberRequest.getGroup().setIdealPhoto(idealPhotoManager.mixIdealPhotos(groupMemberRequest.getGroup().getIdealPhoto(), groupMemberRequest.getUser().getIdealPhoto()).getImageURL());
 
         if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
             groupMemberRequest.getGroup().setJoinable(false);

@@ -19,5 +19,6 @@ public class GroupWithMemberCount {
     private boolean isMatched;
     private boolean isJoinable;
     private String memo;
+    private String idealPhoto;
     private LocalDateTime createdAt;
 }
