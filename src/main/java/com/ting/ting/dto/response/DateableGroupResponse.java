@@ -16,6 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @AllArgsConstructor
 public class DateableGroupResponse {
 
+    private Long groupDateRequestId;
     private GroupWithMemberInfoResponse group;
     private RequestStatus requestStatus;
     private LikeStatus likeStatus;
@@ -27,6 +28,17 @@ public class DateableGroupResponse {
 
     public static DateableGroupResponse from(Group entity, RequestStatus requestStatus, LikeStatus likeStatus, Integer likeCount) {
         return new DateableGroupResponse(
+                null,
+                GroupWithMemberInfoResponse.from(entity),
+                requestStatus,
+                likeStatus,
+                likeCount
+        );
+    }
+
+    public static DateableGroupResponse from(Long groupDateRequestId, Group entity, RequestStatus requestStatus, LikeStatus likeStatus, Integer likeCount) {
+        return new DateableGroupResponse(
+                groupDateRequestId,
                 GroupWithMemberInfoResponse.from(entity),
                 requestStatus,
                 likeStatus,

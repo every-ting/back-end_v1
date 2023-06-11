@@ -81,6 +81,7 @@ public class GroupDateServiceTest {
         GroupMember memberRecordOfUser = GroupMember.of(myGroup, user, MemberRole.MEMBER);
         ReflectionTestUtils.setField(fromGroup, "groupMembers", Set.of(GroupMember.of(fromGroup, UserFixture.createUserById(1L), MemberRole.LEADER)));
         GroupDateRequest dateRequest = GroupDateRequest.of(fromGroup, myGroup);
+        ReflectionTestUtils.setField(dateRequest, "id", 1L);
         GroupIdWithLikeCount fromGroupIdWithLikeCount = new GroupIdWithLikeCount(fromGroup.getId(), 0L);
 
         given(groupRepository.findById(any())).willReturn(Optional.of(myGroup));

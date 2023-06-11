@@ -140,7 +140,7 @@ class GroupServiceTest {
         //Then
         List<DateableGroupResponse> createdList = created.getContent().stream().collect(Collectors.toList());
         assertThat(createdList).hasSize(1);
-        assertThat(createdList.get(0)).hasNoNullFieldsOrPropertiesExcept("requestStatus", "likeCount");
+        assertThat(createdList.get(0)).hasNoNullFieldsOrPropertiesExcept("requestStatus", "likeCount", "groupDateRequestId");
         assertThat(createdList.get(0)).hasFieldOrPropertyWithValue("likeStatus", LikeStatus.NOT_LIKED);
         assertThat(createdList.get(0).getGroup().getMajorsOfMembers()).hasSize(1);
     }

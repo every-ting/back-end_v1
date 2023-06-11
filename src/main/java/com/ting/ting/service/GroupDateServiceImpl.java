@@ -52,6 +52,7 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
         );
 
         Page<GroupDateRequest> dateRequests = groupDateRequestRepository.findAllByFromGroup_IsMatchedAndToGroup(false, group, pageable);
+        Map<Long, Long> fromGroupIdWithDateRequestId = dateRequests.stream().collect(Collectors.toMap(gdr -> gdr.getFromGroup().getId(), GroupDateRequest::getId));
         List<Group> fromGroups = dateRequests.stream().map(GroupDateRequest::getFromGroup).collect(Collectors.toUnmodifiableList());
 
         // 과팅 요청이 없는 경우는 바로 return
@@ -65,7 +66,7 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
 
         List<DateableGroupResponse> fromGroupResponse = fromGroupWithMembersInfo.stream()
                 .map(fromGroup -> {
-                    DateableGroupResponse response = DateableGroupResponse.from(fromGroup, null, null, fromGroupIdWithLikeCountMap.getOrDefault(fromGroup.getId(), 0));
+                    DateableGroupResponse response = DateableGroupResponse.from(fromGroupIdWithDateRequestId.get(fromGroup.getId()), fromGroup, null, null, fromGroupIdWithLikeCountMap.getOrDefault(fromGroup.getId(), 0));
 
                     // 멤버에게는 수락, 거절 버튼이 비활성화 되도록
                     if (memberRecordOfUser.getRole() == MemberRole.LEADER) {
