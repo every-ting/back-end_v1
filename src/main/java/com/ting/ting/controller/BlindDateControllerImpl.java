@@ -29,61 +29,52 @@ public class BlindDateControllerImpl extends AbstractController implements Blind
 
     @Override
     public Response<Page<BlindUserWithRequestStatusAndLikeStatusResponse>> getBlindUsersInfo(Pageable pageable) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindService.blindUsersInfo(userId, pageable));
+        return success(blindService.blindUsersInfo(pageable));
     }
 
     @Override
     public Response<Void> sendJoinRequest(long toUserId) {
-        Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.createJoinRequest(fromUserId, toUserId);
+        blindService.createJoinRequest(toUserId);
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinRequest(long toUserId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.deleteRequestById(userId, toUserId);
+        blindService.deleteRequestById(toUserId);
         return success();
     }
 
     @Override
     public Response<BlindRequestWithFromAndToResponse> getBlindRequest() {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindService.getBlindRequest(userId));
+        return success(blindService.getBlindRequest());
     }
 
     @Override
     public Response<Void> acceptRequest(long blindRequestId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.acceptRequest(userId, blindRequestId);
+        blindService.acceptRequest(blindRequestId);
         return success();
     }
 
     @Override
     public Response<Void> rejectRequest(long blindRequestId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindService.rejectRequest(userId, blindRequestId);
+        blindService.rejectRequest(blindRequestId);
         return success();
     }
 
     @Override
     public Response<Void> sendJoinLiked(long toUserId) {
-        Long fromUserId = 9L;  // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindLikeService.createJoinLiked(fromUserId, toUserId);
+        blindLikeService.createJoinLiked(toUserId);
         return success();
     }
 
     @Override
     public Response<Void> deleteJoinLiked(long toUserId) {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        blindLikeService.deleteLikedByFromUserIdAndToUserId(userId, toUserId);
+        blindLikeService.deleteLikedByFromUserIdAndToUserId(toUserId);
         return success();
     }
 
     @Override
     public Response<Set<BlindLikeResponse>> getBlindLiked() {
-        Long userId = 9L; // userId를 임의로 설정 TODO: user 구현 후 수정
-        return success(blindLikeService.getBlindLike(userId));
+        return success(blindLikeService.getBlindLike());
     }
 }
