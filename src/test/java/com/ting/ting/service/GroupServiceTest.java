@@ -1,5 +1,6 @@
 package com.ting.ting.service;
 
+import com.ting.ting.TingApplication;
 import com.ting.ting.domain.Group;
 import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.User;
@@ -9,6 +10,8 @@ import com.ting.ting.dto.request.GroupRequest;
 import com.ting.ting.dto.response.DateableGroupResponse;
 import com.ting.ting.dto.response.GroupDetailResponse;
 import com.ting.ting.dto.response.GroupResponse;
+import com.ting.ting.exception.ErrorCode;
+import com.ting.ting.exception.TingApplicationException;
 import com.ting.ting.fixture.GroupFixture;
 import com.ting.ting.fixture.UserFixture;
 import com.ting.ting.repository.*;
@@ -34,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
@@ -161,6 +165,7 @@ class GroupServiceTest {
     void Given_GroupRequest_When_SaveGroup_Then_ReturnsCreatedGroup() {
         //Given
         GroupRequest request = GroupFixture.request();
+        ReflectionTestUtils.setField(user, "idealPhoto", "https://~");
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.existsByGroupName(request.getGroupName())).willReturn(false);
@@ -172,5 +177,22 @@ class GroupServiceTest {
         //Then
         assertThat(actual.getGroupName()).isSameAs(request.getGroupName());
         then(groupMemberRepository).should().save(any(GroupMember.class));
+    }
+
+    @DisplayName("팀 생성 기능 테스트 - 생성하는 멤버의 idealPhoto 가 null 인 경우")
+    @Test
+    void Given_GroupRequestAndUserWithOutIdealPhoto_When_SaveGroup_Then_ThrowsException() {
+        //Given
+        GroupRequest request = GroupFixture.request();
+
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+
+        //When
+        Throwable t = catchThrowable(() -> groupService.saveGroup(request));
+
+        //Then
+        assertThat(t)
+                .isInstanceOf(TingApplicationException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_IDEAL_PHOTO);
     }
 }
