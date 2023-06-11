@@ -27,9 +27,9 @@ public class DateableGroupResponse {
     }
 
     public static DateableGroupResponse from(Group entity, RequestStatus requestStatus, LikeStatus likeStatus, Integer likeCount) {
-        return new DateableGroupResponse(
+        return from(
                 null,
-                GroupWithMemberInfoResponse.from(entity),
+                entity,
                 requestStatus,
                 likeStatus,
                 likeCount
