@@ -36,12 +36,11 @@ public class Response<T> {
     }
 
     public String toStream() {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"result\":").append(result.toStream()).append(",");
+        sb.append("\"data\":").append(data != null ? "\"" + data + "\"" : null);
+        sb.append("}");
+        return sb.toString();
     }
 }

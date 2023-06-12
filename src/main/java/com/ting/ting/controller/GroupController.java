@@ -61,7 +61,7 @@ public interface GroupController {
     Response<Set<GroupMemberResponse>> getGroupMemberList(@PathVariable Long groupId);
 
     /**
-     * 과팅 가입 요청 조회
+     * 유저가 같은 성별 팀에 한 가입 요청 조회
      */
     @GetMapping("/requests")
     Response<Page<JoinableGroupResponse>> getUserJoinRequestList(@ParameterObject Pageable pageable);
