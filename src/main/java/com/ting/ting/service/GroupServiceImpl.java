@@ -5,7 +5,7 @@ import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -121,7 +121,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public GroupResponse saveGroup(GroupRequest request) {
+    public GroupResponse saveGroup(GroupCreateRequest request) {
         User leader = loadUserByUserId(getCurrentUserId());
         validateGroupName(request.getGroupName());
 
@@ -137,8 +137,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         }
     }
 
-    private Group createGroupFromRequest(GroupRequest request, User leader) {
-        Group group = request.toEntity();
+    private Group createGroupFromRequest(GroupCreateRequest request, User leader) {
+        Group group = request.toEntity(leader.getGender(), leader.getSchool());
         group.setIdealPhoto(leader.getIdealPhoto());
         return group;
     }

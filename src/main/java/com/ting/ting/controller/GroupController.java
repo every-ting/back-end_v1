@@ -1,6 +1,6 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -88,7 +88,7 @@ public interface GroupController {
      * 그룹 생성
      */
     @PostMapping
-    Response<GroupResponse> createGroup(@RequestBody GroupRequest request);
+    Response<GroupResponse> createGroup(@RequestBody GroupCreateRequest request);
 
     /**
      * 팀장 - 과팅 요청

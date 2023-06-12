@@ -5,7 +5,7 @@ import com.ting.ting.domain.GroupMember;
 import com.ting.ting.domain.User;
 import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.DateableGroupResponse;
 import com.ting.ting.dto.response.GroupDetailResponse;
 import com.ting.ting.dto.response.GroupResponse;
@@ -160,11 +160,11 @@ class GroupServiceTest {
     @Test
     void Given_GroupRequest_When_SaveGroup_Then_ReturnsCreatedGroup() {
         //Given
-        GroupRequest request = GroupFixture.request();
+        GroupCreateRequest request = GroupFixture.request();
 
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(groupRepository.existsByGroupName(request.getGroupName())).willReturn(false);
-        given(groupRepository.save(any())).willReturn(request.toEntity());
+        given(groupRepository.save(any())).willReturn(request.toEntity(user.getGender(), user.getSchool()));
 
         //When
         GroupResponse actual = groupService.saveGroup(request);

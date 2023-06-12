@@ -1,6 +1,6 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.GroupDateService;
@@ -85,7 +85,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<GroupResponse> createGroup(GroupRequest request) {
+    public Response<GroupResponse> createGroup(GroupCreateRequest request) {
         return success(groupService.saveGroup(request));
     }
 
