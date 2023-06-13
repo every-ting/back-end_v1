@@ -79,7 +79,7 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
         User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group.getId()))
         );
 
         // 팀에서 나가려는 유저가 그 팀의 리더라면

@@ -97,7 +97,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group.getId()))
         );
 
         Page<Group> oppositeGenderGroups = groupRepository.findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(group.getGender().getOpposite(), false, false, group.getMemberSizeLimit(), pageable);

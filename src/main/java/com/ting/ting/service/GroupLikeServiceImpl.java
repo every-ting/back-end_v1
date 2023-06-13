@@ -51,7 +51,7 @@ public class GroupLikeServiceImpl extends AbstractService implements GroupLikeSe
         User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group.getId()))
         );
 
         Page<GroupIdWithLikeCount> idAndLikeCountOfGroupsLikeToDate = groupLikeToDateRepository.findAllToGroupIdAndLikeCountByFromGroupMember_Group(group, pageable);
