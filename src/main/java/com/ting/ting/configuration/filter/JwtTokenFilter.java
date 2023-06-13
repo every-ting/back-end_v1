@@ -1,6 +1,7 @@
 package com.ting.ting.configuration.filter;
 
 import com.ting.ting.dto.UserDto;
+import com.ting.ting.dto.response.Response;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.exception.TingApplicationException;
@@ -35,8 +36,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             jwtTokenUtil.validateToken(token);
             authenticateUser(token, request);
         } catch (TingApplicationException e) {
-            logger.error(e.getMessageForServer());
-            request.setAttribute("exception", new TingApplicationException(ErrorCode.INVALID_ACCESS_TOKEN, ServiceType.AUTHENTICATION, e.getMessage()));
+            sendErrorResponse(response, ErrorCode.INVALID_ACCESS_TOKEN, e.getMessage());
+        } catch (RuntimeException e) {
+            sendErrorResponse(response, ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
         filterChain.doFilter(request, response);
@@ -59,6 +61,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String message) throws IOException {
+        TingApplicationException e = new TingApplicationException(errorCode, ServiceType.AUTHENTICATION, message);
+        Response<?> body = new Response<>(e);
+
+        log.error(e.getMessageForServer());
+        response.setStatus(e.getErrorCode().getHttpStatus());
+        response.getWriter().write(body.toStream());
     }
 
     @Override

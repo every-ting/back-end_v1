@@ -37,4 +37,14 @@ public class ResultObject {
     public static ResultObject success(ServiceType serviceType) {
         return new ResultObject(HttpStatus.OK.value(), serviceType.name(), "success");
     }
+
+    public String toStream() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"resultCode\":").append(resultCode).append(",");
+        sb.append("\"serviceType\":").append("\"").append(serviceType).append("\",");
+        sb.append("\"message\":").append("\"").append(message).append("\"");
+        sb.append("}");
+        return sb.toString();
+    }
 }
