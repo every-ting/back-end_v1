@@ -105,5 +105,15 @@ insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at
 insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (2, 8, 1, now(), now());
 insert into group_like_to_date(id, from_group_member_id, to_group_id, created_at, updated_at) values (3, 1, 8, now(), now());
 
-insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(1, 13, 9, 'PENDING', now(), now());
-insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(2, 16, 9, 'PENDING', now(), now());
+insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(1, 1, 6, 'PENDING', now(), now());
+insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(2, 1, 7, 'PENDING', now(), now());
+insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(3, 29, 1, 'PENDING', now(), now());
+insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(4, 30, 1, 'PENDING', now(), now());
+insert into blind_request(id, from_user_id, to_user_id, request_status, created_at, updated_at) values(5, 25, 1, 'ACCEPTED', now(), now());
+
+insert into blind_like(id, from_user_id, to_user_id, created_at, updated_at) values(1, 1, 6, now(), now());
+insert into blind_like(id, from_user_id, to_user_id, created_at, updated_at) values(2, 1, 25, now(), now());
+insert into blind_like(id, from_user_id, to_user_id, created_at, updated_at) values(3, 1, 8, now(), now());
+
+
+insert into blind_date(id, men_user_id, women_user_id, created_at, updated_at) values(1, 1, 25, now(), now());
