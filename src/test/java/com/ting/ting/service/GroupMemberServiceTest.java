@@ -338,7 +338,9 @@ public class GroupMemberServiceTest {
 
         Group group = GroupFixture.createGroupById(1L);
         group.setMemberSizeLimit(3);
-        GroupMemberRequest request = GroupMemberRequest.of(group, UserFixture.createUserById(user.getId() + 1));
+        User requestingUser = UserFixture.createUserById(user.getId() + 1);
+        ReflectionTestUtils.setField(requestingUser, "idealPhoto", "https://~");
+        GroupMemberRequest request = GroupMemberRequest.of(group, requestingUser);
 
         given(userRepository.findById(any())).willReturn(Optional.of(mock(User.class)));
         given(groupMemberRequestRepository.findById(any())).willReturn(Optional.of(request));

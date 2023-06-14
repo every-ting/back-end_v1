@@ -123,6 +123,11 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     @Override
     public GroupResponse saveGroup(GroupCreateRequest request) {
         User leader = loadUserByUserId(getCurrentUserId());
+
+        if (leader.getIdealPhoto() == null || leader.getIdealPhoto().isEmpty()) {
+            throwException(ErrorCode.INVALID_IDEAL_PHOTO, String.format("Ideal photo of User(id: %d) is null", leader.getId()));
+        }
+
         validateGroupName(request.getGroupName());
 
         Group group = createGroupFromRequest(request, leader);

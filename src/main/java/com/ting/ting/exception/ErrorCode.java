@@ -29,6 +29,7 @@ public enum ErrorCode {
     DUPLICATE_SOCIAL_EMAIL(HttpStatus.CONFLICT, "Social Email already exists."),
     TOKEN_ERROR(HttpStatus.BAD_REQUEST, "Token generation error"),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token is invalid"),
+    INVALID_IDEAL_PHOTO(HttpStatus.BAD_REQUEST, "ideal photo is invalid"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AuthenticationException occurred"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error")
     ;

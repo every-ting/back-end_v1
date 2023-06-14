@@ -165,27 +165,31 @@ public class GroupMemberServiceImpl extends AbstractService implements GroupMemb
         GroupMemberRequest groupMemberRequest = groupMemberRequestRepository.findById(groupMemberRequestId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("GroupMemberRequest(id: %d) not found", groupMemberRequestId))
         );
+        Group group = groupMemberRequest.getGroup();
+        User user = groupMemberRequest.getUser();
 
         // validate group member
-        if (groupMemberRepository.existsByGroupAndMember(groupMemberRequest.getGroup(), groupMemberRequest.getUser())) {
+        if (groupMemberRepository.existsByGroupAndMember(group, user)) {
             groupMemberRequestRepository.delete(groupMemberRequest);
             throwException(ErrorCode.DUPLICATED_REQUEST, String.format("User(id: %d) is already a member of Group(id: %d)", groupMemberRequest.getUser().getId(), groupMemberRequest.getGroup().getId()));
         }
 
         // validate group size
-        Long actualNumOfMembers = groupMemberRepository.countByGroup(groupMemberRequest.getGroup());
-        if (actualNumOfMembers >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
+        Long actualNumOfMembers = groupMemberRepository.countByGroup(group);
+        if (actualNumOfMembers >= group.getMemberSizeLimit()) {
             throwException(ErrorCode.REACHED_MEMBERS_SIZE_LIMIT, String.format("Maximum Group(id: %d) capacity of %d members reached", groupMemberRequest.getGroup().getId(), groupMemberRequest.getGroup().getMemberSizeLimit()));
         }
 
-        throwIfUserIsNotTheLeaderOfGroup(leader, groupMemberRequest.getGroup());
+        throwIfUserIsNotTheLeaderOfGroup(leader, group);
 
         // save group member
-        GroupMember created = groupMemberRepository.save(GroupMember.of(groupMemberRequest.getGroup(), groupMemberRequest.getUser(), MemberRole.MEMBER));
+        GroupMember created = groupMemberRepository.save(GroupMember.of(group, user, MemberRole.MEMBER));
         groupMemberRequestRepository.delete(groupMemberRequest);
 
         // update group ideal photo
-        groupMemberRequest.getGroup().setIdealPhoto(idealPhotoManager.mixIdealPhotos(groupMemberRequest.getGroup().getIdealPhoto(), groupMemberRequest.getUser().getIdealPhoto()).getImageURL());
+        if (user.getIdealPhoto() != null || !user.getIdealPhoto().isEmpty()) {
+            group.setIdealPhoto(idealPhotoManager.mixIdealPhotos(group.getIdealPhoto(), user.getIdealPhoto()).getImageURL());
+        }
 
         if (actualNumOfMembers + 1 >= groupMemberRequest.getGroup().getMemberSizeLimit()) {
             groupMemberRequest.getGroup().setJoinable(false);
