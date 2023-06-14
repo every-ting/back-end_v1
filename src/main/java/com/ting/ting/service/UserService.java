@@ -10,10 +10,10 @@ public interface UserService {
     /**
      * user 조회
      */
-    UserDto getUserById(Long userId);
+    UserDto getUserDtoById(Long userId);
 
     /**
-     * 로그인 로직 구현
+     * 로그인 로직
      */
     LogInResponse logIn(String code);
 
@@ -23,7 +23,12 @@ public interface UserService {
     LogInResponse logInTest(Long userId);
 
     /**
-     * 회원가입 로직 구현
+     * 회원가입 로직
      */
     SignUpResponse signUp(SignUpRequest request);
+
+    /**
+     * 이상형 사진 업데이트 로직
+     */
+    void updateIdealPhoto(String idealPhoto);
 }

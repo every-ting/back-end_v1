@@ -27,7 +27,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public UserDto getUserDtoById(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) not found", userId))
         );
@@ -60,7 +60,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 throwException(ErrorCode.DUPLICATE_USERNAME)
         );
 
-        if(newUsername.length() < 4) {
+        if (newUsername.length() < 4) {
             throwException(ErrorCode.LIMIT_USERNAME_LENGTH);
         }
 
@@ -76,6 +76,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return new SignUpResponse(request.getUsername(), jwtTokenUtil.createTokenById(newUser.getId()));
     }
 
+    @Override
+    public void updateIdealPhoto(String idealPhoto) {
+        User user = getUserById(getCurrentUserId());
+        user.setIdealPhoto(idealPhoto);
+        userRepository.save(user);
+    }
+
     private String getSocialEmailByCode(String code) {
         String accessToken = kakaoManger.getKakaoTokenResponse(code).getAccess_token();
         return kakaoManger.getKakaoUserInfoResponse(accessToken).getKakao_account().getEmail();
@@ -84,5 +91,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private User getUserBySocialEmail(String socialEmail) {
         return userRepository.findBySocialEmail(socialEmail).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%s]의 유저 정보가 존재하지 않습니다.", socialEmail)));
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%s]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 }
