@@ -1,6 +1,6 @@
 package com.ting.ting.service;
 
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,5 +37,5 @@ public interface GroupService {
     /**
      * 그룹 생성
      */
-    GroupResponse saveGroup(GroupRequest request);
+    GroupResponse saveGroup(GroupCreateRequest request);
 }

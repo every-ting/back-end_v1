@@ -9,7 +9,6 @@ import com.ting.ting.service.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/ting")
 @RestController
 public class UserControllerImpl extends AbstractController implements UserController {
 
@@ -25,11 +24,19 @@ public class UserControllerImpl extends AbstractController implements UserContro
         return success(userService.logInTest(userId));
     }
 
+    @Override
     public Response<LogInResponse> logIn(String code) {
         return success(userService.logIn(code));
     }
 
+    @Override
     public Response<SignUpResponse> signUp(SignUpRequest request) {
         return success(userService.signUp(request));
+    }
+
+    @Override
+    public Response<Void> updateIdealPhoto(String idealPhoto) {
+        userService.updateIdealPhoto(idealPhoto);
+        return success();
     }
 }

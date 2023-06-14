@@ -48,7 +48,7 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
         User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group.getId()))
         );
 
         Page<GroupDateRequest> dateRequests = groupDateRequestRepository.findAllByFromGroup_IsMatchedAndToGroup(false, group, pageable);
@@ -93,7 +93,7 @@ public class GroupDateServiceImpl extends AbstractService implements GroupDateSe
         }
 
         if (groupDateRequestRepository.existsByFromGroupAndToGroup(fromGroup, toGroup)) {
-            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("fromGroup(id:%d) has already requested a date match with toGroup(id:%d)", fromGroup, toGroup));
+            throwException(ErrorCode.DUPLICATED_REQUEST, String.format("fromGroup(id:%d) has already requested a date match with toGroup(id:%d)", fromGroupId, toGroupId));
         }
 
         throwIfUserIsNotTheLeaderOfGroup(leader, fromGroup);

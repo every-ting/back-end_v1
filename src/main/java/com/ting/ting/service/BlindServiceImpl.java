@@ -39,11 +39,11 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Long userId, Pageable pageable) {
-        User user = getUserById(userId);
+    public Page<BlindUserWithRequestStatusAndLikeStatusResponse> blindUsersInfo(Pageable pageable) {
+        User user = getUserById(getCurrentUserId());
         Set<Long> idToBeRemoved = getUserIdOfMyDateMatchedUsers(user);
 
-        idToBeRemoved.add(userId);
+        idToBeRemoved.add(getCurrentUserId());
 
         return getBlindUserWithRequestStatusAndLikeStatusResponses(user, pageable, userRepository.findAllByGenderAndIdNotIn(user.getGender().getOpposite(), idToBeRemoved, pageable));
     }
@@ -83,7 +83,9 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void createJoinRequest(long fromUserId, long toUserId) {
+    public void createJoinRequest(long toUserId) {
+        Long fromUserId = getCurrentUserId();
+
         if (fromUserId == toUserId) {
             throwException(ErrorCode.DUPLICATED_USER_REQUEST);
         }
@@ -115,14 +117,16 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void deleteRequestById(long userId, long toUserId) {
-        BlindRequest request = blindRequestRepository.findByFromUser_IdAndToUser_Id(userId, toUserId)
+    public void deleteRequestById(long toUserId) {
+        BlindRequest request = blindRequestRepository.findByFromUser_IdAndToUser_Id(getCurrentUserId(), toUserId)
                 .orElseThrow(() -> throwException(ErrorCode.REQUEST_NOT_FOUND));
         blindRequestRepository.delete(request);
     }
 
     @Override
-    public BlindRequestWithFromAndToResponse getBlindRequest(long userId) {
+    public BlindRequestWithFromAndToResponse getBlindRequest() {
+        Long userId = getCurrentUserId();
+
         return new BlindRequestWithFromAndToResponse(
                 getBlindRequestResponseByBlindDateResponse(userId, requestToMe(userId)),
                 getBlindRequestResponseByBlindDateResponse(userId, myRequest(userId))
@@ -162,10 +166,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void acceptRequest(long userId, long blindRequestId) {
+    public void acceptRequest(long blindRequestId) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
 
-        if (blindRequest.getToUser().getId() != userId) {
+        if (blindRequest.getToUser().getId() != getCurrentUserId()) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
         }
 
@@ -199,10 +203,10 @@ public class BlindServiceImpl extends AbstractService implements BlindService {
     }
 
     @Override
-    public void rejectRequest(long userId, long blindRequestId) {
+    public void rejectRequest(long blindRequestId) {
         BlindRequest blindRequest = getBlindRequestById(blindRequestId);
 
-        if (blindRequest.getToUser().getId() != userId) {
+        if (blindRequest.getToUser().getId() != getCurrentUserId()) {
             throwException(ErrorCode.REQUEST_NOT_MINE);
         }
 

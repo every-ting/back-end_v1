@@ -5,7 +5,7 @@ import com.ting.ting.domain.constant.LikeStatus;
 import com.ting.ting.domain.constant.MemberRole;
 import com.ting.ting.domain.constant.RequestStatus;
 import com.ting.ting.domain.custom.GroupWithMemberCount;
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ErrorCode;
 import com.ting.ting.exception.ServiceType;
@@ -97,7 +97,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         User member = loadUserByUserId(getCurrentUserId());
 
         GroupMember memberRecordOfUser = groupMemberRepository.findByGroupAndMember(group, member).orElseThrow(() ->
-                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group))
+                throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) is not a member of the Group(id: %d)", member.getId(), group.getId()))
         );
 
         Page<Group> oppositeGenderGroups = groupRepository.findAllByGenderAndIsJoinableAndIsMatchedAndMemberSizeLimit(group.getGender().getOpposite(), false, false, group.getMemberSizeLimit(), pageable);
@@ -121,7 +121,7 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
     }
 
     @Override
-    public GroupResponse saveGroup(GroupRequest request) {
+    public GroupResponse saveGroup(GroupCreateRequest request) {
         User leader = loadUserByUserId(getCurrentUserId());
 
         if (leader.getIdealPhoto() == null || leader.getIdealPhoto().isEmpty()) {
@@ -142,8 +142,8 @@ public class GroupServiceImpl extends AbstractService implements GroupService {
         }
     }
 
-    private Group createGroupFromRequest(GroupRequest request, User leader) {
-        Group group = request.toEntity();
+    private Group createGroupFromRequest(GroupCreateRequest request, User leader) {
+        Group group = request.toEntity(leader.getGender(), leader.getSchool());
         group.setIdealPhoto(leader.getIdealPhoto());
         return group;
     }

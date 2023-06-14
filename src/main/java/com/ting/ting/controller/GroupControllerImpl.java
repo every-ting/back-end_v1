@@ -1,6 +1,6 @@
 package com.ting.ting.controller;
 
-import com.ting.ting.dto.request.GroupRequest;
+import com.ting.ting.dto.request.GroupCreateRequest;
 import com.ting.ting.dto.response.*;
 import com.ting.ting.exception.ServiceType;
 import com.ting.ting.service.GroupDateService;
@@ -32,15 +32,11 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
 
     @Override
     public Response<Page<JoinableGroupResponse>> getJoinableSameGenderGroupList(Pageable pageable) {
-        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
         return success(groupService.findJoinableSameGenderGroupList(pageable));
     }
 
     @Override
     public Response<GroupDetailResponse> getGroupDetail(Long groupId) {
-        Long userId = 1L; // userId를 임의로 설정 TODO: user 구현 후 수정
-
         return success(groupService.findGroupDetail(groupId));
     }
 
@@ -89,7 +85,7 @@ public class GroupControllerImpl extends AbstractController implements GroupCont
     }
 
     @Override
-    public Response<GroupResponse> createGroup(GroupRequest request) {
+    public Response<GroupResponse> createGroup(GroupCreateRequest request) {
         return success(groupService.saveGroup(request));
     }
 

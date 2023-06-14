@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.dto.UserDto;
 import com.ting.ting.dto.request.SignUpRequest;
 import com.ting.ting.dto.response.LogInResponse;
@@ -27,7 +28,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public UserDto getUserDtoById(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 throwException(ErrorCode.REQUEST_NOT_FOUND, String.format("User(id: %d) not found", userId))
         );
@@ -37,7 +38,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public LogInResponse logInTest(Long userId) {
-        return new LogInResponse(true, "", jwtTokenUtil.createTokenById(userId));
+        return new LogInResponse(true, "", null, jwtTokenUtil.createTokenById(userId));
     }
 
     @Override
@@ -47,24 +48,40 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, socialEmail, jwtTokenUtil.createTokenById(user.getId()));
+                    return new LogInResponse(true, socialEmail, user.getGender(),jwtTokenUtil.createTokenById(user.getId()));
                 })
                 .orElse(new LogInResponse(false, socialEmail));
     }
 
     @Override
     public SignUpResponse signUp(SignUpRequest request) {
-        userRepository.findByUsername(request.getUsername()).ifPresent(username ->
+        String newUsername = request.getUsername();
+
+        userRepository.findByUsername(newUsername).ifPresent(username ->
                 throwException(ErrorCode.DUPLICATE_USERNAME)
         );
+
+        if (newUsername.length() < 4) {
+            throwException(ErrorCode.LIMIT_USERNAME_LENGTH);
+        }
 
         userRepository.findByEmail(request.getEmail()).ifPresent(email ->
                 throwException(ErrorCode.DUPLICATE_EMAIL));
 
+        userRepository.findBySocialEmail(request.getSocialEmail()).ifPresent(email ->
+                throwException(ErrorCode.DUPLICATE_SOCIAL_EMAIL));
+
         User newUser = User.from(request);
         userRepository.save(newUser);
 
-        return new SignUpResponse(request.getUsername(), jwtTokenUtil.createTokenById(newUser.getId()));
+        return new SignUpResponse(request.getUsername(), request.getGender(), jwtTokenUtil.createTokenById(newUser.getId()));
+    }
+
+    @Override
+    public void updateIdealPhoto(String idealPhoto) {
+        User user = getUserById(getCurrentUserId());
+        user.setIdealPhoto(idealPhoto);
+        userRepository.save(user);
     }
 
     private String getSocialEmailByCode(String code) {
@@ -75,5 +92,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private User getUserBySocialEmail(String socialEmail) {
         return userRepository.findBySocialEmail(socialEmail).orElseThrow(() ->
                 throwException(ErrorCode.USER_NOT_FOUND, String.format("[%s]의 유저 정보가 존재하지 않습니다.", socialEmail)));
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                throwException(ErrorCode.USER_NOT_FOUND, String.format("[%s]의 유저 정보가 존재하지 않습니다.", userId)));
     }
 }
