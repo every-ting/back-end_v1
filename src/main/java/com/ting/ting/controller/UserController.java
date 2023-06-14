@@ -6,24 +6,31 @@ import com.ting.ting.dto.response.Response;
 import com.ting.ting.dto.response.SignUpResponse;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/ting")
+import javax.validation.constraints.NotNull;
+
 public interface UserController {
 
     /**
      * 테스트 용
      */
-    @GetMapping("/{userId}")
+    @GetMapping("/ting/{userId}")
     Response<LogInResponse> logIn(@PathVariable Long userId);
 
     /**
      * 로그인 구현
      */
-    @GetMapping("/logIn")
+    @GetMapping("/ting/logIn")
     Response<LogInResponse> logIn(@RequestParam String code);
 
     /**
      * 회원가입 구현
      */
-    @PostMapping("/signUp")
+    @PostMapping("/ting/signUp")
     Response<SignUpResponse> signUp(@RequestBody SignUpRequest request);
+
+    /**
+     * 이상형 사진 업데이트
+     */
+    @PutMapping("/user/idealPhoto")
+    Response<Void> updateIdealPhoto(@RequestParam @NotNull String idealPhoto);
 }
