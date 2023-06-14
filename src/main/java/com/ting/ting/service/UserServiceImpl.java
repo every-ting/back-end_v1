@@ -1,6 +1,7 @@
 package com.ting.ting.service;
 
 import com.ting.ting.domain.User;
+import com.ting.ting.domain.constant.Gender;
 import com.ting.ting.dto.UserDto;
 import com.ting.ting.dto.request.SignUpRequest;
 import com.ting.ting.dto.response.LogInResponse;
@@ -37,7 +38,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public LogInResponse logInTest(Long userId) {
-        return new LogInResponse(true, "", jwtTokenUtil.createTokenById(userId));
+        return new LogInResponse(true, "", null, jwtTokenUtil.createTokenById(userId));
     }
 
     @Override
@@ -47,7 +48,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.findBySocialEmail(socialEmail)
                 .map(response -> {
                     User user = getUserBySocialEmail(socialEmail);
-                    return new LogInResponse(true, socialEmail, jwtTokenUtil.createTokenById(user.getId()));
+                    return new LogInResponse(true, socialEmail, user.getGender(),jwtTokenUtil.createTokenById(user.getId()));
                 })
                 .orElse(new LogInResponse(false, socialEmail));
     }
@@ -73,7 +74,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         User newUser = User.from(request);
         userRepository.save(newUser);
 
-        return new SignUpResponse(request.getUsername(), jwtTokenUtil.createTokenById(newUser.getId()));
+        return new SignUpResponse(request.getUsername(), request.getGender(), jwtTokenUtil.createTokenById(newUser.getId()));
     }
 
     @Override
