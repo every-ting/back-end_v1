@@ -35,6 +35,9 @@
     <li>
       <a href="#class-diagram">Class Diagram</a>
     </li>
+      <li>
+      <a href="#실제-서비스-모습">실제 서비스 모습</a>
+    </li>
   </ol>
 </details>
 
@@ -136,4 +139,25 @@ https://port-0-ting-backend-dihik2mlingy09v.sel4.cloudtype.app/swagger-ui/index.
 ## Class Diagram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
+## 실제 서비스 모습
+
+<div style="display: flex;">
+    <img width="30%" src="https://github.com/realSolarDragons/back-end/assets/83967710/fce7d563-e721-453b-adac-ec64e1cdbec8"/>
+    <img width="30%" src="https://github.com/realSolarDragons/back-end/assets/83967710/238ead1a-31f5-46ec-a786-f85342a6d4c0"/>
+    <img width="30%" src="https://github.com/realSolarDragons/back-end/assets/83967710/897a3659-9abb-4794-aea5-933cd2082cfe"/>
+</div>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
 
