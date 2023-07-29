@@ -28,6 +28,9 @@
     </li>
       <li>
       <a href="#backend-layers">BackEnd Layers</a>
+       <ul>
+        <li><a href="#swagger">Swagger</a></li>
+      </ul>
     </li>
     <li>
       <a href="#class-diagram">Class Diagram</a>
@@ -95,6 +98,8 @@
 
 &nbsp;
 &nbsp;
+&nbsp;
+&nbsp;
 
 ## Architecture
 ![image](https://github.com/realSolarDragons/back-end/assets/83967710/d3fc9e13-480f-4da4-aef2-14611c12a3b4)
@@ -104,13 +109,18 @@
 
 &nbsp;
 &nbsp;
+&nbsp;
+&nbsp;
 
 ## BackEnd Layers
 ![image](https://github.com/solpinetree/simple-sns-service/assets/83967710/c158e364-8a0b-4bda-b79c-218f4378224e)
-
+### Swagger
+https://port-0-ting-backend-dihik2mlingy09v.sel4.cloudtype.app/swagger-ui/index.html
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;
 
@@ -118,6 +128,8 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;
 
