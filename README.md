@@ -97,6 +97,8 @@
 &nbsp;
 
 ## Architecture
+![image](https://github.com/realSolarDragons/back-end/assets/83967710/d3fc9e13-480f-4da4-aef2-14611c12a3b4)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
