@@ -33,7 +33,7 @@
       </ul>
     </li>
     <li>
-      <a href="#class-diagram">Class Diagram</a>
+      <a href="#erd">ERD</a>
     </li>
       <li>
       <a href="#실제-서비스-모습">실제 서비스 모습</a>
@@ -136,7 +136,8 @@ https://port-0-ting-backend-dihik2mlingy09v.sel4.cloudtype.app/swagger-ui/index.
 &nbsp;
 &nbsp;
 
-## Class Diagram
+## ERD
+![image](https://github.com/realSolarDragons/back-end/assets/83967710/2cbbec19-9635-4823-ba3c-d82fa4b4d55b)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
