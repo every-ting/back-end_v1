@@ -7,7 +7,7 @@
   <h3 align="center">생성 AI를 이용한 소개팅, 과팅 앱</h3>
 
   <p align="center">
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+<!--     <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a> -->
   </p>
 </div>
 
