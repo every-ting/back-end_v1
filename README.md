@@ -128,6 +128,8 @@ https://port-0-ting-backend-dihik2mlingy09v.sel4.cloudtype.app/swagger-ui/index.
 &nbsp;
 
 ## Security Diagram
+![image](https://github.com/realSolarDragons/back-end/assets/83967710/e35465db-d96d-4665-9d5e-37e9c0ceb100)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
