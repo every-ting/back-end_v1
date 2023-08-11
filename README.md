@@ -51,6 +51,9 @@
 ## About The Project
 
 생성 AI를 이용해 만들어진 상대방의 이상형 사진을 기반으로 소개팅/과팅을 매칭해주는 앱입니다.
+
+
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -111,7 +114,8 @@
 ## Architecture
 ![image](https://github.com/realSolarDragons/back-end/assets/83967710/8b2263c6-1bb1-49a9-8dc9-2f82db6c69fa)
 
-
+리액트와 스프링부트는 [클라우드타입](https://cloudtype.io/) 으로 배포했습니다.  <br>
+머신러닝 서버와 백엔드 서버는 spring webflux를 이용해 머신러닝 서버의 flask로 개발된 api들에 요청을 보내고 원하는 값을 반환 받았습니다.
 
 
 
