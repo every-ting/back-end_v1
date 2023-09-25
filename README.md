@@ -160,6 +160,8 @@
 ## API 문서
 ### Swagger
 https://port-0-ting-backend-dihik2mlingy09v.sel4.cloudtype.app/swagger-ui/index.html
+![image](https://github.com/every-ting/back-end_v1/assets/83967710/88e9eb9a-39dc-47bf-b8ac-f7e674982b00)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
